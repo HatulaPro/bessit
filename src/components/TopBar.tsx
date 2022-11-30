@@ -1,0 +1,110 @@
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useSession, signOut, signIn } from "next-auth/react";
+import Link from "next/link";
+import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
+// import { BsPersonCircle } from "react-icons/bs";
+import { cx } from "../utils/general";
+
+export const TopBar: React.FC = () => {
+  const session = useSession();
+
+  return (
+    <div className="sticky top-0 flex w-full justify-between bg-zinc-700 p-2 text-white">
+      <div className="flex">
+        <Link
+          href="/"
+          className="group relative flex items-center gap-2 pr-4 text-xl active:underline"
+        >
+          <div className="absolute -z-10 h-12 w-12 rounded-full bg-indigo-600 transition-all group-hover:w-full"></div>
+          <Image
+            src="/bessit_logo.png"
+            alt="Bessit's Logo"
+            width={128}
+            height={128}
+            className="h-12 w-12"
+          />
+          <span>Bessit</span>
+        </Link>
+      </div>
+      <div className="relative flex items-center gap-2 rounded-md border-[1px] border-zinc-500 bg-zinc-800 p-1">
+        {session.data?.user ? (
+          <>
+            {session.data.user.image ? (
+              <Image
+                className="rounded-full"
+                loader={({ src }) => src}
+                src={session.data.user.image}
+                alt="Profile Image"
+                width={36}
+                height={36}
+              />
+            ) : (
+              <AiFillMeh className="h-9 w-9 rounded-full" />
+            )}
+            <span className="text-lg">{session.data.user.name}</span>
+            <TopBarUserMenu />
+          </>
+        ) : (
+          <button
+            className="w-24 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-700"
+            onClick={() => signIn()}
+          >
+            LOG IN
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const TopBarUserMenu: React.FC = () => {
+  const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const listener = (e: MouseEvent) => {
+      if (!isMenuOpen) return;
+      if (!e.target || !menuRef.current || !buttonRef.current) return;
+      if (
+        !menuRef.current.contains(e.target as Node) &&
+        e.target !== menuRef.current &&
+        !buttonRef.current.contains(e.target as Node) &&
+        e.target !== buttonRef.current
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", listener);
+    return () => document.removeEventListener("mousedown", listener);
+  }, [menuRef, isMenuOpen, setMenuOpen]);
+
+  return (
+    <>
+      <button
+        className="h-full px-2 transition-colors hover:bg-zinc-900"
+        onClick={() => setMenuOpen((prev) => !prev)}
+        ref={buttonRef}
+      >
+        <AiFillCaretDown
+          className={cx("transition-transform", isMenuOpen && "rotate-90")}
+        />
+      </button>
+      <div
+        className={cx(
+          "absolute bottom-0 -m-1 flex w-full origin-right translate-y-full flex-col bg-zinc-800 p-1 transition-transform duration-75",
+          isMenuOpen ? "scale-x-full" : "scale-x-0"
+        )}
+        ref={menuRef}
+      >
+        <button
+          className="p-1 transition-colors hover:bg-zinc-700"
+          onClick={() => signOut()}
+        >
+          LOG OUT
+        </button>
+      </div>
+    </>
+  );
+};
