@@ -105,9 +105,12 @@ const TopBarUserMenu: React.FC = () => {
           log out
         </button>
         <hr className="m-1" />
-        <button className="flex items-center justify-center gap-2 p-1 transition-colors hover:bg-zinc-700">
+        <Link
+          href="/create_community"
+          className="flex items-center justify-center gap-2 p-1 transition-colors hover:bg-zinc-700"
+        >
           <CgComponents /> new community
-        </button>
+        </Link>
       </div>
     </>
   );

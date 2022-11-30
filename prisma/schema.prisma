@@ -81,11 +81,12 @@ model Post {
 }
 
 model Community {
-  id      String @id @default(cuid())
-  name    String @unique
+  id      String  @id @default(cuid())
+  name    String  @unique
+  desc    String
   ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  logo    String
-  image   String
+  owner   User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  logo    String?
+  image   String?
   posts   Post[]
 }
