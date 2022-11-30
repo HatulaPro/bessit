@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useSession, signOut, signIn } from "next-auth/react";
 import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
-// import { BsPersonCircle } from "react-icons/bs";
+import { CgComponents } from "react-icons/cg";
 import { cx } from "../utils/general";
 
 export const TopBar: React.FC = () => {
@@ -93,7 +93,7 @@ const TopBarUserMenu: React.FC = () => {
       </button>
       <div
         className={cx(
-          "absolute bottom-0 -m-1 flex w-full origin-right translate-y-full flex-col bg-zinc-800 p-1 transition-transform duration-75",
+          "absolute bottom-0 -m-1 flex w-full origin-right translate-y-full flex-col rounded bg-zinc-800 p-1 transition-transform duration-75",
           isMenuOpen ? "scale-x-full" : "scale-x-0"
         )}
         ref={menuRef}
@@ -102,7 +102,11 @@ const TopBarUserMenu: React.FC = () => {
           className="p-1 transition-colors hover:bg-zinc-700"
           onClick={() => signOut()}
         >
-          LOG OUT
+          log out
+        </button>
+        <hr className="m-1" />
+        <button className="flex items-center justify-center gap-2 p-1 transition-colors hover:bg-zinc-700">
+          <CgComponents /> new community
         </button>
       </div>
     </>
