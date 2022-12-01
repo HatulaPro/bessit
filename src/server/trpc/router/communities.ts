@@ -16,6 +16,17 @@ export const communitiesRouter = router({
           throw new TRPCError(reason);
         });
     }),
+  findCommunity: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(({ ctx, input }) => {
+      console.log("name", input.name);
+      return ctx.prisma.community
+        .findMany({
+          where: { name: { contains: input.name } },
+          take: 12,
+        })
+        .then((values) => values);
+    }),
   createCommunity: protectedProcedure
     .input(createCommunitySchema)
     .mutation(({ ctx, input }) => {

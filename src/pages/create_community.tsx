@@ -6,9 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Loading } from "../components/Loading";
+import { useDebounce } from "../hooks/useDebounce";
 
 const CreateCommunity: NextPage = () => {
   return (
@@ -38,22 +38,6 @@ export const createCommunitySchema = z.object({
   desc: z.string(),
 });
 export type createCommunityForm = z.infer<typeof createCommunitySchema>;
-
-function useDebounce<T>(value: T, time: number) {
-  const [current, setCurrent] = useState<T>(value);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setCurrent(value);
-    }, time);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [value, current, setCurrent, time]);
-
-  return current;
-}
 
 const CreateCommunityForm: React.FC = () => {
   const router = useRouter();
