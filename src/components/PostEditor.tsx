@@ -230,7 +230,11 @@ export const PostEditor: React.FC = () => {
                   ></textarea>
                 </>
               ),
-              preview: <ReactMarkdown>{field.value}</ReactMarkdown>,
+              preview: (
+                <ReactMarkdown className="prose prose-invert">
+                  {field.value}
+                </ReactMarkdown>
+              ),
             }}
           />
         )}

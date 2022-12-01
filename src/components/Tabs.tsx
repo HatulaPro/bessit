@@ -11,12 +11,18 @@ export function Tabs<T extends Record<string, JSX.Element>>({
   defaultValue,
 }: TabsProps<T>) {
   const [currentTab, setCurrentTab] = useState<keyof typeof data>(defaultValue);
-  const currentTabRef = useRef<HTMLDivElement>(null);
+  const tabParentRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (currentTabRef.current) {
-      currentTabRef.current.scrollIntoView({ behavior: "smooth" });
+    if (tabParentRef.current) {
+      const keys = Object.keys(data).filter((x) => data.hasOwnProperty(x));
+      const currentIndex = keys.indexOf(currentTab as string);
+      tabParentRef.current.scrollTo({
+        left: currentIndex * tabParentRef.current.clientWidth,
+        behavior: "smooth",
+      });
     }
-  }, [currentTab, currentTabRef]);
+  }, [currentTab, tabParentRef, data]);
+
   return (
     <div className="w-full">
       <div className="flex justify-center overflow-hidden rounded-t-xl bg-zinc-700 text-xl">
@@ -39,16 +45,25 @@ export function Tabs<T extends Record<string, JSX.Element>>({
           );
         })}
       </div>
-      <div className="flex overflow-hidden">
+      <div
+        className="flex overflow-hidden"
+        ref={tabParentRef}
+        // TODO: not doing this might cause issues on mobile
+        // onScroll={(e) => {
+        //   const keys = Object.keys(data).filter((x) => data.hasOwnProperty(x));
+        //   const nextKeyIndex = Math.floor(
+        //     e.currentTarget.scrollLeft / e.currentTarget.clientWidth
+        //   );
+        //   if (keys[nextKeyIndex] !== currentTab) {
+        //     setCurrentTab(keys[nextKeyIndex] as keyof typeof data);
+        //   }
+        // }}
+      >
         {Object.keys(data).map((key) => {
           if (!data.hasOwnProperty(key)) return null;
           return (
             <div
-              ref={key === currentTab ? currentTabRef : undefined}
-              className={cx(
-                "w-full flex-1 flex-shrink-0 basis-full transition-all delay-150",
-                key !== currentTab && "invisible"
-              )}
+              className="relative w-full flex-1 flex-shrink-0 basis-full"
               key={key}
             >
               {data[key]}
