@@ -9,7 +9,6 @@ import { trpc } from "../utils/trpc";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Loading } from "../components/Loading";
-import { useQueryClient } from "@tanstack/react-query";
 
 const CreateCommunity: NextPage = () => {
   return (
