@@ -33,7 +33,7 @@ export const communitiesRouter = router({
         .then((newCommunity) => {
           return newCommunity;
         })
-        .catch((reason) => {
+        .catch(() => {
           throw new TRPCError({
             message: "Community name is already taken.",
             code: "BAD_REQUEST",
