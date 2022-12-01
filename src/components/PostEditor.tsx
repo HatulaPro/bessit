@@ -24,10 +24,6 @@ export const PostEditor: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // TODO: better redirect
-  const createPostMutation = trpc.post.createPost.useMutation({
-    onSuccess: () => router.push("/"),
-  });
   const {
     control,
     handleSubmit,
@@ -40,6 +36,13 @@ export const PostEditor: React.FC = () => {
     mode: "onTouched",
     resolver: zodResolver(createPostSchema),
     defaultValues: { communityName: "", content: "", title: "" },
+  });
+
+  // TODO: better redirect
+  const createPostMutation = trpc.post.createPost.useMutation({
+    onSuccess: () => router.push("/"),
+    onError: (err) =>
+      setError("communityName", { message: err.shape?.message }),
   });
 
   const searchCommunityQueryInput = watch("communityName");
@@ -75,7 +78,7 @@ export const PostEditor: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8"
+      className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8 text-white"
     >
       <div className="flex w-full items-center">
         <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
