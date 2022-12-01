@@ -25,13 +25,13 @@ export function Tabs<T extends Record<string, JSX.Element>>({
 
   return (
     <div className="w-full">
-      <div className="flex justify-center overflow-hidden rounded-t-xl bg-zinc-700 text-xl">
+      <div className="mt-2 flex justify-center overflow-hidden rounded-t-xl bg-zinc-700 bg-opacity-50 text-lg text-white">
         {Object.keys(data).map((key) => {
           if (!data.hasOwnProperty(key)) return null;
           return (
             <button
               className={cx(
-                "flex-1 p-2 hover:bg-zinc-600",
+                "flex-1 p-1 hover:bg-zinc-700",
                 currentTab === key && "underline decoration-cyan-500"
               )}
               key={key}

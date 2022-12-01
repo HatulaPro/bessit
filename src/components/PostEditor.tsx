@@ -7,6 +7,8 @@ import { trpc } from "../utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
 import ReactMarkdown from "react-markdown";
+import { useRouter } from "next/router";
+import { Loading } from "./Loading";
 
 export const createPostSchema = z.object({
   title: z.string().min(2).max(256),
@@ -20,13 +22,25 @@ export const PostEditor: React.FC = () => {
   const [isFocused, setFocused] = useState<boolean>(false);
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
-  const { control, handleSubmit, setError, watch, getValues, setValue } =
-    useForm<createPostForm>({
-      mode: "onTouched",
-      resolver: zodResolver(createPostSchema),
-      defaultValues: { communityName: "", content: "", title: "" },
-    });
+  // TODO: better redirect
+  const createPostMutation = trpc.post.createPost.useMutation({
+    onSuccess: () => router.push("/"),
+  });
+  const {
+    control,
+    handleSubmit,
+    setError,
+    watch,
+    getValues,
+    setValue,
+    formState,
+  } = useForm<createPostForm>({
+    mode: "onTouched",
+    resolver: zodResolver(createPostSchema),
+    defaultValues: { communityName: "", content: "", title: "" },
+  });
 
   const searchCommunityQueryInput = watch("communityName");
   const setSearchCommunityQueryInput = (value: string) =>
@@ -54,16 +68,26 @@ export const PostEditor: React.FC = () => {
     }
   );
 
-  const onSubmit = (data: createPostForm) => console.log(data);
+  const onSubmit = (data: createPostForm) => {
+    createPostMutation.mutate(data);
+  };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8"
     >
-      <div className="flex w-full">
+      <div className="flex w-full items-center">
         <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
+        <button
+          type="submit"
+          className="mt-4 w-24 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400"
+          disabled={!formState.isValid || createPostMutation.isLoading}
+        >
+          Create
+        </button>
       </div>
+      <Loading show={createPostMutation.isLoading} />
       <hr className="my-2 w-full" />
       <div
         className="relative mb-8 flex w-full flex-col"
@@ -239,13 +263,6 @@ export const PostEditor: React.FC = () => {
           />
         )}
       />
-
-      <button
-        type="submit"
-        className="mt-4 w-24 rounded bg-indigo-700 p-2 text-white"
-      >
-        Create
-      </button>
     </form>
   );
 };
