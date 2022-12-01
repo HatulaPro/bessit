@@ -8,8 +8,10 @@ export const Dialog: React.FC<{
 }> = ({ children, isOpen, close }) => {
   useEffect(() => {
     document.body.style.overflowY = isOpen ? "hidden" : "";
+    document.body.style.paddingRight = isOpen ? "12px" : "0px";
     return () => {
       document.body.style.overflowY = "";
+      document.body.style.paddingRight = "0px";
     };
   }, [isOpen]);
   return (
