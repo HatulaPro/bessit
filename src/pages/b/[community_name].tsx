@@ -2,9 +2,11 @@ import type { Community } from "@prisma/client";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import { Dialog } from "../../components/Dialog";
 import { Loading } from "../../components/Loading";
+import { PostEditor } from "../../components/PostEditor";
 import { TopBar } from "../../components/TopBar";
 import { trpc } from "../../utils/trpc";
 
@@ -96,17 +98,22 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
 };
 
 const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
+  const [isOpen, setOpen] = useState<boolean>(false);
+
   return (
     <div className="hidden flex-1 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
       <h2 className="text-center text-xl text-zinc-400">About Community</h2>
       <p>{community.desc}</p>
       <hr className="m-2" />
-      <Link
-        href="/"
+      <button
+        onClick={() => setOpen(true)}
         className="mx-auto block w-2/3 rounded-lg bg-zinc-300 p-1 text-center font-bold text-black hover:bg-zinc-400 active:bg-zinc-500"
       >
         Create Post
-      </Link>
+      </button>
+      <Dialog close={() => setOpen(false)} isOpen={isOpen}>
+        <PostEditor />
+      </Dialog>
     </div>
   );
 };

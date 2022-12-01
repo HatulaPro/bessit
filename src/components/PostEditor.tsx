@@ -1,6 +1,6 @@
 export const PostEditor: React.FC = () => {
   return (
-    <div className="flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 p-8">
+    <div className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8">
       <div className="flex w-full">
         <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
       </div>
