@@ -65,7 +65,7 @@ const CreateCommunityForm: React.FC = () => {
     });
   const name = useDebounce(watch("name"), 3000);
 
-  trpc.community.doesCommunityExist.useQuery(
+  trpc.community.getCommunity.useQuery(
     { name },
     {
       enabled: name !== undefined && formState.isValid,

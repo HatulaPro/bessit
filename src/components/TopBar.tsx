@@ -10,7 +10,7 @@ export const TopBar: React.FC = () => {
   const session = useSession();
 
   return (
-    <div className="sticky top-0 flex w-full justify-between bg-zinc-700 p-2 text-white">
+    <div className="sticky top-0 z-50 flex w-full justify-between bg-zinc-700 p-2 text-white">
       <div className="flex">
         <Link
           href="/"

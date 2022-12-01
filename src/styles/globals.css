@@ -38,3 +38,16 @@ body {
 *::-webkit-scrollbar-corner {
   background: rgba(0, 0, 0, 0);
 }
+
+@keyframes RotatingBackgroundAnimation {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: 100% 0px;
+  }
+}
+
+.bg-rotate {
+  animation: RotatingBackgroundAnimation 60s infinite linear;
+}

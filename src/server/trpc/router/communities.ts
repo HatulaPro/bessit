@@ -4,13 +4,13 @@ import { createCommunitySchema } from "../../../pages/create_community";
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 
 export const communitiesRouter = router({
-  doesCommunityExist: publicProcedure
+  getCommunity: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.prisma.community
         .findUnique({ where: { name: input.name } })
         .then((res) => {
-          return Boolean(res);
+          return res;
         })
         .catch((reason) => {
           throw new TRPCError(reason);
