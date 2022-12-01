@@ -5,6 +5,10 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cx } from "../utils/general";
+import { trpc } from "../utils/trpc";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { Loading } from "../components/Loading";
 
 const CreateCommunity: NextPage = () => {
   return (
@@ -25,20 +29,72 @@ const CreateCommunity: NextPage = () => {
   );
 };
 
-const schema = z.object({
+export const createCommunitySchema = z.object({
   name: z
     .string()
     .min(2, { message: "Name must have at least 2 characters" })
-    .max(24, { message: "Name must have at most 24 characters" }),
+    .max(24, { message: "Name must have at most 24 characters" })
+    .regex(/^[a-zA-Z0-9_]*$/),
   desc: z.string(),
 });
+export type createCommunityForm = z.infer<typeof createCommunitySchema>;
+
+function useDebounce<T>(value: T, time: number) {
+  const [current, setCurrent] = useState<T>(value);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCurrent(value);
+    }, time);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [value, current, setCurrent, time]);
+
+  return current;
+}
 
 const CreateCommunityForm: React.FC = () => {
-  const { control, handleSubmit, formState } = useForm<z.infer<typeof schema>>({
-    mode: "onTouched",
-    resolver: zodResolver(schema),
-  });
-  const onSubmit = (data: z.infer<typeof schema>) => console.log(data);
+  const router = useRouter();
+  const { control, handleSubmit, formState, setError, watch } =
+    useForm<createCommunityForm>({
+      mode: "onTouched",
+      resolver: zodResolver(createCommunitySchema),
+      defaultValues: { name: "", desc: "" },
+    });
+  const name = useDebounce(watch("name"), 3000);
+
+  trpc.community.doesCommunityExist.useQuery(
+    { name },
+    {
+      enabled: name !== undefined && formState.isValid,
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      onSuccess(data) {
+        if (data) {
+          setError("name", { message: "Community name is already taken." });
+        }
+      },
+    }
+  );
+
+  const createCommunityMutation = trpc.community.createCommunity.useMutation();
+  const onSubmit = (data: createCommunityForm) => {
+    createCommunityMutation
+      .mutateAsync({ name: data.name, desc: data.desc })
+      .then((com) => {
+        // TODO: redirect to page
+        console.log(com);
+        router.push("/");
+      })
+      .catch((reason) => {
+        setError("name", reason.shape?.message ?? "Unkown error.");
+      });
+  };
 
   return (
     <form
@@ -99,10 +155,14 @@ const CreateCommunityForm: React.FC = () => {
       />
       <button
         type="submit"
-        className="mt-4 w-24 rounded bg-indigo-700 p-2 text-white"
+        className={cx(
+          "mt-4 w-24 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400"
+        )}
+        disabled={!formState.isValid}
       >
         Create
       </button>
+      <Loading show={createCommunityMutation.isLoading} />
     </form>
   );
 };
