@@ -79,13 +79,13 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
         </div>
       </div>
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-16 px-0 md:px-2">
-        <div className="flex-[2] border-2 border-x-0 border-zinc-400 bg-zinc-800 p-4 md:rounded-md md:border-x-2">
+        <div className="flex-[2] border-[1px] border-x-0 border-zinc-400 bg-zinc-800 p-4 md:rounded-md md:border-x-[1px]">
           <h2 className="text-center text-xl text-zinc-400">Posts</h2>
           {new Array(25).fill(0).map((_, i) => (
             <p key={i}>A lot of data</p>
           ))}
         </div>
-        <div className="hidden flex-1 rounded-md border-2 border-zinc-400 bg-zinc-800 p-4 md:block">
+        <div className="hidden flex-1 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
           <h2 className="text-center text-xl text-zinc-400">About Community</h2>
           <p>{communityQuery.data.desc}</p>
           <hr className="m-2" />

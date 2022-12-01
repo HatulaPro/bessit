@@ -9,6 +9,7 @@ import { trpc } from "../utils/trpc";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Loading } from "../components/Loading";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CreateCommunity: NextPage = () => {
   return (
@@ -65,7 +66,8 @@ const CreateCommunityForm: React.FC = () => {
     });
   const name = useDebounce(watch("name"), 3000);
 
-  trpc.community.getCommunity.useQuery(
+  const createCommunityMutation = trpc.community.createCommunity.useMutation();
+  const getCommunityQuery = trpc.community.getCommunity.useQuery(
     { name },
     {
       enabled: name !== undefined && formState.isValid,
@@ -75,21 +77,19 @@ const CreateCommunityForm: React.FC = () => {
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       onSuccess(data) {
-        if (data) {
+        if (data && !createCommunityMutation.isSuccess) {
           setError("name", { message: "Community name is already taken." });
         }
       },
     }
   );
 
-  const createCommunityMutation = trpc.community.createCommunity.useMutation();
   const onSubmit = (data: createCommunityForm) => {
     createCommunityMutation
       .mutateAsync({ name: data.name, desc: data.desc })
       .then((com) => {
-        // TODO: redirect to page
-        console.log(com);
-        router.push("/");
+        // TODO: trpc setQueryData?
+        getCommunityQuery.refetch().then(() => router.push(`/b/${com.name}`));
       })
       .catch((reason) => {
         setError("name", reason.shape?.message ?? "Unkown error.");
