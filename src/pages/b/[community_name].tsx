@@ -115,20 +115,11 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
         Create Post
       </button>
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
-        <PostEditor />
+        <PostEditor defaultCommunity={community.name} />
       </Dialog>
     </div>
   );
 };
-
-// const CommunityPosts: React.FC<{ community: Community }> = ({ community }) => {
-//   return (
-//       <h2 className="text-center text-xl text-zinc-400">Posts</h2>
-//       {new Array(25).fill(0).map((_, i) => (
-//         <p key={i}>A lot of data for {community.name}</p>
-//       ))}
-//   );
-// };
 
 const CommunityNotFound: React.FC = () => {
   return (

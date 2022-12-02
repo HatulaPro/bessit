@@ -18,7 +18,9 @@ export const createPostSchema = z.object({
 
 export type createPostForm = z.infer<typeof createPostSchema>;
 
-export const PostEditor: React.FC = () => {
+export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
+  defaultCommunity,
+}) => {
   const [isFocused, setFocused] = useState<boolean>(false);
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +37,11 @@ export const PostEditor: React.FC = () => {
   } = useForm<createPostForm>({
     mode: "onTouched",
     resolver: zodResolver(createPostSchema),
-    defaultValues: { communityName: "", content: "", title: "" },
+    defaultValues: {
+      communityName: defaultCommunity ?? "",
+      content: "",
+      title: "",
+    },
   });
 
   // TODO: better redirect
