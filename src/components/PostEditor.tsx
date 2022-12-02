@@ -44,13 +44,6 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
     },
   });
 
-  // TODO: better redirect
-  const createPostMutation = trpc.post.createPost.useMutation({
-    onSuccess: () => router.push("/"),
-    onError: (err) =>
-      setError("communityName", { message: err.shape?.message }),
-  });
-
   const searchCommunityQueryInput = watch("communityName");
   const setSearchCommunityQueryInput = (value: string) =>
     setValue("communityName", value);
@@ -76,6 +69,18 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
       },
     }
   );
+
+  const trpcContext = trpc.useContext();
+
+  // TODO: better redirect
+  const createPostMutation = trpc.post.createPost.useMutation({
+    onSuccess: () => {
+      trpcContext.post.getPosts.invalidate();
+      router.push("/");
+    },
+    onError: (err) =>
+      setError("communityName", { message: err.shape?.message }),
+  });
 
   const onSubmit = (data: createPostForm) => {
     createPostMutation.mutate(data);
