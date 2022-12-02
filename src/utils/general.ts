@@ -1,3 +1,26 @@
 export const cx = (...args: (string | boolean)[]) => {
   return args.filter((x) => x).join(" ");
 };
+
+export const timeAgo = (date: Date): string => {
+  const now = new Date().getTime();
+  const millisDiff = now - date.getTime();
+
+  const seconds = millisDiff / 1000;
+  if (seconds < 60) return `${Math.floor(seconds)}sec`;
+
+  const minutes = seconds / 60;
+  if (minutes < 60) return `${Math.floor(minutes)}min`;
+
+  const hours = minutes / 60;
+  if (hours < 24) return `${Math.floor(hours)}hr`;
+
+  const days = hours / 24;
+  if (days < 30) return `${Math.floor(days)}d`;
+
+  const months = days / 30.5;
+  if (days < 12) return `${Math.floor(months)}mo`;
+
+  const years = months / 12;
+  return `${Math.floor(years)}y`;
+};

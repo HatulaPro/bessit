@@ -8,7 +8,7 @@ import { Loading } from "./Loading";
 import { Dialog } from "./Dialog";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { useState } from "react";
-import { cx } from "../utils/general";
+import { cx, timeAgo } from "../utils/general";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -92,6 +92,8 @@ const SinglePost: React.FC<
               u/{post.user.name}
             </Link>
           </div>
+          <BsDot className="text-xs text-gray-400" />
+          <div className="text-xs text-gray-400">{timeAgo(post.createdAt)}</div>
         </div>
         <h3
           className={cx(
