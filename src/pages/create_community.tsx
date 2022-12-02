@@ -145,7 +145,7 @@ const CreateCommunityForm: React.FC = () => {
       >
         Create
       </button>
-      <Loading show={createCommunityMutation.isLoading} />
+      <Loading size="small" show={createCommunityMutation.isLoading} />
     </form>
   );
 };
