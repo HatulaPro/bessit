@@ -17,7 +17,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="min-h-screen bg-zinc-900">
         <TopBar />
-        <div className="container my-2 flex flex-col items-center justify-center">
+        <div className="container my-2 mx-auto flex flex-col items-center justify-center">
           <PostEditor />
           <PostsViewer communityName={null} />
         </div>

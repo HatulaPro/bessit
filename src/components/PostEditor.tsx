@@ -6,9 +6,9 @@ import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
-import ReactMarkdown from "react-markdown";
 import { useRouter } from "next/router";
 import { Loading } from "./Loading";
+import { Markdown } from "./Markdown";
 
 export const createPostSchema = z.object({
   title: z.string().min(2).max(256),
@@ -257,11 +257,7 @@ export const PostEditor: React.FC = () => {
                   ></textarea>
                 </>
               ),
-              preview: (
-                <ReactMarkdown className="prose prose-invert">
-                  {field.value}
-                </ReactMarkdown>
-              ),
+              preview: <Markdown source={field.value} />,
             }}
           />
         )}
