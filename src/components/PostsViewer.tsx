@@ -48,7 +48,7 @@ const SinglePost: React.FC<{
         <BsDot className="text-xs text-gray-400" />
         <div className="text-xs text-gray-400">
           Posted by {/* TODO: User profile page */}
-          <Link href="" className="hover:underline">
+          <Link href="/" className="hover:underline">
             u/{post.user.name}
           </Link>
         </div>
