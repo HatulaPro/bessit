@@ -2,6 +2,7 @@ import type { Community } from "@prisma/client";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Dialog } from "../../components/Dialog";
@@ -9,7 +10,7 @@ import { Loading } from "../../components/Loading";
 import { PostEditor } from "../../components/PostEditor";
 import { PostsViewer } from "../../components/PostsViewer";
 import { TopBar } from "../../components/TopBar";
-import { trpc } from "../../utils/trpc";
+import { useCommunityPosts } from "../../hooks/useCommunityPosts";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -41,28 +42,23 @@ const CommunityPage: NextPage = () => {
 export default CommunityPage;
 
 const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
-  const communityQuery = trpc.community.getCommunity.useQuery(
-    { name },
-    {
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      staleTime: 60 * 60 * 1000,
-      cacheTime: Infinity,
+  const communityPosts = useCommunityPosts(name);
+
+  if (!communityPosts.community) {
+    if (communityPosts.isLoading) {
+      return <Loading size="large" show />;
     }
-  );
-  if (communityQuery.isLoading) {
-    return <Loading size="large" show />;
-  } else if (!communityQuery.data) {
+
     return <CommunityNotFound />;
   }
   return (
     <div className="w-full">
-      <CommunityHeader community={communityQuery.data} />
+      <CommunityHeader community={communityPosts.community} />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
         <div className="flex-[3]">
-          <PostsViewer communityName={communityQuery.data.name} />
+          <PostsViewer communityPosts={communityPosts} />
         </div>
-        <AboutCommunity community={communityQuery.data} />
+        <AboutCommunity community={communityPosts.community} />
       </div>
     </div>
   );
@@ -123,10 +119,20 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
 
 const CommunityNotFound: React.FC = () => {
   return (
-    <div className="container">
-      <h1 className="text-3xl text-white">
+    <div className="container m-auto text-center">
+      <Image
+        src="/okay_guy.png"
+        alt="Dude is sad because he could not find somethingy"
+        width={200}
+        height={200}
+        className="mx-auto"
+      />
+      <h2 className="text-3xl text-white">
         This community does not seem to exist
-      </h1>
+      </h2>
+      <Link href="/" className="my-8 text-xl text-indigo-500 hover:underline">
+        Go Home
+      </Link>
     </div>
   );
 };

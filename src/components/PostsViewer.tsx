@@ -1,63 +1,20 @@
 import type { Community, Post, User } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
-import { trpc } from "../utils/trpc";
 import { Markdown } from "./Markdown";
 import { BsDot, BsShare } from "react-icons/bs";
 import { Loading } from "./Loading";
+import type { CommunityPosts } from "../hooks/useCommunityPosts";
 
-export const PostsViewer: React.FC<{ communityName: string | null }> = ({
-  communityName,
+export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
+  communityPosts,
 }) => {
-  const getPostsQuery = trpc.post.getPosts.useInfiniteQuery(
-    {
-      community: communityName,
-      count: 12,
-      sort: "new",
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      staleTime: Infinity,
-      cacheTime: Infinity,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      retry: 0,
-    }
-  );
-
-  useEffect(() => {
-    const listener = () => {
-      if (
-        getPostsQuery.isLoading ||
-        getPostsQuery.isFetchingNextPage ||
-        !getPostsQuery.hasNextPage
-      )
-        return;
-      if (
-        window.innerHeight + window.scrollY + 200 >
-        document.body.offsetHeight
-      ) {
-        console.log("load new");
-        getPostsQuery.fetchNextPage();
-      }
-    };
-    window.addEventListener("scroll", listener);
-
-    return () => {
-      window.removeEventListener("scroll", listener);
-    };
-  }, [getPostsQuery]);
-
   return (
     <div className="container max-w-3xl">
-      {getPostsQuery.data?.pages.map((page) =>
-        page.posts.map((post) => <SinglePost key={post.id} post={post} />)
-      )}
-      <Loading
-        size="large"
-        show={getPostsQuery.isFetching || getPostsQuery.isLoading}
-      />
+      {communityPosts.posts.map((post) => (
+        <SinglePost key={post.id} post={post} />
+      ))}
+      <Loading size="large" show={communityPosts.isLoading} />
     </div>
   );
 };
