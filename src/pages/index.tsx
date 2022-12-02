@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { PostEditor } from "../components/PostEditor";
+import { PostsViewer } from "../components/PostsViewer";
 import { TopBar } from "../components/TopBar";
 
 const Home: NextPage = () => {
@@ -18,6 +19,7 @@ const Home: NextPage = () => {
         <TopBar />
         <div className="container my-2 flex flex-col items-center justify-center">
           <PostEditor />
+          <PostsViewer communityName={null} />
         </div>
       </main>
     </>
