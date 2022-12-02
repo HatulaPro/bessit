@@ -96,7 +96,7 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
           Create
         </button>
       </div>
-      <Loading show={createPostMutation.isLoading} />
+      <Loading size="small" show={createPostMutation.isLoading} />
       <hr className="my-2 w-full" />
       <div
         className="relative mb-8 flex w-full flex-col"

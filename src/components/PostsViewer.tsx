@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { trpc } from "../utils/trpc";
 import { Markdown } from "./Markdown";
 import { BsDot, BsShare } from "react-icons/bs";
+import { Loading } from "./Loading";
 
 export const PostsViewer: React.FC<{ communityName: string | null }> = ({
   communityName,
@@ -53,6 +54,10 @@ export const PostsViewer: React.FC<{ communityName: string | null }> = ({
       {getPostsQuery.data?.pages.map((page) =>
         page.posts.map((post) => <SinglePost key={post.id} post={post} />)
       )}
+      <Loading
+        size="large"
+        show={getPostsQuery.isFetching || getPostsQuery.isLoading}
+      />
     </div>
   );
 };

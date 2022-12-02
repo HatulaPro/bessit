@@ -51,7 +51,7 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
     }
   );
   if (communityQuery.isLoading) {
-    return <Loading show />;
+    return <Loading size="large" show />;
   } else if (!communityQuery.data) {
     return <CommunityNotFound />;
   }
