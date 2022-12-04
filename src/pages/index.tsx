@@ -2,7 +2,6 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { PostEditor } from "../components/PostEditor";
 import { PostsViewer } from "../components/PostsViewer";
-import { TopBar } from "../components/TopBar";
 import { useCommunityPosts } from "../hooks/useCommunityPosts";
 
 const Home: NextPage = () => {
@@ -19,7 +18,6 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="min-h-screen bg-zinc-900">
-        <TopBar />
         <div className="container my-2 mx-auto flex flex-col items-center justify-center">
           <PostEditor />
           <PostsViewer communityPosts={communityPosts} />

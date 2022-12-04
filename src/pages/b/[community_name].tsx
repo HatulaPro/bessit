@@ -9,7 +9,6 @@ import { Dialog } from "../../components/Dialog";
 import { Loading } from "../../components/Loading";
 import { PostEditor } from "../../components/PostEditor";
 import { PostsViewer } from "../../components/PostsViewer";
-import { TopBar } from "../../components/TopBar";
 import { useCommunityPosts } from "../../hooks/useCommunityPosts";
 
 const CommunityPage: NextPage = () => {
@@ -28,7 +27,6 @@ const CommunityPage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen w-full flex-col items-center bg-zinc-900 pb-2 text-white">
-        <TopBar />
         {typeof community_name !== "string" ? (
           <CommunityNotFound />
         ) : (
