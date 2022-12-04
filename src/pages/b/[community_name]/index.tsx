@@ -2,14 +2,14 @@ import type { Community } from "@prisma/client";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Dialog } from "../../components/Dialog";
-import { Loading } from "../../components/Loading";
-import { PostEditor } from "../../components/PostEditor";
-import { PostsViewer } from "../../components/PostsViewer";
-import { useCommunityPosts } from "../../hooks/useCommunityPosts";
+import { Dialog } from "../../../components/Dialog";
+import { Loading } from "../../../components/Loading";
+import { NotFoundMessage } from "../../../components/NotFoundMessage";
+import { PostEditor } from "../../../components/PostEditor";
+import { PostsViewer } from "../../../components/PostsViewer";
+import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -28,7 +28,7 @@ const CommunityPage: NextPage = () => {
       </Head>
       <main className="flex min-h-screen w-full flex-col items-center bg-zinc-900 pb-2 text-white">
         {typeof community_name !== "string" ? (
-          <CommunityNotFound />
+          <NotFoundMessage message="This community does not seem to exist" />
         ) : (
           <CommunityPageContent name={community_name} />
         )}
@@ -47,7 +47,7 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
       return <Loading size="large" show />;
     }
 
-    return <CommunityNotFound />;
+    return <NotFoundMessage message="This community does not seem to exist" />;
   }
   return (
     <div className="w-full">
@@ -111,26 +111,6 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
         <PostEditor defaultCommunity={community.name} />
       </Dialog>
-    </div>
-  );
-};
-
-const CommunityNotFound: React.FC = () => {
-  return (
-    <div className="container m-auto text-center">
-      <Image
-        src="/okay_guy.png"
-        alt="Dude is sad because he could not find somethingy"
-        width={200}
-        height={200}
-        className="mx-auto"
-      />
-      <h2 className="text-3xl text-white">
-        This community does not seem to exist
-      </h2>
-      <Link href="/" className="my-8 text-xl text-indigo-500 hover:underline">
-        Go Home
-      </Link>
     </div>
   );
 };

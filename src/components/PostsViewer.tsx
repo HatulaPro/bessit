@@ -1,14 +1,12 @@
 import type { Community, Post, User } from "@prisma/client";
+import superjson from "superjson";
 import Image from "next/image";
 import Link from "next/link";
 import { Markdown } from "./Markdown";
 import { BsDot, BsShare } from "react-icons/bs";
-import { IoMdClose } from "react-icons/io";
 import { Loading } from "./Loading";
-import { Dialog } from "./Dialog";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
-import { useState } from "react";
-import { cx, timeAgo } from "../utils/general";
+import { cx, slugify, timeAgo } from "../utils/general";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -16,55 +14,28 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   return (
     <div className="container max-w-3xl">
       {communityPosts.posts.map((post) => (
-        <SinglePost key={post.id} post={post} asDialog={false} />
+        <SinglePost key={post.id} post={post} isMain={false} />
       ))}
       <Loading size="large" show={communityPosts.isLoading} />
     </div>
   );
 };
 
-const SinglePost: React.FC<
-  {
-    post: Post & {
-      user: User;
-      community: Community;
-    };
-  } & (
-    | {
-        asDialog: true;
-        close: () => void;
-      }
-    | { asDialog: false; close?: undefined }
-  )
-> = ({ post, asDialog, close }) => {
-  const [isOpen, setOpen] = useState<boolean>(false);
-
+export const SinglePost: React.FC<{
+  post: Post & {
+    user: User;
+    community: Community;
+  };
+  isMain: boolean;
+}> = ({ post, isMain }) => {
   return (
     <>
-      {!asDialog && (
-        <Dialog isOpen={isOpen} close={() => setOpen(false)}>
-          <SinglePost
-            post={post}
-            asDialog={true}
-            close={() => setOpen(false)}
-          />
-        </Dialog>
-      )}
       <div
         className={cx(
           "relative m-4 rounded-md border-[1px] border-transparent bg-zinc-800 p-4 pb-1 text-white",
-          asDialog && "container max-w-3xl"
+          isMain && "container max-w-3xl"
         )}
       >
-        {asDialog && (
-          <button
-            onClick={() => close()}
-            className="absolute right-4 top-4 flex items-center gap-1 rounded-xl px-2 py-1 hover:bg-white hover:bg-opacity-10"
-          >
-            <IoMdClose className="text-2xl" />
-            <span className="text-xs">Close</span>
-          </button>
-        )}
         <div className="flex items-center">
           <Link
             href={`/b/${post.community.name}`}
@@ -95,24 +66,34 @@ const SinglePost: React.FC<
           <BsDot className="text-xs text-gray-400" />
           <div className="text-xs text-gray-400">{timeAgo(post.createdAt)}</div>
         </div>
-        <h3
-          className={cx(
-            asDialog
-              ? "my-6 text-center text-3xl underline decoration-indigo-600"
-              : "my-2 cursor-pointer text-2xl hover:underline"
-          )}
-          onClick={
-            asDialog
-              ? undefined
-              : () => {
-                  setOpen(true);
-                }
-          }
-        >
-          {post.title}
-        </h3>
+        {isMain ? (
+          <h3
+            className={
+              "my-6 text-center text-3xl underline decoration-indigo-600"
+            }
+          >
+            {post.title}
+          </h3>
+        ) : (
+          <Link
+            href={{
+              pathname: `/b/${post.community.name}/post/${post.id}/${slugify(
+                post.title
+              )}`,
+              query: { cached_post: superjson.stringify(post) },
+            }}
+            as={`/b/${post.community.name}/post/${post.id}/${slugify(
+              post.title
+            )}`}
+            shallow
+          >
+            <h3 className={"my-2 cursor-pointer text-2xl hover:underline"}>
+              {post.title}
+            </h3>
+          </Link>
+        )}
         <p className="text-sm text-gray-400">
-          <Markdown source={post.content} simplify={!asDialog} />
+          <Markdown source={post.content} simplify={!isMain} />
         </p>
         <hr className="my-2 opacity-50" />
         <div className="flex justify-center">

@@ -30,6 +30,15 @@ export const postsRouter = router({
       });
       return newPost;
     }),
+  getPost: publicProcedure
+    .input(z.object({ post_id: z.string() }))
+    .query(({ ctx, input }) => {
+      // TODO: handle deletions
+      return ctx.prisma.post.findUnique({
+        where: { id: input.post_id },
+        include: { community: true, user: true },
+      });
+    }),
   getPosts: publicProcedure
     .input(
       z.object({
