@@ -24,3 +24,12 @@ export const timeAgo = (date: Date): string => {
   const years = months / 12;
   return `${Math.floor(years)}y`;
 };
+
+const slugCache = new Map<string, string>();
+export const slugify = (sentence: string): string => {
+  const cachedValue = slugCache.get(sentence);
+  if (cachedValue) return cachedValue;
+  const newValue = sentence.replaceAll(/[ \/#\?=]/g, "-");
+  slugCache.set(sentence, newValue);
+  return newValue;
+};
