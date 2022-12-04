@@ -29,7 +29,11 @@ const CommunityPage: NextPage = () => {
       </Head>
       <main className="flex min-h-screen w-full flex-col items-center bg-zinc-900 pb-2 text-white">
         {typeof community_name !== "string" ? (
-          <NotFoundMessage message="This community does not seem to exist" />
+          router.query ? (
+            <Loading size="large" show />
+          ) : (
+            <NotFoundMessage message="This community does not seem to exist" />
+          )
         ) : (
           <CommunityPageContent name={community_name} />
         )}
@@ -47,7 +51,6 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
     if (communityPosts.isLoading) {
       return <Loading size="large" show />;
     }
-
     return <NotFoundMessage message="This community does not seem to exist" />;
   }
   return (
