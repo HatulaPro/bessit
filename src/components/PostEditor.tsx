@@ -2,7 +2,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useRef, useState } from "react";
 import { z } from "zod";
 import { useDebounce } from "../hooks/useDebounce";
-import { cx } from "../utils/general";
+import { cx, slugify } from "../utils/general";
 import { trpc } from "../utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
@@ -72,11 +72,12 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
 
   const trpcContext = trpc.useContext();
 
-  // TODO: better redirect
   const createPostMutation = trpc.post.createPost.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       trpcContext.post.getPosts.invalidate();
-      router.push("/");
+      router.push(
+        `/b/${searchCommunityQueryInput}/post/${data.id}/${slugify(data.title)}`
+      );
     },
     onError: (err) =>
       setError("communityName", { message: err.shape?.message }),
