@@ -1,5 +1,6 @@
 import type { Community } from "@prisma/client";
 import type { NextPage } from "next";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -96,18 +97,31 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
 
 const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
+  const { status: authStatus } = useSession();
 
   return (
     <div className="sticky top-20 my-4 hidden flex-1 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
       <h2 className="text-center text-xl text-zinc-400">About Community</h2>
       <p>{community.desc}</p>
       <hr className="m-2" />
-      <button
-        onClick={() => setOpen(true)}
-        className="mx-auto block w-2/3 rounded-lg bg-zinc-300 p-1 text-center font-bold text-black hover:bg-zinc-400 active:bg-zinc-500"
-      >
-        Create Post
-      </button>
+      {authStatus === "authenticated" ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="mx-auto block w-2/3 rounded-lg bg-zinc-300 p-1 text-center font-bold text-black hover:bg-zinc-400 active:bg-zinc-500"
+        >
+          Create Post
+        </button>
+      ) : (
+        <p className="w-full text-left text-sm">
+          <button
+            onClick={() => signIn()}
+            className="cursor-pointer text-indigo-500 hover:underline"
+          >
+            Log in
+          </button>{" "}
+          to post
+        </p>
+      )}
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
         <PostEditor defaultCommunity={community.name} defaultOpen />
       </Dialog>

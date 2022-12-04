@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { Loading } from "./Loading";
 import { Markdown } from "./Markdown";
 import { AiFillCaretDown } from "react-icons/ai";
+import { signIn, useSession } from "next-auth/react";
 
 export const createPostSchema = z.object({
   title: z.string().min(2).max(256),
@@ -28,6 +29,8 @@ export const PostEditor: React.FC<{
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const { status: authStatus } = useSession();
 
   const {
     control,
@@ -93,15 +96,18 @@ export const PostEditor: React.FC<{
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8 pb-4 text-white"
+      className="my-auto flex w-full max-w-3xl flex-col items-center gap-1 rounded border-2 border-zinc-800 bg-zinc-900 p-8 pb-4 text-white"
     >
       <div className="flex w-full items-center">
         {defaultOpen ? (
           <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
         ) : (
           <button
-            className="group flex w-full items-center gap-4 pl-0 text-left text-xl"
+            className={cx(
+              "enabled:group flex w-full items-center gap-4 pl-0 text-left text-xl disabled:cursor-not-allowed"
+            )}
             onClick={() => setOpen((prev) => !prev)}
+            disabled={authStatus !== "authenticated"}
           >
             <span className="p-2 transition-colors group-hover:bg-zinc-800">
               <AiFillCaretDown
@@ -303,6 +309,17 @@ export const PostEditor: React.FC<{
           )}
         />
       </div>
+      {authStatus !== "authenticated" && (
+        <p className="w-full text-left text-sm">
+          <button
+            onClick={() => signIn()}
+            className="cursor-pointer text-indigo-500 hover:underline"
+          >
+            Log in
+          </button>{" "}
+          to post
+        </p>
+      )}
     </form>
   );
 };
