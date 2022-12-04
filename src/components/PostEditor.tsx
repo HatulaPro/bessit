@@ -9,6 +9,7 @@ import { Tabs } from "./Tabs";
 import { useRouter } from "next/router";
 import { Loading } from "./Loading";
 import { Markdown } from "./Markdown";
+import { AiFillCaretDown } from "react-icons/ai";
 
 export const createPostSchema = z.object({
   title: z.string().min(2).max(256),
@@ -18,10 +19,12 @@ export const createPostSchema = z.object({
 
 export type createPostForm = z.infer<typeof createPostSchema>;
 
-export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
-  defaultCommunity,
-}) => {
+export const PostEditor: React.FC<{
+  defaultCommunity?: string;
+  defaultOpen: boolean;
+}> = ({ defaultCommunity, defaultOpen }) => {
   const [isFocused, setFocused] = useState<boolean>(false);
+  const [isOpen, setOpen] = useState<boolean>(defaultOpen);
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -90,10 +93,24 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8 text-white"
+      className="my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 bg-zinc-900 p-8 pb-4 text-white"
     >
       <div className="flex w-full items-center">
-        <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
+        {defaultOpen ? (
+          <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
+        ) : (
+          <button
+            className="group flex w-full items-center gap-4 pl-0 text-left text-xl"
+            onClick={() => setOpen((prev) => !prev)}
+          >
+            <span className="p-2 transition-colors group-hover:bg-zinc-800">
+              <AiFillCaretDown
+                className={cx("transition-transform", isOpen && "rotate-180")}
+              />
+            </span>
+            <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
+          </button>
+        )}
         <button
           type="submit"
           className="mt-4 w-24 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400"
@@ -103,18 +120,127 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
         </button>
       </div>
       <Loading size="small" show={createPostMutation.isLoading} />
-      <hr className="my-2 w-full" />
       <div
-        className="relative mb-8 flex w-full flex-col"
-        onBlur={(e) => {
-          if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
-            setFocused(false);
-          }
-        }}
+        className={cx(
+          "flex w-full origin-top flex-col gap-2 transition-all",
+          defaultOpen || isOpen
+            ? "visible max-h-[250vh] scale-y-100"
+            : "invisible max-h-0 scale-y-0"
+        )}
       >
+        <hr className="my-2 w-full" />
+        <div
+          className="relative mb-8 flex w-full flex-col"
+          onBlur={(e) => {
+            if (
+              !e.relatedTarget ||
+              !e.currentTarget.contains(e.relatedTarget)
+            ) {
+              setFocused(false);
+            }
+          }}
+        >
+          <Controller
+            name="communityName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <div
+                  className={cx(
+                    "overflow-hidden text-red-400 transition-all",
+                    fieldState.error?.message ? "h-8" : "h-0"
+                  )}
+                >
+                  {fieldState.error?.message}
+                </div>
+                <input
+                  autoComplete="off"
+                  type="text"
+                  className={cx(
+                    "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+                    fieldState.error
+                      ? "border-red-600"
+                      : "border-zinc-500 focus:border-zinc-300"
+                  )}
+                  placeholder="Choose community..."
+                  {...field}
+                  onFocus={() => setFocused(true)}
+                  onKeyDown={(e) => {
+                    if (!optionsDivRef.current?.children.length) return;
+                    if (e.key === "ArrowDown") {
+                      (
+                        optionsDivRef.current?.children[0] as HTMLDivElement
+                      ).focus();
+                      e.preventDefault();
+                    } else if (e.key === "ArrowUp") {
+                      (
+                        optionsDivRef.current?.children[
+                          optionsDivRef.current?.children.length - 1
+                        ] as HTMLDivElement
+                      ).focus();
+                      e.preventDefault();
+                    }
+                  }}
+                  ref={searchInputRef}
+                />
+              </>
+            )}
+          />
+          <div
+            className={cx(
+              "absolute top-full z-10 flex max-h-44 w-full origin-top flex-col gap-1 overflow-y-scroll bg-zinc-800 transition-transform",
+              !isFocused && "scale-y-0"
+            )}
+            ref={optionsDivRef}
+          >
+            {searchCommunityQuery.data?.map((option, index) => (
+              <div
+                key={option.id}
+                className="cursor-pointer p-2 outline-none hover:bg-zinc-700 focus:bg-zinc-700"
+                tabIndex={index}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowDown") {
+                    const nextOption = optionsDivRef.current?.children[
+                      (index + 1) % optionsDivRef.current?.children.length
+                    ] as HTMLDivElement;
+                    nextOption.focus();
+                    nextOption.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                    e.preventDefault();
+                  } else if (e.key === "ArrowUp") {
+                    const nextOption = optionsDivRef.current?.children[
+                      (index - 1 + optionsDivRef.current?.children.length) %
+                        optionsDivRef.current?.children.length
+                    ] as HTMLDivElement;
+                    nextOption.focus();
+                    nextOption.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                    e.preventDefault();
+                  } else if (e.key === "Enter" || e.key === " ") {
+                    setSearchCommunityQueryInput(option.name);
+                    (document.activeElement as HTMLElement).blur();
+                  } else if (e.key === "Escape") {
+                    (document.activeElement as HTMLElement).blur();
+                  }
+                }}
+                onClick={() => {
+                  setSearchCommunityQueryInput(option.name);
+                  (document.activeElement as HTMLElement).blur();
+                }}
+              >
+                {option.name}
+              </div>
+            ))}
+          </div>
+        </div>
+
         <Controller
-          name="communityName"
           control={control}
+          name="title"
           render={({ field, fieldState }) => (
             <>
               <div
@@ -127,153 +253,56 @@ export const PostEditor: React.FC<{ defaultCommunity?: string }> = ({
               </div>
               <input
                 autoComplete="off"
-                type="text"
+                {...field}
                 className={cx(
                   "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
                   fieldState.error
                     ? "border-red-600"
                     : "border-zinc-500 focus:border-zinc-300"
                 )}
-                placeholder="Choose community..."
-                {...field}
-                onFocus={() => setFocused(true)}
-                onKeyDown={(e) => {
-                  if (!optionsDivRef.current?.children.length) return;
-                  if (e.key === "ArrowDown") {
-                    (
-                      optionsDivRef.current?.children[0] as HTMLDivElement
-                    ).focus();
-                    e.preventDefault();
-                  } else if (e.key === "ArrowUp") {
-                    (
-                      optionsDivRef.current?.children[
-                        optionsDivRef.current?.children.length - 1
-                      ] as HTMLDivElement
-                    ).focus();
-                    e.preventDefault();
-                  }
-                }}
-                ref={searchInputRef}
+                type="text"
+                placeholder="Title"
               />
             </>
           )}
         />
-        <div
-          className={cx(
-            "absolute top-full z-10 flex max-h-44 w-full origin-top flex-col gap-1 overflow-y-scroll bg-zinc-800 transition-transform",
-            !isFocused && "scale-y-0"
-          )}
-          ref={optionsDivRef}
-        >
-          {searchCommunityQuery.data?.map((option, index) => (
-            <div
-              key={option.id}
-              className="cursor-pointer p-2 outline-none hover:bg-zinc-700 focus:bg-zinc-700"
-              tabIndex={index}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowDown") {
-                  const nextOption = optionsDivRef.current?.children[
-                    (index + 1) % optionsDivRef.current?.children.length
-                  ] as HTMLDivElement;
-                  nextOption.focus();
-                  nextOption.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                  e.preventDefault();
-                } else if (e.key === "ArrowUp") {
-                  const nextOption = optionsDivRef.current?.children[
-                    (index - 1 + optionsDivRef.current?.children.length) %
-                      optionsDivRef.current?.children.length
-                  ] as HTMLDivElement;
-                  nextOption.focus();
-                  nextOption.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                  e.preventDefault();
-                } else if (e.key === "Enter" || e.key === " ") {
-                  setSearchCommunityQueryInput(option.name);
-                  (document.activeElement as HTMLElement).blur();
-                } else if (e.key === "Escape") {
-                  (document.activeElement as HTMLElement).blur();
-                }
-              }}
-              onClick={() => {
-                setSearchCommunityQueryInput(option.name);
-                (document.activeElement as HTMLElement).blur();
-              }}
-            >
-              {option.name}
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <Controller
-        control={control}
-        name="title"
-        render={({ field, fieldState }) => (
-          <>
-            <div
-              className={cx(
-                "overflow-hidden text-red-400 transition-all",
-                fieldState.error?.message ? "h-8" : "h-0"
-              )}
-            >
-              {fieldState.error?.message}
-            </div>
-            <input
-              autoComplete="off"
-              {...field}
-              className={cx(
-                "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
-                fieldState.error
-                  ? "border-red-600"
-                  : "border-zinc-500 focus:border-zinc-300"
-              )}
-              type="text"
-              placeholder="Title"
+        <Controller
+          control={control}
+          name="content"
+          render={({ field, fieldState }) => (
+            <Tabs
+              defaultValue="editor"
+              data={{
+                editor: (
+                  <>
+                    <div
+                      className={cx(
+                        "overflow-hidden text-red-400 transition-all",
+                        fieldState.error?.message ? "h-8" : "h-0"
+                      )}
+                    >
+                      {fieldState.error?.message}
+                    </div>
+                    <textarea
+                      autoComplete="off"
+                      {...field}
+                      className={cx(
+                        "max-h-[200vh] min-h-[2.4rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+                        fieldState.error
+                          ? "border-red-600"
+                          : "border-zinc-500 focus:border-zinc-300"
+                      )}
+                      placeholder="Your awesome post"
+                    ></textarea>
+                  </>
+                ),
+                preview: <Markdown source={field.value} />,
+              }}
             />
-          </>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="content"
-        render={({ field, fieldState }) => (
-          <Tabs
-            defaultValue="editor"
-            data={{
-              editor: (
-                <>
-                  <div
-                    className={cx(
-                      "overflow-hidden text-red-400 transition-all",
-                      fieldState.error?.message ? "h-8" : "h-0"
-                    )}
-                  >
-                    {fieldState.error?.message}
-                  </div>
-                  <textarea
-                    autoComplete="off"
-                    {...field}
-                    className={cx(
-                      "min-h-[2.4rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
-                      fieldState.error
-                        ? "border-red-600"
-                        : "border-zinc-500 focus:border-zinc-300"
-                    )}
-                    placeholder="Your awesome post"
-                  ></textarea>
-                </>
-              ),
-              preview: <Markdown source={field.value} />,
-            }}
-          />
-        )}
-      />
+          )}
+        />
+      </div>
     </form>
   );
 };

@@ -109,7 +109,7 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
         Create Post
       </button>
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
-        <PostEditor defaultCommunity={community.name} />
+        <PostEditor defaultCommunity={community.name} defaultOpen />
       </Dialog>
     </div>
   );
