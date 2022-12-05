@@ -19,7 +19,7 @@ export const postsRouter = router({
           code: "BAD_REQUEST",
         });
       }
-      const newPost = await ctx.prisma.post.create({
+      return await ctx.prisma.post.create({
         data: {
           title: input.title,
           content: input.content,
@@ -28,7 +28,6 @@ export const postsRouter = router({
           communityId: community.id,
         },
       });
-      return newPost;
     }),
   getPost: publicProcedure
     .input(z.object({ post_id: z.string() }))
@@ -46,6 +45,23 @@ export const postsRouter = router({
           },
         },
       });
+    }),
+  likePost: protectedProcedure
+    .input(z.object({ postId: z.string(), action: z.enum(["like", "unlike"]) }))
+    .mutation(({ ctx, input }) => {
+      const userId_postId = {
+        postId: input.postId,
+        userId: ctx.session.user.id,
+      };
+      if (input.action === "like") {
+        return ctx.prisma.postVote.upsert({
+          create: userId_postId,
+          update: userId_postId,
+          where: { userId_postId },
+        });
+      } else {
+        return ctx.prisma.postVote.delete({ where: { userId_postId } });
+      }
     }),
   getPosts: publicProcedure
     .input(

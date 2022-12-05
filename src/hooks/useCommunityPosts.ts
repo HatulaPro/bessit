@@ -1,4 +1,4 @@
-import type { Community, Post, User } from "@prisma/client";
+import type { Community, Post, PostVote, User } from "@prisma/client";
 import { useEffect, useMemo } from "react";
 import { trpc } from "../utils/trpc";
 
@@ -43,15 +43,21 @@ export function useCommunityPosts(communityName: string | null) {
     };
   }, [getPostsQuery]);
   const flattenedPosts = useMemo(() => {
-    const posts: (Post & {
-      user: User;
-      community: Community;
-    })[] = [];
-    if (!getPostsQuery.data) return posts;
-    for (const page of getPostsQuery.data.pages) {
-      posts.push(...page.posts);
-    }
-    return posts;
+    return (
+      getPostsQuery.data?.pages.reduce<
+        (Post & {
+          user: User;
+          community: Community;
+          votes: PostVote[];
+          _count: {
+            votes: number;
+          };
+        })[]
+      >((acc, cur) => {
+        acc.push(...cur.posts);
+        return acc;
+      }, []) || []
+    );
   }, [getPostsQuery.data]);
 
   return {

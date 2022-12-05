@@ -9,6 +9,7 @@ import { SinglePost } from "../../../../components/PostsViewer";
 import { trpc } from "../../../../utils/trpc";
 import superjson from "superjson";
 import { IoMdClose } from "react-icons/io";
+import type { CommunityPosts } from "../../../../hooks/useCommunityPosts";
 
 const PostPage: NextPage = () => {
   const { post, isLoading, is404 } = useCachedPost();
@@ -46,10 +47,7 @@ const PostPage: NextPage = () => {
 export default PostPage;
 
 const PostPageContent: React.FC<{
-  post: Post & {
-    user: User;
-    community: Community;
-  };
+  post: CommunityPosts["posts"][number];
 }> = ({ post }) => {
   return <SinglePost post={post} isMain={true} />;
 };

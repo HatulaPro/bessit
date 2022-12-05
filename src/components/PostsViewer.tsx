@@ -1,4 +1,3 @@
-import type { Community, Post, User } from "@prisma/client";
 import superjson from "superjson";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +6,7 @@ import { BsDot, BsShare } from "react-icons/bs";
 import { Loading } from "./Loading";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { cx, slugify, timeAgo } from "../utils/general";
+import { LikeButton } from "./LikeButton";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -22,10 +22,7 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
 };
 
 export const SinglePost: React.FC<{
-  post: Post & {
-    user: User;
-    community: Community;
-  };
+  post: CommunityPosts["posts"][number];
   isMain: boolean;
 }> = ({ post, isMain }) => {
   return (
@@ -96,11 +93,12 @@ export const SinglePost: React.FC<{
           <Markdown source={post.content} simplify={!isMain} />
         </p>
         <hr className="my-2 opacity-50" />
-        <div className="flex justify-center">
-          <button className="flex flex-col items-center gap-2 py-1 px-2 text-xs hover:bg-zinc-700">
+        <div className="mx-auto flex max-w-md justify-evenly pb-2">
+          <button className="p-2 hover:bg-zinc-700">
             <BsShare size="18px" />
-            Share
           </button>
+
+          <LikeButton post={post} />
         </div>
       </div>
     </>
