@@ -36,7 +36,15 @@ export const postsRouter = router({
       // TODO: handle deletions
       return ctx.prisma.post.findUnique({
         where: { id: input.post_id },
-        include: { community: true, user: true },
+        include: {
+          community: true,
+          user: true,
+          _count: { select: { votes: true } },
+          votes: {
+            where: { userId: ctx.session?.user?.id },
+            take: 1,
+          },
+        },
       });
     }),
   getPosts: publicProcedure
@@ -68,7 +76,15 @@ export const postsRouter = router({
         take: input.count + 1,
         where: whereQuery,
         cursor: input.cursor ? { id: input.cursor } : undefined,
-        include: { community: true, user: true },
+        include: {
+          community: true,
+          user: true,
+          _count: { select: { votes: true } },
+          votes: {
+            where: { userId: ctx.session?.user?.id },
+            take: 1,
+          },
+        },
       });
       if (posts.length < input.count) {
         return {
