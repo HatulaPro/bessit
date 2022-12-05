@@ -1,7 +1,15 @@
+import { useQueryClient } from "@tanstack/react-query";
+import type { InfiniteData } from "@tanstack/react-query";
 import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { trpc } from "../utils/trpc";
+import type { RouterOutputs, RouterInputs } from "../utils/trpc";
 import { Loading } from "./Loading";
+
+type InfinityQueryKeyInput<T> = {
+  input: T;
+  type: "infinite";
+};
 
 export const LikeButton: React.FC<{
   post: CommunityPosts["posts"][number];
@@ -9,6 +17,7 @@ export const LikeButton: React.FC<{
 }> = ({ post, communityQueryInput }) => {
   const utils = trpc.useContext();
   const voted = post.votes.length > 0;
+  const queryClient = useQueryClient();
   const likeMutation = trpc.post.likePost.useMutation({
     cacheTime: 0,
     onSuccess: (data) => {
@@ -23,11 +32,25 @@ export const LikeButton: React.FC<{
           }
         );
       }
-      if (communityQueryInput) {
-        const cacheData =
-          utils.post.getPosts.getInfiniteData(communityQueryInput);
-        if (cacheData) {
-          cacheData.pages = cacheData.pages.map((page) => {
+
+      // Getting all the keys
+      const communityQueries = queryClient.getQueriesData<
+        InfiniteData<RouterOutputs["post"]["getPosts"]>
+      >([["post", "getPosts"]]);
+
+      // For every key
+      for (const [queryKey, queryData] of communityQueries) {
+        const queryKeyTyped = queryKey[1] as unknown as InfinityQueryKeyInput<
+          RouterInputs["post"]["getPosts"]
+        >;
+
+        // queryData exists, and the community can "hold" the post
+        if (
+          queryData &&
+          (queryKeyTyped.input.community === null ||
+            queryKeyTyped.input.community === post.community.name)
+        ) {
+          queryData.pages = queryData.pages.map((page) => {
             let needsChange = false;
             const nextPosts = page.posts.map((pagePost) => {
               if (pagePost.id === post.id) {
@@ -35,7 +58,9 @@ export const LikeButton: React.FC<{
                 return {
                   ...pagePost,
                   votes: voted ? [] : [data],
-                  _count: { votes: pagePost._count.votes + (voted ? -1 : 1) },
+                  _count: {
+                    votes: pagePost._count.votes + (voted ? -1 : 1),
+                  },
                 };
               }
               return pagePost;
@@ -48,10 +73,9 @@ export const LikeButton: React.FC<{
             }
             return page;
           });
-
-          utils.post.getPosts.setInfiniteData(communityQueryInput, {
-            ...cacheData,
-          });
+          queryClient.setQueryData<
+            InfiniteData<RouterOutputs["post"]["getPosts"]>
+          >([["post", "getPosts"], queryKeyTyped], { ...queryData });
         }
       }
     },
