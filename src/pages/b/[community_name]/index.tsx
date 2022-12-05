@@ -11,6 +11,8 @@ import { NotFoundMessage } from "../../../components/NotFoundMessage";
 import { PostEditor } from "../../../components/PostEditor";
 import { PostsViewer } from "../../../components/PostsViewer";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
+import { cx } from "../../../utils/general";
+import { RouterInputs } from "../../../utils/trpc";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -45,10 +47,13 @@ const CommunityPage: NextPage = () => {
 export default CommunityPage;
 
 const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
-  const communityPosts = useCommunityPosts(name);
+  const [sortBy, setSortBy] =
+    useState<RouterInputs["post"]["getPosts"]["sort"]>("new");
+  const communityPosts = useCommunityPosts(name, sortBy);
 
   if (!communityPosts.community) {
     if (communityPosts.isLoading) {
+      console.log("no community?");
       return <Loading size="large" show />;
     }
     return <NotFoundMessage message="This community does not seem to exist" />;
@@ -58,6 +63,23 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
       <CommunityHeader community={communityPosts.community} />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
         <div className="flex-[3]">
+          <div className="m-4 flex justify-center gap-2">
+            {(["new", "hot"] as const).map((value) => (
+              <button
+                className={cx(
+                  "rounded-full px-6 py-0.5 transition-all disabled:opacity-50 disabled:contrast-50",
+                  value === sortBy
+                    ? "bg-zinc-100 text-black"
+                    : "bg-zinc-700 text-white"
+                )}
+                key={value}
+                onClick={() => setSortBy(value)}
+                disabled={communityPosts.isLoading}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
           <PostsViewer communityPosts={communityPosts} />
         </div>
         <AboutCommunity community={communityPosts.community} />

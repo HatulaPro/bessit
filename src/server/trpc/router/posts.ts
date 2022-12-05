@@ -69,7 +69,7 @@ export const postsRouter = router({
   getPosts: publicProcedure
     .input(
       z.object({
-        sort: z.enum(["new"]),
+        sort: z.enum(["new", "hot"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
         community: z.string().min(4).max(24).nullable(),
@@ -91,7 +91,10 @@ export const postsRouter = router({
         whereQuery = { communityId: community.id, isDeleted: false };
       }
       const posts = await ctx.prisma.post.findMany({
-        orderBy: { createdAt: "desc" },
+        orderBy:
+          input.sort === "new"
+            ? { createdAt: "desc" }
+            : { votes: { _count: "desc" } },
         take: input.count + 1,
         where: whereQuery,
         cursor: input.cursor ? { id: input.cursor } : undefined,

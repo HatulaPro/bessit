@@ -5,7 +5,7 @@ import { PostsViewer } from "../components/PostsViewer";
 import { useCommunityPosts } from "../hooks/useCommunityPosts";
 
 const Home: NextPage = () => {
-  const communityPosts = useCommunityPosts(null);
+  const communityPosts = useCommunityPosts(null, "hot");
 
   return (
     <>

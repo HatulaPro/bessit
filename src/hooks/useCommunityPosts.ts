@@ -5,11 +5,14 @@ import type { RouterInputs } from "../utils/trpc";
 
 export type CommunityPosts = ReturnType<typeof useCommunityPosts>;
 
-export function useCommunityPosts(communityName: string | null) {
+export function useCommunityPosts(
+  communityName: string | null,
+  sort: RouterInputs["post"]["getPosts"]["sort"]
+) {
   const input: RouterInputs["post"]["getPosts"] = {
     community: communityName ?? null,
     count: 12,
-    sort: "new",
+    sort,
   };
   const getPostsQuery = trpc.post.getPosts.useInfiniteQuery(input, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -19,6 +22,7 @@ export function useCommunityPosts(communityName: string | null) {
     refetchOnWindowFocus: false,
     retry: 0,
     notifyOnChangeProps: "all",
+    keepPreviousData: true,
   });
 
   useEffect(() => {
