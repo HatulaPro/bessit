@@ -294,7 +294,7 @@ export const PostEditor: React.FC<{
                       autoComplete="off"
                       {...field}
                       className={cx(
-                        "max-h-[200vh] min-h-[2.4rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+                        "max-h-[50vh] min-h-[2.4rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
                         fieldState.error
                           ? "border-red-600"
                           : "border-zinc-500 focus:border-zinc-300"
