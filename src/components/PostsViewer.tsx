@@ -7,6 +7,7 @@ import { Loading } from "./Loading";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { cx, slugify, timeAgo } from "../utils/general";
 import { LikeButton } from "./LikeButton";
+import { useSession } from "next-auth/react";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -25,6 +26,7 @@ export const SinglePost: React.FC<{
   post: CommunityPosts["posts"][number];
   isMain: boolean;
 }> = ({ post, isMain }) => {
+  const { status: authStatus } = useSession();
   return (
     <>
       <div
@@ -97,8 +99,7 @@ export const SinglePost: React.FC<{
           <button className="p-2 hover:bg-zinc-700">
             <BsShare size="18px" />
           </button>
-
-          <LikeButton post={post} />
+          {authStatus === "authenticated" && <LikeButton post={post} />}
         </div>
       </div>
     </>
