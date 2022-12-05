@@ -20,8 +20,10 @@ export const Dialog: React.FC<{
         if (e.currentTarget === e.target) close();
       }}
       className={cx(
-        "fixed left-0 right-0 bottom-0 top-0 z-50 flex max-h-screen items-start justify-center overflow-y-scroll bg-zinc-900 bg-opacity-80 py-4 transition-all duration-200",
-        isOpen ? "opacity-1 visible" : "invisible opacity-0"
+        "fixed left-0 right-0 bottom-0 top-0 z-50 flex items-start justify-center overflow-y-scroll bg-zinc-900 bg-opacity-80 py-4 transition-all duration-200",
+        isOpen
+          ? "opacity-1 visible max-h-screen"
+          : "invisible max-h-0 opacity-0"
       )}
     >
       {children}

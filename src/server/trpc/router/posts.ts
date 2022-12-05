@@ -60,7 +60,10 @@ export const postsRouter = router({
           where: { userId_postId },
         });
       } else {
-        return ctx.prisma.postVote.delete({ where: { userId_postId } });
+        return ctx.prisma.postVote
+          .delete({ where: { userId_postId } })
+          .then(() => userId_postId)
+          .catch(() => userId_postId);
       }
     }),
   getPosts: publicProcedure
