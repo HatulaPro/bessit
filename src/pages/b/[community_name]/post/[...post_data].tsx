@@ -49,9 +49,7 @@ export default PostPage;
 const PostPageContent: React.FC<{
   post: CommunityPosts["posts"][number];
 }> = ({ post }) => {
-  return (
-    <SinglePost post={post} isMain={true} communityQueryInput={undefined} />
-  );
+  return <SinglePost post={post} isMain={true} />;
 };
 
 const postDataQuerySchema = z.object({

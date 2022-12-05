@@ -13,8 +13,7 @@ type InfinityQueryKeyInput<T> = {
 
 export const LikeButton: React.FC<{
   post: CommunityPosts["posts"][number];
-  communityQueryInput?: CommunityPosts["input"];
-}> = ({ post, communityQueryInput }) => {
+}> = ({ post }) => {
   const utils = trpc.useContext();
   const voted = post.votes.length > 0;
   const queryClient = useQueryClient();

@@ -14,32 +14,17 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   return (
     <div className="container max-w-3xl">
       {communityPosts.posts.map((post) => (
-        <SinglePost
-          key={post.id}
-          post={post}
-          isMain={false}
-          communityQueryInput={communityPosts.input}
-        />
+        <SinglePost key={post.id} post={post} isMain={false} />
       ))}
       <Loading size="large" show={communityPosts.isLoading} />
     </div>
   );
 };
 
-export const SinglePost: React.FC<
-  {
-    post: CommunityPosts["posts"][number];
-  } & (
-    | {
-        isMain: false;
-        communityQueryInput: CommunityPosts["input"];
-      }
-    | {
-        isMain: true;
-        communityQueryInput: undefined;
-      }
-  )
-> = ({ post, isMain, communityQueryInput }) => {
+export const SinglePost: React.FC<{
+  post: CommunityPosts["posts"][number];
+  isMain: boolean;
+}> = ({ post, isMain }) => {
   return (
     <>
       <div
@@ -113,7 +98,7 @@ export const SinglePost: React.FC<
             <BsShare size="18px" />
           </button>
 
-          <LikeButton post={post} communityQueryInput={communityQueryInput} />
+          <LikeButton post={post} />
         </div>
       </div>
     </>

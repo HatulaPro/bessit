@@ -64,6 +64,5 @@ export function useCommunityPosts(communityName: string | null) {
     posts: flattenedPosts,
     isLoading: getPostsQuery.isLoading || getPostsQuery.isFetching,
     community: communityName ? flattenedPosts[0]?.community : null,
-    input,
   };
 }
