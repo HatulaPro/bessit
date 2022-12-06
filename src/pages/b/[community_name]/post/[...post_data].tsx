@@ -148,7 +148,7 @@ const PostComments: React.FC<{
           return (
             <div
               key={comment.id}
-              className="mt-2 rounded-sm border-l-4 border-zinc-600 pl-3 pt-3"
+              className="mt-2 rounded-sm border-l-4 border-zinc-600 pl-3 pt-1"
             >
               <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
                 <Link
