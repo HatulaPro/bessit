@@ -21,6 +21,7 @@ import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
 
 const PostPage: NextPage = () => {
+  // TODO: This var can be moved to a route path
   const [currentParentCommentId, setCurrentParentCommentId] = useState<
     string | null
   >(null);
@@ -50,6 +51,7 @@ const PostPage: NextPage = () => {
             currentParentCommentId={currentParentCommentId}
             comments={comments}
             post={post}
+            isLoadingComments={isLoading.comments}
           />
         )}
 
@@ -74,11 +76,13 @@ const PostPageContent: React.FC<{
   comments: ReturnType<typeof useCachedPost>["comments"];
   setCurrentParentCommentId: (x: string | null) => void;
   currentParentCommentId: string | null;
+  isLoadingComments: boolean;
 }> = ({
   post,
   comments,
   setCurrentParentCommentId,
   currentParentCommentId,
+  isLoadingComments,
 }) => {
   const { status: authStatus } = useSession();
   const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
@@ -104,14 +108,17 @@ const PostPageContent: React.FC<{
           setCurrentParentCommentId={setCurrentParentCommentId}
         />
       )}
+      <Loading size="large" show={isLoadingComments} />
 
-      <PostComments
-        comments={comments}
-        postId={post.id}
-        openCreateCommentId={openCreateCommentId}
-        setOpenCreateCommentId={setOpenCreateCommentId}
-        setCurrentParentCommentId={setCurrentParentCommentId}
-      />
+      {comments && comments.length > 0 && (
+        <PostComments
+          comments={comments}
+          postId={post.id}
+          openCreateCommentId={openCreateCommentId}
+          setOpenCreateCommentId={setOpenCreateCommentId}
+          setCurrentParentCommentId={setCurrentParentCommentId}
+        />
+      )}
     </div>
   );
 };
@@ -143,102 +150,98 @@ const PostComments: React.FC<{
   const { status: authStatus } = useSession();
   return (
     <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 px-1 pt-2 md:max-w-5xl">
-      {comments ? (
-        comments.map((comment) => {
-          return (
-            <div
-              key={comment.id}
-              className="mt-2 rounded-sm border-l-4 border-zinc-600 pl-3 pt-1"
-            >
-              <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
-                <Link
-                  className="group flex items-center hover:underline"
-                  href="/"
-                >
-                  <div className="h-10 w-10">
-                    {comment.user.image ? (
-                      <Image
-                        className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
-                        loader={({ src }) => src}
-                        src={comment.user.image}
-                        alt={`Profile image of ${comment.user.name}`}
-                        width="128"
-                        height="128"
-                      />
-                    ) : (
-                      comment.user.name?.charAt(0).toUpperCase() ?? ""
-                    )}
-                  </div>
-                  {/* TODO: user profile */}
-                  u/{comment.user.name}
-                </Link>
-                <BsDot />
-                {timeAgo(comment.createdAt)}
-              </div>
-              <div className="ml-8">
-                <Markdown source={comment.content} />
-              </div>
-              <hr className="my-1.5 opacity-50" />
-              <div className="mx-auto flex max-w-sm justify-evenly">
-                <button className="text-md m-2 hover:text-zinc-400">
-                  <BsShare />
-                </button>
-                {authStatus === "authenticated" && (
-                  <button
-                    className="text-md m-2 hover:text-zinc-400"
-                    onClick={() => {
-                      setOpenCreateCommentId(
-                        openCreateCommentId === comment.id ? null : comment.id
-                      );
-                    }}
-                  >
-                    <BsChatLeft />
-                  </button>
-                )}
-              </div>
-              {authStatus === "authenticated" && (
-                <div
-                  className={cx(
-                    "w-full transition-all",
-                    openCreateCommentId === comment.id
-                      ? "min-h-[9rem]"
-                      : "min-h-0"
-                  )}
-                >
-                  {openCreateCommentId === comment.id && (
-                    <CreateCommentForm
-                      parentCommentId={openCreateCommentId}
-                      postId={postId}
-                      setCurrentParentCommentId={setCurrentParentCommentId}
+      {comments.map((comment) => {
+        return (
+          <div
+            key={comment.id}
+            className="mt-2 rounded-sm border-l-4 border-zinc-600 pl-3 pt-1"
+          >
+            <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
+              <Link
+                className="group flex items-center hover:underline"
+                href="/"
+              >
+                <div className="h-10 w-10">
+                  {comment.user.image ? (
+                    <Image
+                      className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
+                      loader={({ src }) => src}
+                      src={comment.user.image}
+                      alt={`Profile image of ${comment.user.name}`}
+                      width="128"
+                      height="128"
                     />
+                  ) : (
+                    comment.user.name?.charAt(0).toUpperCase() ?? ""
                   )}
                 </div>
-              )}
-
-              {comment.childComments && comment.childComments.length > 0 ? (
-                <PostComments
-                  postId={postId}
-                  comments={comment.childComments}
-                  openCreateCommentId={openCreateCommentId}
-                  setOpenCreateCommentId={setOpenCreateCommentId}
-                  setCurrentParentCommentId={setCurrentParentCommentId}
-                />
-              ) : (
-                comment._count.childComments > 0 && (
-                  <button
-                    className="ml-4 text-indigo-400 hover:underline"
-                    onClick={() => setCurrentParentCommentId(comment.id)}
-                  >
-                    {comment._count.childComments} more replies
-                  </button>
-                )
+                {/* TODO: user profile */}
+                u/{comment.user.name}
+              </Link>
+              <BsDot />
+              {timeAgo(comment.createdAt)}
+            </div>
+            <div className="ml-8">
+              <Markdown source={comment.content} />
+            </div>
+            <hr className="my-1.5 opacity-50" />
+            <div className="mx-auto flex max-w-sm justify-evenly">
+              <button className="text-md m-2 hover:text-zinc-400">
+                <BsShare />
+              </button>
+              {authStatus === "authenticated" && (
+                <button
+                  className="text-md m-2 hover:text-zinc-400"
+                  onClick={() => {
+                    setOpenCreateCommentId(
+                      openCreateCommentId === comment.id ? null : comment.id
+                    );
+                  }}
+                >
+                  <BsChatLeft />
+                </button>
               )}
             </div>
-          );
-        })
-      ) : (
-        <Loading show size="large" />
-      )}
+            {authStatus === "authenticated" && (
+              <div
+                className={cx(
+                  "w-full transition-all",
+                  openCreateCommentId === comment.id
+                    ? "min-h-[9rem]"
+                    : "min-h-0"
+                )}
+              >
+                {openCreateCommentId === comment.id && (
+                  <CreateCommentForm
+                    parentCommentId={openCreateCommentId}
+                    postId={postId}
+                    setCurrentParentCommentId={setCurrentParentCommentId}
+                  />
+                )}
+              </div>
+            )}
+
+            {comment.childComments && comment.childComments.length > 0 ? (
+              <PostComments
+                postId={postId}
+                comments={comment.childComments}
+                openCreateCommentId={openCreateCommentId}
+                setOpenCreateCommentId={setOpenCreateCommentId}
+                setCurrentParentCommentId={setCurrentParentCommentId}
+              />
+            ) : (
+              comment._count.childComments > 0 && (
+                <button
+                  className="ml-4 text-indigo-400 hover:underline"
+                  onClick={() => setCurrentParentCommentId(comment.id)}
+                >
+                  {comment._count.childComments} more replies
+                </button>
+              )
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
