@@ -13,7 +13,7 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
 }) => {
   return (
-    <div className="container max-w-3xl">
+    <div className="container my-4 max-w-3xl">
       {communityPosts.posts.map((post) => (
         <SinglePost key={post.id} post={post} isMain={false} />
       ))}
