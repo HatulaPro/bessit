@@ -22,12 +22,14 @@ import { Markdown } from "../../../../components/Markdown";
 
 const PostPage: NextPage = () => {
   // TODO: This var can be moved to a route path
-  const [currentParentCommentId, setCurrentParentCommentId] = useState<
-    string | null
-  >(null);
-  const { post, isLoading, is404, comments } = useCachedPost(
-    currentParentCommentId
-  );
+  const {
+    post,
+    isLoading,
+    is404,
+    comments,
+    currentParentCommentId,
+    setCurrentParentCommentId,
+  } = useCachedPost();
   const pageTitle = `Bessit | ${post?.title ?? "View Post"}`;
   const router = useRouter();
   return (
@@ -337,10 +339,10 @@ const CreateCommentForm: React.FC<{
 
 const postDataQuerySchema = z.object({
   community_name: z.string(),
-  post_data: z.array(z.string()).length(2),
+  post_data: z.array(z.string()).min(2).max(3),
   cached_post: z.string().optional(),
 });
-const useCachedPost = (parentCommentId: string | null) => {
+const useCachedPost = () => {
   const router = useRouter();
   const zodParsing = postDataQuerySchema.safeParse(router.query);
   const queryData = zodParsing.success ? zodParsing.data : undefined;
@@ -368,7 +370,7 @@ const useCachedPost = (parentCommentId: string | null) => {
       post: queryData?.post_data[0] ?? "NOT_SENDABLE",
       count: 12,
       sort: "new",
-      parentCommentId,
+      parentCommentId: queryData?.post_data[2] ?? null,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -420,6 +422,21 @@ const useCachedPost = (parentCommentId: string | null) => {
     isLoading: {
       post: postQuery.isFetching || postQuery.isLoading,
       comments: commentsQuery.isLoading || commentsQuery.isFetching,
+    },
+    currentParentCommentId: queryData?.post_data[2] ?? null,
+    setCurrentParentCommentId: (commentId: string | null) => {
+      if (!queryData?.post_data) return;
+      const copyPostData = [...queryData.post_data];
+      if (commentId === null && copyPostData.length === 3) {
+        copyPostData.pop();
+      } else {
+        copyPostData[2] = commentId as string;
+      }
+      router.push(
+        { query: { ...router.query, post_data: copyPostData } },
+        undefined,
+        { shallow: true }
+      );
     },
   };
 };
