@@ -12,8 +12,13 @@ import { IoMdClose } from "react-icons/io";
 import type { CommunityPosts } from "../../../../hooks/useCommunityPosts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { cx } from "../../../../utils/general";
+import { cx, timeAgo } from "../../../../utils/general";
 import { useSession } from "next-auth/react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { BsDot, BsChatLeft, BsShare } from "react-icons/bs";
+import Image from "next/image";
+import { Markdown } from "../../../../components/Markdown";
 
 const PostPage: NextPage = () => {
   const { post, isLoading, is404, comments } = useCachedPost();
@@ -37,7 +42,9 @@ const PostPage: NextPage = () => {
         {post && <PostPageContent comments={comments} post={post} />}
 
         <button
-          onClick={() => router.back()}
+          onClick={() => {
+            router.back();
+          }}
           className="absolute right-12 top-12 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
         >
           <IoMdClose className="text-2xl" />
@@ -54,27 +61,127 @@ const PostPageContent: React.FC<{
   post: CommunityPosts["posts"][number];
   comments: ReturnType<typeof useCachedPost>["comments"];
 }> = ({ post, comments }) => {
+  const { status: authStatus } = useSession();
+  const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
+    null
+  );
+
   return (
     <div className="w-full">
       <SinglePost post={post} isMain={true} />
-      <PostComments comments={comments} postId={post.id} />
+      {authStatus === "authenticated" && (
+        <CreateCommentForm parentCommentId={null} postId={post.id} />
+      )}
+
+      <PostComments
+        comments={comments}
+        postId={post.id}
+        openCreateCommentId={openCreateCommentId}
+        setOpenCreateCommentId={setOpenCreateCommentId}
+      />
     </div>
   );
 };
 
+type UIComment = {
+  id: string;
+  createdAt: Date;
+  user: User;
+  content: string;
+  childComments?: UIComment[];
+};
+
 const PostComments: React.FC<{
   postId: string;
-  comments: ReturnType<typeof useCachedPost>["comments"];
-}> = ({ postId, comments }) => {
+  comments: UIComment[];
+  openCreateCommentId: string | null;
+  setOpenCreateCommentId: (x: string | null) => void;
+}> = ({ postId, comments, openCreateCommentId, setOpenCreateCommentId }) => {
   const { status: authStatus } = useSession();
   return (
-    <div>
-      {authStatus === "authenticated" && <CreateCommentForm postId={postId} />}
-
+    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 p-2 md:max-w-5xl">
       {comments ? (
-        comments.pages.map((page) =>
-          page.comments.map((com) => <div key={com.id}>{com.content}</div>)
-        )
+        comments.map((comment) => {
+          return (
+            <div
+              key={comment.id}
+              className="mt-2 rounded-sm border-l-4 border-zinc-600 p-3"
+            >
+              <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
+                <Link
+                  className="group flex items-center hover:underline"
+                  href="/"
+                >
+                  <div className="h-10 w-10">
+                    {comment.user.image ? (
+                      <Image
+                        className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
+                        loader={({ src }) => src}
+                        src={comment.user.image}
+                        alt={`Profile image of ${comment.user.name}`}
+                        width="128"
+                        height="128"
+                      />
+                    ) : (
+                      comment.user.name?.charAt(0).toUpperCase() ?? ""
+                    )}
+                  </div>
+                  {/* TODO: user profile */}
+                  u/{comment.user.name}
+                </Link>
+                <BsDot />
+                {timeAgo(comment.createdAt)}
+              </div>
+              <div className="ml-8">
+                <Markdown source={comment.content} />
+              </div>
+              <hr className="my-1.5 opacity-50" />
+              <div className="mx-auto flex max-w-sm justify-evenly">
+                <button className="text-md m-2 hover:text-zinc-400">
+                  <BsShare />
+                </button>
+                {authStatus === "authenticated" && (
+                  <button
+                    className="text-md m-2 hover:text-zinc-400"
+                    onClick={() => {
+                      setOpenCreateCommentId(
+                        openCreateCommentId === comment.id ? null : comment.id
+                      );
+                    }}
+                  >
+                    <BsChatLeft />
+                  </button>
+                )}
+              </div>
+              {authStatus === "authenticated" && (
+                <div
+                  className={cx(
+                    "w-full transition-all",
+                    openCreateCommentId === comment.id
+                      ? "min-h-[9rem]"
+                      : "min-h-0"
+                  )}
+                >
+                  {openCreateCommentId === comment.id && (
+                    <CreateCommentForm
+                      parentCommentId={openCreateCommentId}
+                      postId={postId}
+                    />
+                  )}
+                </div>
+              )}
+
+              {comment.childComments && comment.childComments.length > 0 && (
+                <PostComments
+                  postId={postId}
+                  comments={comment.childComments}
+                  openCreateCommentId={openCreateCommentId}
+                  setOpenCreateCommentId={setOpenCreateCommentId}
+                />
+              )}
+            </div>
+          );
+        })
       ) : (
         <Loading show size="large" />
       )}
@@ -90,9 +197,12 @@ const createCommentSchema = z.object({
 });
 type createCommentForm = z.infer<typeof createCommentSchema>;
 
-const CreateCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
+const CreateCommentForm: React.FC<{
+  postId: string;
+  parentCommentId: string | null;
+}> = ({ postId, parentCommentId }) => {
   const { control, handleSubmit, reset } = useForm<createCommentForm>({
-    mode: "onTouched",
+    mode: "onSubmit",
     resolver: zodResolver(createCommentSchema),
     defaultValues: {
       content: "",
@@ -107,11 +217,15 @@ const CreateCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
     },
   });
   const onSubmit = (data: createCommentForm) => {
-    createCommentMutation.mutate({ postId, content: data.content });
+    createCommentMutation.mutate({
+      postId,
+      content: data.content,
+      parentCommentId,
+    });
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 p-4">
+    <div className="grow-on-mount mx-auto w-full max-w-3xl rounded bg-zinc-800 p-2 md:max-w-5xl">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Controller
           control={control}
@@ -121,17 +235,19 @@ const CreateCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
               <div
                 className={cx(
                   "overflow-hidden text-red-400 transition-all",
-                  fieldState.error?.message ? "h-8" : "h-0"
+                  fieldState.isDirty && fieldState.error?.message
+                    ? "h-8"
+                    : "h-0"
                 )}
               >
-                {fieldState.error?.message}
+                {fieldState.isDirty && fieldState.error?.message}
               </div>
               <textarea
                 autoComplete="off"
                 {...field}
                 className={cx(
                   "max-h-[50vh] min-h-[5rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none disabled:contrast-50",
-                  fieldState.error
+                  fieldState.isDirty && fieldState.error
                     ? "border-red-600"
                     : "border-zinc-500 focus:border-zinc-300"
                 )}
@@ -187,6 +303,7 @@ const useCachedPost = () => {
   const commentsQuery = trpc.post.getComments.useInfiniteQuery(
     { post: queryData?.post_data[0] ?? "NOT_SENDABLE", count: 12, sort: "new" },
     {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: Boolean(queryData),
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -195,10 +312,21 @@ const useCachedPost = () => {
     }
   );
 
+  const flattenedComments = useMemo(() => {
+    return (
+      commentsQuery.data?.pages.reduce<
+        typeof commentsQuery["data"]["pages"][number]["comments"]
+      >((acc, cur) => {
+        acc.push(...cur.comments);
+        return acc;
+      }, []) || []
+    );
+  }, [commentsQuery]);
+
   return {
     is404: postQuery.status === "success" && !postQuery.data,
     post: postQuery.data,
-    comments: commentsQuery.data,
+    comments: flattenedComments,
     isLoading: {
       post: postQuery.isFetching || postQuery.isLoading,
       comments: commentsQuery.isLoading || commentsQuery.isFetching,

@@ -32,7 +32,7 @@ export const SinglePost: React.FC<{
       <div
         className={cx(
           "relative my-4 mx-auto rounded-md border-[1px] border-transparent bg-zinc-800 p-4 pb-1 text-white",
-          isMain && "container max-w-3xl"
+          isMain && "container max-w-3xl md:max-w-5xl"
         )}
       >
         <div className="flex items-center">

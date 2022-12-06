@@ -33,6 +33,7 @@ export const postsRouter = router({
     .input(
       z.object({
         postId: z.string().length(25),
+        parentCommentId: z.string().length(25).nullable(),
         content: z.string().min(4).max(4096),
       })
     )
@@ -47,7 +48,7 @@ export const postsRouter = router({
         data: {
           content: input.content,
           isDeleted: false,
-          parentCommentId: null,
+          parentCommentId: input.parentCommentId,
           postId: post.id,
           userId: ctx.session.user.id,
         },
@@ -88,12 +89,14 @@ export const postsRouter = router({
         // TODO: Rethink this stupid recursion thing
         select: {
           childComments: {
+            orderBy: { createdAt: "desc" },
             select: {
               content: true,
               createdAt: true,
               id: true,
               user: true,
               childComments: {
+                orderBy: { createdAt: "desc" },
                 select: {
                   user: true,
                   content: true,

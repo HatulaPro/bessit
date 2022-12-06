@@ -4,6 +4,7 @@ module.exports = {
   variants: {
     underline: ["group-hover"],
     "no-underline": ["group-hover"],
+    rounded: ["group-hover"],
   },
   theme: {
     extend: {
