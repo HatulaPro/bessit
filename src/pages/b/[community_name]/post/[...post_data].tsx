@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { cx, timeAgo } from "../../../../utils/general";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { BsDot, BsChatLeft, BsShare } from "react-icons/bs";
 import Image from "next/image";
@@ -321,6 +321,28 @@ const useCachedPost = () => {
         return acc;
       }, []) || []
     );
+  }, [commentsQuery]);
+
+  useEffect(() => {
+    const listener = () => {
+      if (
+        commentsQuery.isLoading ||
+        commentsQuery.isFetchingNextPage ||
+        !commentsQuery.hasNextPage
+      )
+        return;
+      if (
+        window.innerHeight + window.scrollY + 200 >
+        document.body.offsetHeight
+      ) {
+        commentsQuery.fetchNextPage();
+      }
+    };
+    window.addEventListener("scroll", listener);
+
+    return () => {
+      window.removeEventListener("scroll", listener);
+    };
   }, [commentsQuery]);
 
   return {
