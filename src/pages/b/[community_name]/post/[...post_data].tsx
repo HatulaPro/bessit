@@ -94,7 +94,7 @@ const PostPageContent: React.FC<{
           onClick={() => setCurrentParentCommentId(null)}
         >
           <BsArrowUpCircle className="text-2xl" />
-          Viewing subcomments
+          Back to main thread
         </button>
       )}
       {authStatus === "authenticated" && (
@@ -142,13 +142,13 @@ const PostComments: React.FC<{
 }) => {
   const { status: authStatus } = useSession();
   return (
-    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 p-2 pb-0 md:max-w-5xl">
+    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 px-1 pt-2 md:max-w-5xl">
       {comments ? (
         comments.map((comment) => {
           return (
             <div
               key={comment.id}
-              className="mt-2 rounded-sm border-l-4 border-zinc-600 p-3 pb-0"
+              className="mt-2 rounded-sm border-l-4 border-zinc-600 pl-3 pt-3"
             >
               <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
                 <Link
@@ -282,8 +282,8 @@ const CreateCommentForm: React.FC<{
   return (
     <div
       className={cx(
-        "grow-on-mount mx-auto w-full max-w-3xl rounded bg-zinc-800 md:max-w-5xl",
-        parentCommentId === null && "p-3"
+        "mx-auto w-full max-w-3xl rounded bg-zinc-800 md:max-w-5xl",
+        parentCommentId === null ? "p-3" : "grow-on-mount"
       )}
     >
       <form onSubmit={handleSubmit(onSubmit)}>
