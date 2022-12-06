@@ -150,97 +150,135 @@ const PostComments: React.FC<{
   setCurrentParentCommentId,
 }) => {
   const { status: authStatus } = useSession();
+  const [closedComments, setClosedComments] = useState<Set<string>>(new Set());
+
+  function closeOrOpenComment(commentId: string) {
+    return () => {
+      if (closedComments.has(commentId)) {
+        closedComments.delete(commentId);
+      } else {
+        closedComments.add(commentId);
+      }
+      setClosedComments((prev) => new Set(prev));
+    };
+  }
+
   return (
     <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 px-1 pt-2 md:max-w-5xl">
       {comments.map((comment) => {
         return (
-          <div
-            key={comment.id}
-            className="mt-2 rounded-sm border-l-4 border-zinc-600 pl-3 pt-1"
-          >
-            <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
-              <Link
-                className="group flex items-center hover:underline"
-                href="/"
-              >
-                <div className="h-10 w-10">
-                  {comment.user.image ? (
-                    <Image
-                      className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
-                      loader={({ src }) => src}
-                      src={comment.user.image}
-                      alt={`Profile image of ${comment.user.name}`}
-                      width="128"
-                      height="128"
+          <div key={comment.id} className="flex">
+            <button
+              className="mt-2 w-1 cursor-pointer bg-zinc-600 hover:bg-zinc-200"
+              onClick={closeOrOpenComment(comment.id)}
+            ></button>
+            <div
+              className={cx(
+                "mt-2 w-full overflow-hidden rounded-sm pl-3 pt-1 transition-colors duration-300",
+                closedComments.has(comment.id) &&
+                  "h-12 cursor-pointer bg-zinc-900"
+              )}
+              onClick={
+                closedComments.has(comment.id)
+                  ? () =>
+                      setClosedComments((prev) => {
+                        const x = new Set(prev);
+                        x.delete(comment.id);
+                        return x;
+                      })
+                  : undefined
+              }
+            >
+              <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
+                <Link
+                  className="group flex items-center hover:underline"
+                  href="/"
+                >
+                  <div className="h-10 w-10">
+                    {comment.user.image ? (
+                      <Image
+                        className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
+                        loader={({ src }) => src}
+                        src={comment.user.image}
+                        alt={`Profile image of ${comment.user.name}`}
+                        width="128"
+                        height="128"
+                      />
+                    ) : (
+                      comment.user.name?.charAt(0).toUpperCase() ?? ""
+                    )}
+                  </div>
+                  {/* TODO: user profile */}
+                  u/{comment.user.name}
+                </Link>
+                <BsDot />
+                {timeAgo(comment.createdAt)}
+              </div>
+              {!closedComments.has(comment.id) && (
+                <div className="w-full">
+                  <div className="ml-8">
+                    <Markdown source={comment.content} />
+                  </div>
+                  <hr className="my-1.5 opacity-50" />
+                  <div className="mx-auto flex max-w-sm justify-evenly">
+                    <button className="text-md m-2 hover:text-zinc-400">
+                      <BsShare />
+                    </button>
+                    {authStatus === "authenticated" && (
+                      <button
+                        className="text-md m-2 hover:text-zinc-400"
+                        onClick={() => {
+                          setOpenCreateCommentId(
+                            openCreateCommentId === comment.id
+                              ? null
+                              : comment.id
+                          );
+                        }}
+                      >
+                        <BsChatLeft />
+                      </button>
+                    )}
+                  </div>
+                  {authStatus === "authenticated" && (
+                    <div
+                      className={cx(
+                        "w-full transition-all",
+                        openCreateCommentId === comment.id
+                          ? "min-h-[9rem]"
+                          : "min-h-0"
+                      )}
+                    >
+                      {openCreateCommentId === comment.id && (
+                        <CreateCommentForm
+                          parentCommentId={openCreateCommentId}
+                          postId={postId}
+                          setCurrentParentCommentId={setCurrentParentCommentId}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {comment.childComments && comment.childComments.length > 0 ? (
+                    <PostComments
+                      postId={postId}
+                      comments={comment.childComments}
+                      openCreateCommentId={openCreateCommentId}
+                      setOpenCreateCommentId={setOpenCreateCommentId}
+                      setCurrentParentCommentId={setCurrentParentCommentId}
                     />
                   ) : (
-                    comment.user.name?.charAt(0).toUpperCase() ?? ""
+                    comment._count.childComments > 0 && (
+                      <button
+                        className="ml-4 text-indigo-400 hover:underline"
+                        onClick={() => setCurrentParentCommentId(comment.id)}
+                      >
+                        {comment._count.childComments} more replies
+                      </button>
+                    )
                   )}
                 </div>
-                {/* TODO: user profile */}
-                u/{comment.user.name}
-              </Link>
-              <BsDot />
-              {timeAgo(comment.createdAt)}
-            </div>
-            <div className="ml-8">
-              <Markdown source={comment.content} />
-            </div>
-            <hr className="my-1.5 opacity-50" />
-            <div className="mx-auto flex max-w-sm justify-evenly">
-              <button className="text-md m-2 hover:text-zinc-400">
-                <BsShare />
-              </button>
-              {authStatus === "authenticated" && (
-                <button
-                  className="text-md m-2 hover:text-zinc-400"
-                  onClick={() => {
-                    setOpenCreateCommentId(
-                      openCreateCommentId === comment.id ? null : comment.id
-                    );
-                  }}
-                >
-                  <BsChatLeft />
-                </button>
               )}
             </div>
-            {authStatus === "authenticated" && (
-              <div
-                className={cx(
-                  "w-full transition-all",
-                  openCreateCommentId === comment.id
-                    ? "min-h-[9rem]"
-                    : "min-h-0"
-                )}
-              >
-                {openCreateCommentId === comment.id && (
-                  <CreateCommentForm
-                    parentCommentId={openCreateCommentId}
-                    postId={postId}
-                    setCurrentParentCommentId={setCurrentParentCommentId}
-                  />
-                )}
-              </div>
-            )}
-
-            {comment.childComments && comment.childComments.length > 0 ? (
-              <PostComments
-                postId={postId}
-                comments={comment.childComments}
-                openCreateCommentId={openCreateCommentId}
-                setOpenCreateCommentId={setOpenCreateCommentId}
-                setCurrentParentCommentId={setCurrentParentCommentId}
-              />
-            ) : (
-              comment._count.childComments > 0 && (
-                <button
-                  className="ml-4 text-indigo-400 hover:underline"
-                  onClick={() => setCurrentParentCommentId(comment.id)}
-                >
-                  {comment._count.childComments} more replies
-                </button>
-              )
-            )}
           </div>
         );
       })}
