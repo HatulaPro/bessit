@@ -12,7 +12,7 @@ import { PostEditor } from "../../../components/PostEditor";
 import { PostsViewer } from "../../../components/PostsViewer";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 import { cx } from "../../../utils/general";
-import { RouterInputs } from "../../../utils/trpc";
+import type { RouterInputs } from "../../../utils/trpc";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();

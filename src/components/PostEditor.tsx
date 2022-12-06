@@ -96,11 +96,13 @@ export const PostEditor: React.FC<{
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="my-auto flex w-full max-w-3xl flex-col items-center gap-1 rounded border-2 border-zinc-800 bg-zinc-900 p-8 pb-4 text-white"
+      className="my-auto flex w-full max-w-3xl flex-col items-center gap-1 rounded border-2 border-transparent bg-zinc-900 p-2 pb-0 text-white md:border-zinc-800 md:p-8 md:pb-4"
     >
       <div className="flex w-full items-center">
         {defaultOpen ? (
-          <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
+          <h2 className="my-2 w-full text-xl text-white md:text-3xl">
+            Create a post
+          </h2>
         ) : (
           <button
             className={cx(
