@@ -88,7 +88,7 @@ export const postsRouter = router({
         sort: z.enum(["new"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
-        parentCommentId: z.string().length(25).nullable(),
+        mainCommentId: z.string().length(25).nullable(),
         post: z.string().length(25),
       })
     )
@@ -99,7 +99,8 @@ export const postsRouter = router({
         take: input.count,
         where: {
           postId: input.post,
-          parentCommentId: input.parentCommentId,
+          parentCommentId: input.mainCommentId ? undefined : null,
+          id: input.mainCommentId ?? undefined,
           isDeleted: false,
         },
         // TODO: Rethink this stupid recursion thing

@@ -27,8 +27,8 @@ const PostPage: NextPage = () => {
     isLoading,
     is404,
     comments,
-    currentParentCommentId,
-    setCurrentParentCommentId,
+    currentMainCommentId: currentParentCommentId,
+    setCurrentMainCommentId: setCurrentParentCommentId,
   } = useCachedPost();
   const pageTitle = `Bessit | ${post?.title ?? "View Post"}`;
   const router = useRouter();
@@ -408,7 +408,7 @@ const useCachedPost = () => {
       post: queryData?.post_data[0] ?? "NOT_SENDABLE",
       count: 12,
       sort: "new",
-      parentCommentId: queryData?.post_data[2] ?? null,
+      mainCommentId: queryData?.post_data[2] ?? null,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -461,8 +461,8 @@ const useCachedPost = () => {
       post: postQuery.isFetching || postQuery.isLoading,
       comments: commentsQuery.isLoading || commentsQuery.isFetching,
     },
-    currentParentCommentId: queryData?.post_data[2] ?? null,
-    setCurrentParentCommentId: (commentId: string | null) => {
+    currentMainCommentId: queryData?.post_data[2] ?? null,
+    setCurrentMainCommentId: (commentId: string | null) => {
       if (!queryData?.post_data) return;
       const copyPostData = [...queryData.post_data];
       if (commentId === null && copyPostData.length === 3) {
