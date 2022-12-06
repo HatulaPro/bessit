@@ -169,7 +169,7 @@ const PostComments: React.FC<{
         return (
           <div key={comment.id} className="flex">
             <button
-              className="mt-2 w-1 cursor-pointer bg-zinc-600 hover:bg-zinc-200"
+              className="mt-2 w-1 cursor-pointer rounded-full bg-zinc-600 hover:bg-zinc-200"
               onClick={closeOrOpenComment(comment.id)}
             ></button>
             <div
