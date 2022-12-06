@@ -88,6 +88,7 @@ export const postsRouter = router({
         sort: z.enum(["new"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
+        parentCommentId: z.string().length(25).nullable(),
         post: z.string().length(25),
       })
     )
@@ -96,7 +97,11 @@ export const postsRouter = router({
         cursor: input.cursor ? { id: input.cursor } : undefined,
         orderBy: { createdAt: "desc" },
         take: input.count,
-        where: { postId: input.post, parentCommentId: null, isDeleted: false },
+        where: {
+          postId: input.post,
+          parentCommentId: input.parentCommentId,
+          isDeleted: false,
+        },
         // TODO: Rethink this stupid recursion thing
         select: {
           childComments: {
@@ -106,6 +111,7 @@ export const postsRouter = router({
               createdAt: true,
               id: true,
               user: true,
+              _count: { select: { childComments: true } },
               childComments: {
                 orderBy: { createdAt: "desc" },
                 select: {
@@ -113,6 +119,27 @@ export const postsRouter = router({
                   content: true,
                   createdAt: true,
                   id: true,
+                  _count: { select: { childComments: true } },
+                  childComments: {
+                    orderBy: { createdAt: "desc" },
+                    select: {
+                      user: true,
+                      content: true,
+                      createdAt: true,
+                      id: true,
+                      _count: { select: { childComments: true } },
+                      childComments: {
+                        orderBy: { createdAt: "desc" },
+                        select: {
+                          user: true,
+                          content: true,
+                          createdAt: true,
+                          id: true,
+                          _count: { select: { childComments: true } },
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -121,6 +148,7 @@ export const postsRouter = router({
           createdAt: true,
           id: true,
           user: true,
+          _count: { select: { childComments: true } },
         },
       });
       if (comments.length < input.count) {

@@ -16,12 +16,17 @@ import { cx, timeAgo } from "../../../../utils/general";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BsDot, BsChatLeft, BsShare } from "react-icons/bs";
+import { BsDot, BsChatLeft, BsShare, BsArrowUpCircle } from "react-icons/bs";
 import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
 
 const PostPage: NextPage = () => {
-  const { post, isLoading, is404, comments } = useCachedPost();
+  const [currentParentCommentId, setCurrentParentCommentId] = useState<
+    string | null
+  >(null);
+  const { post, isLoading, is404, comments } = useCachedPost(
+    currentParentCommentId
+  );
   const pageTitle = `Bessit | ${post?.title ?? "View Post"}`;
   const router = useRouter();
   return (
@@ -39,7 +44,14 @@ const PostPage: NextPage = () => {
         {is404 && (
           <NotFoundMessage message="This post does not seem to exist" />
         )}
-        {post && <PostPageContent comments={comments} post={post} />}
+        {post && (
+          <PostPageContent
+            setCurrentParentCommentId={setCurrentParentCommentId}
+            currentParentCommentId={currentParentCommentId}
+            comments={comments}
+            post={post}
+          />
+        )}
 
         <button
           onClick={() => {
@@ -60,7 +72,14 @@ export default PostPage;
 const PostPageContent: React.FC<{
   post: CommunityPosts["posts"][number];
   comments: ReturnType<typeof useCachedPost>["comments"];
-}> = ({ post, comments }) => {
+  setCurrentParentCommentId: (x: string | null) => void;
+  currentParentCommentId: string | null;
+}> = ({
+  post,
+  comments,
+  setCurrentParentCommentId,
+  currentParentCommentId,
+}) => {
   const { status: authStatus } = useSession();
   const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
     null
@@ -69,8 +88,21 @@ const PostPageContent: React.FC<{
   return (
     <div className="w-full">
       <SinglePost post={post} isMain={true} />
+      {currentParentCommentId !== null && (
+        <button
+          className="text-md m-2 mx-auto flex flex-col items-center justify-center gap-2 text-center hover:underline"
+          onClick={() => setCurrentParentCommentId(null)}
+        >
+          <BsArrowUpCircle className="text-2xl" />
+          Viewing subcomments
+        </button>
+      )}
       {authStatus === "authenticated" && (
-        <CreateCommentForm parentCommentId={null} postId={post.id} />
+        <CreateCommentForm
+          parentCommentId={null}
+          postId={post.id}
+          setCurrentParentCommentId={setCurrentParentCommentId}
+        />
       )}
 
       <PostComments
@@ -78,6 +110,7 @@ const PostPageContent: React.FC<{
         postId={post.id}
         openCreateCommentId={openCreateCommentId}
         setOpenCreateCommentId={setOpenCreateCommentId}
+        setCurrentParentCommentId={setCurrentParentCommentId}
       />
     </div>
   );
@@ -88,6 +121,9 @@ type UIComment = {
   createdAt: Date;
   user: User;
   content: string;
+  _count: {
+    childComments: number;
+  };
   childComments?: UIComment[];
 };
 
@@ -96,7 +132,14 @@ const PostComments: React.FC<{
   comments: UIComment[];
   openCreateCommentId: string | null;
   setOpenCreateCommentId: (x: string | null) => void;
-}> = ({ postId, comments, openCreateCommentId, setOpenCreateCommentId }) => {
+  setCurrentParentCommentId: (x: string | null) => void;
+}> = ({
+  postId,
+  comments,
+  openCreateCommentId,
+  setOpenCreateCommentId,
+  setCurrentParentCommentId,
+}) => {
   const { status: authStatus } = useSession();
   return (
     <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 p-2 md:max-w-5xl">
@@ -166,18 +209,29 @@ const PostComments: React.FC<{
                     <CreateCommentForm
                       parentCommentId={openCreateCommentId}
                       postId={postId}
+                      setCurrentParentCommentId={setCurrentParentCommentId}
                     />
                   )}
                 </div>
               )}
 
-              {comment.childComments && comment.childComments.length > 0 && (
+              {comment.childComments && comment.childComments.length > 0 ? (
                 <PostComments
                   postId={postId}
                   comments={comment.childComments}
                   openCreateCommentId={openCreateCommentId}
                   setOpenCreateCommentId={setOpenCreateCommentId}
+                  setCurrentParentCommentId={setCurrentParentCommentId}
                 />
+              ) : (
+                comment._count.childComments > 0 && (
+                  <button
+                    className="ml-4 text-indigo-400 hover:underline"
+                    onClick={() => setCurrentParentCommentId(comment.id)}
+                  >
+                    {comment._count.childComments} more replies
+                  </button>
+                )
               )}
             </div>
           );
@@ -200,7 +254,8 @@ type createCommentForm = z.infer<typeof createCommentSchema>;
 const CreateCommentForm: React.FC<{
   postId: string;
   parentCommentId: string | null;
-}> = ({ postId, parentCommentId }) => {
+  setCurrentParentCommentId: (x: string | null) => void;
+}> = ({ postId, parentCommentId, setCurrentParentCommentId }) => {
   const { control, handleSubmit, reset } = useForm<createCommentForm>({
     mode: "onSubmit",
     resolver: zodResolver(createCommentSchema),
@@ -208,11 +263,11 @@ const CreateCommentForm: React.FC<{
       content: "",
     },
   });
-
+  const utils = trpc.useContext();
   const createCommentMutation = trpc.post.createComment.useMutation({
     onSuccess: (data) => {
-      // TODO: acually show the comment
-      console.log(data);
+      setCurrentParentCommentId(data.parentCommentId);
+      utils.post.getComments.invalidate();
       reset({ content: "" });
     },
   });
@@ -277,7 +332,7 @@ const postDataQuerySchema = z.object({
   post_data: z.array(z.string()).length(2),
   cached_post: z.string().optional(),
 });
-const useCachedPost = () => {
+const useCachedPost = (parentCommentId: string | null) => {
   const router = useRouter();
   const zodParsing = postDataQuerySchema.safeParse(router.query);
   const queryData = zodParsing.success ? zodParsing.data : undefined;
@@ -301,7 +356,12 @@ const useCachedPost = () => {
   );
 
   const commentsQuery = trpc.post.getComments.useInfiniteQuery(
-    { post: queryData?.post_data[0] ?? "NOT_SENDABLE", count: 12, sort: "new" },
+    {
+      post: queryData?.post_data[0] ?? "NOT_SENDABLE",
+      count: 12,
+      sort: "new",
+      parentCommentId,
+    },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: Boolean(queryData),
