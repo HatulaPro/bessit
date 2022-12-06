@@ -91,9 +91,9 @@ export const SinglePost: React.FC<{
             </h3>
           </Link>
         )}
-        <p className="text-sm text-gray-400">
+        <div className="text-sm text-gray-400">
           <Markdown source={post.content} simplify={!isMain} />
-        </p>
+        </div>
         <hr className="my-2 opacity-50" />
         <div className="mx-auto flex max-w-md justify-evenly pb-2">
           <button className="p-2 hover:bg-zinc-700">
