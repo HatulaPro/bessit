@@ -112,8 +112,8 @@ model Comment {
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   postId          String
   post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parentCommentId String
-  parentComment   Comment   @relation(fields: [parentCommentId], references: [id], onDelete: Cascade, name: "parent-child-comments")
+  parentCommentId String?
+  parentComment   Comment?  @relation(fields: [parentCommentId], references: [id], onDelete: Cascade, name: "parent-child-comments")
   childComments   Comment[] @relation(name: "parent-child-comments")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

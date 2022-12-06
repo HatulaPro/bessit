@@ -49,7 +49,48 @@ export default PostPage;
 const PostPageContent: React.FC<{
   post: CommunityPosts["posts"][number];
 }> = ({ post }) => {
-  return <SinglePost post={post} isMain={true} />;
+  return (
+    <div className="w-full">
+      <SinglePost post={post} isMain={true} />
+      <PostComments postId={post.id} />
+    </div>
+  );
+};
+
+const PostComments: React.FC<{ postId: string }> = ({ postId }) => {
+  const commentsQuery = trpc.post.getComments.useInfiniteQuery(
+    { post: postId ?? "NOT_SENDABLE", count: 12, sort: "new" },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      staleTime: Infinity,
+      cacheTime: Infinity,
+    }
+  );
+
+  if (
+    commentsQuery.isLoading ||
+    commentsQuery.isFetching ||
+    !commentsQuery.data
+  ) {
+    return <Loading show size="large" />;
+  }
+
+  // const flattenedPages = useMemo(() => {
+  //   commentsQuery.data.pages.map((page) => {
+  //     page.map((comment) => {
+  //       comment.
+  //     })
+  //   })
+  // }, commentsQuery.data)
+
+  return (
+    <div>
+      {commentsQuery.data.pages.map((page) =>
+        page.comments.map((com) => <div key={com.id}>{com.content}</div>)
+      )}
+    </div>
+  );
 };
 
 const postDataQuerySchema = z.object({

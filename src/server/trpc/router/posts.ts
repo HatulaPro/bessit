@@ -8,7 +8,7 @@ export const postsRouter = router({
   createPost: protectedProcedure
     .input(createPostSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
+      const userId: string = ctx.session.user.id;
       const community = await ctx.prisma.community.findUnique({
         where: { name: input.communityName },
         select: { id: true },
@@ -45,6 +45,57 @@ export const postsRouter = router({
           },
         },
       });
+    }),
+  getComments: publicProcedure
+    .input(
+      z.object({
+        sort: z.enum(["new"]),
+        count: z.number().min(4).max(50),
+        cursor: z.string().nullish(),
+        post: z.string().length(25),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const comments = await ctx.prisma.comment.findMany({
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+        orderBy: { createdAt: "desc" },
+        take: input.count,
+        where: { postId: input.post, parentCommentId: null, isDeleted: false },
+        // TODO: Rethink this stupid recursion thing
+        select: {
+          childComments: {
+            select: {
+              content: true,
+              createdAt: true,
+              id: true,
+              user: true,
+              childComments: {
+                select: {
+                  user: true,
+                  content: true,
+                  createdAt: true,
+                  id: true,
+                },
+              },
+            },
+          },
+          content: true,
+          createdAt: true,
+          id: true,
+          user: true,
+        },
+      });
+      if (comments.length < input.count) {
+        return {
+          comments,
+          nextCursor: undefined,
+        };
+      }
+      const nextCursor = comments.length > 0 ? comments.pop()?.id : undefined;
+      return {
+        comments,
+        nextCursor,
+      };
     }),
   likePost: protectedProcedure
     .input(z.object({ postId: z.string(), action: z.enum(["like", "unlike"]) }))
