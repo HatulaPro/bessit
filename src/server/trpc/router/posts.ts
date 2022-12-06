@@ -44,6 +44,17 @@ export const postsRouter = router({
       if (!post) {
         throw new TRPCError({ message: "Post not found", code: "BAD_REQUEST" });
       }
+      if (input.parentCommentId !== null) {
+        const parentComment = await ctx.prisma.comment.findUnique({
+          where: { id: input.parentCommentId },
+        });
+        if (!parentComment || parentComment.postId !== input.postId) {
+          throw new TRPCError({
+            message: "Parent comment not found",
+            code: "BAD_REQUEST",
+          });
+        }
+      }
       return await ctx.prisma.comment.create({
         data: {
           content: input.content,
