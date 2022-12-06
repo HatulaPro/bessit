@@ -13,6 +13,7 @@ import type { CommunityPosts } from "../../../../hooks/useCommunityPosts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { cx } from "../../../../utils/general";
+import { useSession } from "next-auth/react";
 
 const PostPage: NextPage = () => {
   const { post, isLoading, is404, comments } = useCachedPost();
@@ -65,9 +66,10 @@ const PostComments: React.FC<{
   postId: string;
   comments: ReturnType<typeof useCachedPost>["comments"];
 }> = ({ postId, comments }) => {
+  const { status: authStatus } = useSession();
   return (
     <div>
-      <CreateCommentForm postId={postId} />
+      {authStatus === "authenticated" && <CreateCommentForm postId={postId} />}
 
       {comments ? (
         comments.pages.map((page) =>
@@ -80,16 +82,16 @@ const PostComments: React.FC<{
   );
 };
 
-export const createCommentSchema = z.object({
+const createCommentSchema = z.object({
   content: z
     .string()
     .min(4, { message: "Comment must be at least 4 characters long" })
     .max(4096, { message: "Comment must be at most 4096 characters long" }),
 });
-export type createCommentForm = z.infer<typeof createCommentSchema>;
+type createCommentForm = z.infer<typeof createCommentSchema>;
 
 const CreateCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
-  const { control, handleSubmit } = useForm<createCommentForm>({
+  const { control, handleSubmit, reset } = useForm<createCommentForm>({
     mode: "onTouched",
     resolver: zodResolver(createCommentSchema),
     defaultValues: {
@@ -97,8 +99,15 @@ const CreateCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
     },
   });
 
+  const createCommentMutation = trpc.post.createComment.useMutation({
+    onSuccess: (data) => {
+      // TODO: acually show the comment
+      console.log(data);
+      reset({ content: "" });
+    },
+  });
   const onSubmit = (data: createCommentForm) => {
-    console.log(data);
+    createCommentMutation.mutate({ postId, content: data.content });
   };
 
   return (
@@ -121,22 +130,27 @@ const CreateCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
                 autoComplete="off"
                 {...field}
                 className={cx(
-                  "max-h-[50vh] min-h-[5rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+                  "max-h-[50vh] min-h-[5rem] w-full overflow-y-scroll rounded border-2 bg-transparent p-1 text-zinc-200 outline-none disabled:contrast-50",
                   fieldState.error
                     ? "border-red-600"
                     : "border-zinc-500 focus:border-zinc-300"
                 )}
                 placeholder="Your nice, helpful and engaging comment"
+                disabled={createCommentMutation.isLoading}
               ></textarea>
             </>
           )}
         />
-        <button
-          type="submit"
-          className="my-2 ml-auto block w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900"
-        >
-          Submit
-        </button>
+        <div className="ml-auto flex w-32 justify-end">
+          <Loading show={createCommentMutation.isLoading} size="small" />
+          <button
+            disabled={createCommentMutation.isLoading}
+            type="submit"
+            className="my-2 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+          >
+            Submit
+          </button>
+        </div>
       </form>
     </div>
   );

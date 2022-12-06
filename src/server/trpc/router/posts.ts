@@ -29,6 +29,30 @@ export const postsRouter = router({
         },
       });
     }),
+  createComment: protectedProcedure
+    .input(
+      z.object({
+        postId: z.string().length(25),
+        content: z.string().min(4).max(4096),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const post = await ctx.prisma.post.findUnique({
+        where: { id: input.postId },
+      });
+      if (!post) {
+        throw new TRPCError({ message: "Post not found", code: "BAD_REQUEST" });
+      }
+      return await ctx.prisma.comment.create({
+        data: {
+          content: input.content,
+          isDeleted: false,
+          parentCommentId: null,
+          postId: post.id,
+          userId: ctx.session.user.id,
+        },
+      });
+    }),
   getPost: publicProcedure
     .input(z.object({ post_id: z.string() }))
     .query(({ ctx, input }) => {
