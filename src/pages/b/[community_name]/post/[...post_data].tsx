@@ -60,7 +60,8 @@ const PostPage: NextPage = () => {
 
         <button
           onClick={() => {
-            router.back();
+            if (!post) return router.back();
+            router.replace(`/b/${post.community.name}`);
           }}
           className="absolute right-12 top-12 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
         >
