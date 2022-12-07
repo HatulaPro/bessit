@@ -4,7 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog } from "../../../components/Dialog";
 import { Loading } from "../../../components/Loading";
 import { NotFoundMessage } from "../../../components/NotFoundMessage";
@@ -49,7 +49,23 @@ export default CommunityPage;
 const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
   const [sortBy, setSortBy] =
     useState<RouterInputs["post"]["getPosts"]["sort"]>("new");
+  const activeSortByRef = useRef<HTMLButtonElement>(null);
   const communityPosts = useCommunityPosts(name, sortBy);
+
+  useEffect(() => {
+    if (activeSortByRef.current) {
+      const activeButton = activeSortByRef.current;
+      const parent = activeButton.parentElement as HTMLDivElement;
+      const buttonRect = activeButton.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
+      const desiredCenter = parentRect.width / 2 + parentRect.left;
+      const buttonCenter = buttonRect.width / 2 + buttonRect.left;
+      parent.scrollBy({
+        behavior: "smooth",
+        left: buttonCenter - desiredCenter,
+      });
+    }
+  }, [sortBy, activeSortByRef, communityPosts]);
 
   if (!communityPosts.community) {
     if (communityPosts.isLoading) {
@@ -62,7 +78,8 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
       <CommunityHeader community={communityPosts.community} />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
         <div className="flex-[3]">
-          <div className="m-4 flex justify-center gap-2">
+          <div className="hidden-scroller justify-left m-4 flex gap-2 overflow-scroll">
+            <div className="w-[50%] shrink-0 basis-[50%]"></div>
             {(["new", "hot", "controversial"] as const).map((value) => (
               <button
                 className={cx(
@@ -72,12 +89,16 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
                     : "bg-zinc-700 text-white"
                 )}
                 key={value}
-                onClick={() => setSortBy(value)}
+                onClick={() => {
+                  setSortBy(value);
+                }}
+                ref={value === sortBy ? activeSortByRef : undefined}
                 disabled={communityPosts.isLoading}
               >
                 {value}
               </button>
             ))}
+            <div className="w-[50%] shrink-0 basis-[50%]"></div>
           </div>
           <PostsViewer communityPosts={communityPosts} />
         </div>
