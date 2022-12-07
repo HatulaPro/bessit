@@ -169,7 +169,7 @@ const PostComments: React.FC<{
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 pr-1 pl-3 pt-2 md:max-w-5xl">
+    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 pr-1 pl-1 pt-2 md:max-w-5xl">
       {comments.map((comment) => {
         return (
           <div key={comment.id} className="flex">
@@ -179,7 +179,7 @@ const PostComments: React.FC<{
             ></button>
             <div
               className={cx(
-                "mt-2 w-full overflow-hidden rounded-sm pl-3 pt-1 transition-colors duration-300",
+                "mt-2 w-full overflow-hidden rounded-sm pl-2 pt-1 transition-colors duration-300",
                 closedComments.has(comment.id) &&
                   "h-12 cursor-pointer bg-zinc-900"
               )}
@@ -224,7 +224,7 @@ const PostComments: React.FC<{
                   <div className="ml-8">
                     <Markdown source={comment.content} />
                   </div>
-                  <div className="ml-8 flex gap-12">
+                  <div className="ml-8 flex gap-8 md:gap-12">
                     <button className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-emerald-400">
                       <BsShare className="text-xl" />
                       Share
