@@ -231,7 +231,7 @@ const PostComments: React.FC<{
                     {authStatus === "authenticated" && (
                       <>
                         <button
-                          className="text-md m-2 hover:text-zinc-400"
+                          className="text-md m-2 text-blue-400 hover:text-blue-500"
                           onClick={() => {
                             setOpenCreateCommentId(
                               openCreateCommentId === comment.id

@@ -110,7 +110,7 @@ export const SinglePost: React.FC<{
           </button>
           {authStatus === "authenticated" && <PostLikeButton post={post} />}
           <LinkToPost post={post}>
-            <button className="flex items-center gap-1.5 p-2 text-lg text-zinc-300 hover:bg-zinc-700">
+            <button className="flex items-center gap-1.5 p-2 text-lg text-blue-400 hover:text-blue-500">
               <BsChatLeft size="18px" />
               {post._count.comments}
             </button>
