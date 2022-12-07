@@ -2,7 +2,7 @@ import superjson from "superjson";
 import Image from "next/image";
 import Link from "next/link";
 import { Markdown } from "./Markdown";
-import { BsDot, BsShare } from "react-icons/bs";
+import { BsChatLeft, BsDot, BsShare } from "react-icons/bs";
 import { Loading } from "./Loading";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { cx, slugify, timeAgo } from "../utils/general";
@@ -19,6 +19,26 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
       ))}
       <Loading size="large" show={communityPosts.isLoading} />
     </div>
+  );
+};
+
+const LinkToPost: React.FC<{
+  post: CommunityPosts["posts"][number];
+  children: JSX.Element;
+}> = ({ post, children }) => {
+  return (
+    <Link
+      href={{
+        pathname: `/b/${post.community.name}/post/${post.id}/${slugify(
+          post.title
+        )}`,
+        query: { cached_post: superjson.stringify(post) },
+      }}
+      as={`/b/${post.community.name}/post/${post.id}/${slugify(post.title)}`}
+      shallow
+    >
+      {children}
+    </Link>
   );
 };
 
@@ -74,22 +94,11 @@ export const SinglePost: React.FC<{
             {post.title}
           </h3>
         ) : (
-          <Link
-            href={{
-              pathname: `/b/${post.community.name}/post/${post.id}/${slugify(
-                post.title
-              )}`,
-              query: { cached_post: superjson.stringify(post) },
-            }}
-            as={`/b/${post.community.name}/post/${post.id}/${slugify(
-              post.title
-            )}`}
-            shallow
-          >
+          <LinkToPost post={post}>
             <h3 className={"my-2 cursor-pointer text-2xl hover:underline"}>
               {post.title}
             </h3>
-          </Link>
+          </LinkToPost>
         )}
         <div className="text-sm text-gray-400">
           <Markdown source={post.content} simplify={!isMain} />
@@ -100,6 +109,12 @@ export const SinglePost: React.FC<{
             <BsShare size="18px" />
           </button>
           {authStatus === "authenticated" && <LikeButton post={post} />}
+          <LinkToPost post={post}>
+            <button className="flex items-center gap-1.5 p-2 text-lg text-zinc-300 hover:bg-zinc-700">
+              <BsChatLeft size="18px" />
+              {post._count.comments}
+            </button>
+          </LinkToPost>
         </div>
       </div>
     </>

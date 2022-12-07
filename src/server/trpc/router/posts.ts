@@ -74,7 +74,7 @@ export const postsRouter = router({
         include: {
           community: true,
           user: true,
-          _count: { select: { votes: true } },
+          _count: { select: { votes: true, comments: true } },
           votes: {
             where: { userId: ctx.session?.user?.id },
             take: 1,
@@ -219,7 +219,7 @@ export const postsRouter = router({
         include: {
           community: true,
           user: true,
-          _count: { select: { votes: true } },
+          _count: { select: { votes: true, comments: true } },
           votes: {
             where: { userId: ctx.session?.user?.id },
             take: 1,

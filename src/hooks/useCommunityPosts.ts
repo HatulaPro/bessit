@@ -1,4 +1,3 @@
-import type { Community, Post, PostVote, User } from "@prisma/client";
 import { useEffect, useMemo } from "react";
 import { trpc } from "../utils/trpc";
 import type { RouterInputs } from "../utils/trpc";
@@ -49,14 +48,7 @@ export function useCommunityPosts(
   const flattenedPosts = useMemo(() => {
     return (
       getPostsQuery.data?.pages.reduce<
-        (Post & {
-          user: User;
-          community: Community;
-          votes: PostVote[];
-          _count: {
-            votes: number;
-          };
-        })[]
+        typeof getPostsQuery["data"]["pages"][number]["posts"]
       >((acc, cur) => {
         acc.push(...cur.posts);
         return acc;

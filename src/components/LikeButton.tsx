@@ -27,7 +27,10 @@ export const LikeButton: React.FC<{
           {
             ...singlePostData,
             votes: voted ? [] : [data],
-            _count: { votes: singlePostData._count.votes + (voted ? -1 : 1) },
+            _count: {
+              ...singlePostData._count,
+              votes: singlePostData._count.votes + (voted ? -1 : 1),
+            },
           }
         );
       }
@@ -58,6 +61,7 @@ export const LikeButton: React.FC<{
                   ...pagePost,
                   votes: voted ? [] : [data],
                   _count: {
+                    ...pagePost._count,
                     votes: pagePost._count.votes + (voted ? -1 : 1),
                   },
                 };

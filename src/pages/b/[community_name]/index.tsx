@@ -53,7 +53,6 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
 
   if (!communityPosts.community) {
     if (communityPosts.isLoading) {
-      console.log("no community?");
       return <Loading size="large" show />;
     }
     return <NotFoundMessage message="This community does not seem to exist" />;
