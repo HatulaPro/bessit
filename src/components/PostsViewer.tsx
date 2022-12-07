@@ -105,13 +105,13 @@ export const SinglePost: React.FC<{
         </div>
         <hr className="my-2 opacity-50" />
         <div className="mx-auto flex max-w-md justify-evenly pb-2">
-          <button className="p-2 hover:bg-zinc-700">
-            <BsShare size="18px" />
+          <button className="p-2 text-zinc-400 hover:text-emerald-400">
+            <BsShare className="text-xl" />
           </button>
           {authStatus === "authenticated" && <PostLikeButton post={post} />}
           <LinkToPost post={post}>
-            <button className="flex items-center gap-1.5 p-2 text-lg text-blue-400 hover:text-blue-500">
-              <BsChatLeft size="18px" />
+            <button className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500">
+              <BsChatLeft className="text-2xl" />
               {post._count.comments}
             </button>
           </LinkToPost>

@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { InfiniteData } from "@tanstack/react-query";
 import { Loading } from "./Loading";
 import type { InfinityQueryKeyInput } from "./PostLikeButton";
+import { cx } from "../utils/general";
 
 export const CommentLikeButton: React.FC<{ comment: UIComment }> = ({
   comment,
@@ -72,7 +73,10 @@ export const CommentLikeButton: React.FC<{ comment: UIComment }> = ({
   return (
     <button
       disabled={likeMutation.isLoading}
-      className="text-md flex items-center gap-2 p-2 text-red-400 hover:text-red-300 disabled:text-zinc-300"
+      className={cx(
+        "text-md group relative flex items-center gap-2 p-2 hover:text-red-400 disabled:text-zinc-500",
+        voted ? "text-red-400" : "text-zinc-400"
+      )}
       onClick={() =>
         likeMutation.mutate({
           action: voted ? "unlike" : "like",
@@ -88,6 +92,7 @@ export const CommentLikeButton: React.FC<{ comment: UIComment }> = ({
         <BsSuitHeart className="text-lg" />
       )}
       {comment._count.votes}
+      <div className="absolute top-1 bottom-1 left-[1px] h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
     </button>
   );
 };

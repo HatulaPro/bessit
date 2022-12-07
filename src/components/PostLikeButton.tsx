@@ -5,6 +5,7 @@ import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { trpc } from "../utils/trpc";
 import type { RouterOutputs, RouterInputs } from "../utils/trpc";
 import { Loading } from "./Loading";
+import { cx } from "../utils/general";
 
 export type InfinityQueryKeyInput<T> = {
   input: T;
@@ -90,17 +91,21 @@ export const PostLikeButton: React.FC<{
           action: voted ? "unlike" : "like",
         })
       }
-      className="flex items-center gap-2 p-2 text-lg text-red-400 transition-colors hover:bg-zinc-700 disabled:text-zinc-300"
+      className={cx(
+        "group relative flex items-center gap-2 p-2 text-lg hover:text-red-400 disabled:text-zinc-500",
+        voted ? "text-red-400" : "text-zinc-400"
+      )}
       disabled={likeMutation.isLoading}
     >
       {likeMutation.isLoading ? (
         <Loading show size="small" />
       ) : voted ? (
-        <BsSuitHeartFill />
+        <BsSuitHeartFill className="text-2xl" />
       ) : (
-        <BsSuitHeart />
+        <BsSuitHeart className="text-2xl" />
       )}
       {post._count.votes}
+      <div className="absolute inset-1 h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
     </button>
   );
 };

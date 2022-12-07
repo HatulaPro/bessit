@@ -169,7 +169,7 @@ const PostComments: React.FC<{
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 px-1 pt-2 md:max-w-5xl">
+    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 pr-1 pl-3 pt-2 md:max-w-5xl">
       {comments.map((comment) => {
         return (
           <div key={comment.id} className="flex">
@@ -224,15 +224,16 @@ const PostComments: React.FC<{
                   <div className="ml-8">
                     <Markdown source={comment.content} />
                   </div>
-                  <hr className="my-1 opacity-50" />
-                  <div className="mx-auto flex max-w-sm justify-evenly">
-                    <button className="text-md hover:text-zinc-400">
-                      <BsShare />
+                  <div className="ml-8 flex gap-12">
+                    <button className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-emerald-400">
+                      <BsShare className="text-xl" />
+                      Share
                     </button>
                     {authStatus === "authenticated" && (
                       <>
+                        <CommentLikeButton comment={comment} />
                         <button
-                          className="text-md text-blue-400 hover:text-blue-500"
+                          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
                           onClick={() => {
                             setOpenCreateCommentId(
                               openCreateCommentId === comment.id
@@ -241,9 +242,9 @@ const PostComments: React.FC<{
                             );
                           }}
                         >
-                          <BsChatLeft />
+                          <BsChatLeft className="text-xl" />
+                          Reply
                         </button>
-                        <CommentLikeButton comment={comment} />
                       </>
                     )}
                   </div>
