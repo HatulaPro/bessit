@@ -6,19 +6,18 @@ import { trpc } from "../utils/trpc";
 import type { RouterOutputs, RouterInputs } from "../utils/trpc";
 import { Loading } from "./Loading";
 
-type InfinityQueryKeyInput<T> = {
+export type InfinityQueryKeyInput<T> = {
   input: T;
   type: "infinite";
 };
 
-export const LikeButton: React.FC<{
+export const PostLikeButton: React.FC<{
   post: CommunityPosts["posts"][number];
 }> = ({ post }) => {
   const utils = trpc.useContext();
   const voted = post.votes.length > 0;
   const queryClient = useQueryClient();
   const likeMutation = trpc.post.likePost.useMutation({
-    cacheTime: 0,
     onSuccess: (data) => {
       const singlePostData = utils.post.getPost.getData({ post_id: post.id });
       if (singlePostData) {

@@ -6,7 +6,7 @@ import { BsChatLeft, BsDot, BsShare } from "react-icons/bs";
 import { Loading } from "./Loading";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { cx, slugify, timeAgo } from "../utils/general";
-import { LikeButton } from "./LikeButton";
+import { PostLikeButton } from "./PostLikeButton";
 import { useSession } from "next-auth/react";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
@@ -108,7 +108,7 @@ export const SinglePost: React.FC<{
           <button className="p-2 hover:bg-zinc-700">
             <BsShare size="18px" />
           </button>
-          {authStatus === "authenticated" && <LikeButton post={post} />}
+          {authStatus === "authenticated" && <PostLikeButton post={post} />}
           <LinkToPost post={post}>
             <button className="flex items-center gap-1.5 p-2 text-lg text-zinc-300 hover:bg-zinc-700">
               <BsChatLeft size="18px" />

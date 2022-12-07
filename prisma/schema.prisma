@@ -48,9 +48,9 @@ model Session {
 }
 
 model User {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?     @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -58,7 +58,8 @@ model User {
   posts         Post[]
   comment       Comment[]
   communities   Community[]
-  votes         PostVote[]
+  postVotes     PostVote[]
+  commentVotes  CommentVote[]
 }
 
 model VerificationToken {
@@ -105,16 +106,26 @@ model Community {
 }
 
 model Comment {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   content         String
   isDeleted       Boolean
   userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   postId          String
-  post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post            Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  votes           CommentVote[]
   parentCommentId String?
-  parentComment   Comment?  @relation(fields: [parentCommentId], references: [id], onDelete: Cascade, name: "parent-child-comments")
-  childComments   Comment[] @relation(name: "parent-child-comments")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  parentComment   Comment?      @relation(fields: [parentCommentId], references: [id], onDelete: Cascade, name: "parent-child-comments")
+  childComments   Comment[]     @relation(name: "parent-child-comments")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model CommentVote {
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
 }

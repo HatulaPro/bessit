@@ -1,4 +1,4 @@
-import type { Community, Post, User } from "@prisma/client";
+import type { CommentVote, Community, Post, User } from "@prisma/client";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -19,6 +19,7 @@ import Link from "next/link";
 import { BsDot, BsChatLeft, BsShare, BsArrowUpCircle } from "react-icons/bs";
 import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
+import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 
 const PostPage: NextPage = () => {
   // TODO: This var can be moved to a route path
@@ -125,15 +126,18 @@ const PostPageContent: React.FC<{
   );
 };
 
-type UIComment = {
+export type UIComment = {
   id: string;
   createdAt: Date;
   user: User;
   content: string;
+  postId: string;
   _count: {
     childComments: number;
+    votes: number;
   };
   childComments?: UIComment[];
+  votes: CommentVote[];
 };
 
 const PostComments: React.FC<{
@@ -225,18 +229,21 @@ const PostComments: React.FC<{
                       <BsShare />
                     </button>
                     {authStatus === "authenticated" && (
-                      <button
-                        className="text-md m-2 hover:text-zinc-400"
-                        onClick={() => {
-                          setOpenCreateCommentId(
-                            openCreateCommentId === comment.id
-                              ? null
-                              : comment.id
-                          );
-                        }}
-                      >
-                        <BsChatLeft />
-                      </button>
+                      <>
+                        <button
+                          className="text-md m-2 hover:text-zinc-400"
+                          onClick={() => {
+                            setOpenCreateCommentId(
+                              openCreateCommentId === comment.id
+                                ? null
+                                : comment.id
+                            );
+                          }}
+                        >
+                          <BsChatLeft />
+                        </button>
+                        <CommentLikeButton comment={comment} />
+                      </>
                     )}
                   </div>
                   {authStatus === "authenticated" && (
@@ -417,6 +424,8 @@ const useCachedPost = () => {
       refetchOnReconnect: false,
       staleTime: Infinity,
       cacheTime: Infinity,
+      notifyOnChangeProps: "all",
+      keepPreviousData: true,
     }
   );
 

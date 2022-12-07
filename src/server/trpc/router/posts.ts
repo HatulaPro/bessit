@@ -110,33 +110,55 @@ export const postsRouter = router({
             select: {
               content: true,
               createdAt: true,
+              postId: true,
               id: true,
               user: true,
-              _count: { select: { childComments: true } },
+              _count: { select: { childComments: true, votes: true } },
+              votes: {
+                where: { userId: ctx.session?.user?.id },
+                take: 1,
+              },
               childComments: {
                 orderBy: { createdAt: "desc" },
                 select: {
                   user: true,
                   content: true,
                   createdAt: true,
+                  postId: true,
                   id: true,
-                  _count: { select: { childComments: true } },
+                  _count: { select: { childComments: true, votes: true } },
+                  votes: {
+                    where: { userId: ctx.session?.user?.id },
+                    take: 1,
+                  },
                   childComments: {
                     orderBy: { createdAt: "desc" },
                     select: {
                       user: true,
                       content: true,
+                      postId: true,
                       createdAt: true,
                       id: true,
-                      _count: { select: { childComments: true } },
+                      _count: { select: { childComments: true, votes: true } },
+                      votes: {
+                        where: { userId: ctx.session?.user?.id },
+                        take: 1,
+                      },
                       childComments: {
                         orderBy: { createdAt: "desc" },
                         select: {
                           user: true,
                           content: true,
+                          postId: true,
                           createdAt: true,
                           id: true,
-                          _count: { select: { childComments: true } },
+                          _count: {
+                            select: { childComments: true, votes: true },
+                          },
+                          votes: {
+                            where: { userId: ctx.session?.user?.id },
+                            take: 1,
+                          },
                         },
                       },
                     },
@@ -149,7 +171,12 @@ export const postsRouter = router({
           createdAt: true,
           id: true,
           user: true,
-          _count: { select: { childComments: true } },
+          postId: true,
+          _count: { select: { childComments: true, votes: true } },
+          votes: {
+            where: { userId: ctx.session?.user?.id },
+            take: 1,
+          },
         },
       });
       if (comments.length < input.count) {
@@ -182,6 +209,28 @@ export const postsRouter = router({
           .delete({ where: { userId_postId } })
           .then(() => userId_postId)
           .catch(() => userId_postId);
+      }
+    }),
+  likeComment: protectedProcedure
+    .input(
+      z.object({ commentId: z.string(), action: z.enum(["like", "unlike"]) })
+    )
+    .mutation(({ ctx, input }) => {
+      const userId_commentId = {
+        commentId: input.commentId,
+        userId: ctx.session.user.id,
+      };
+      if (input.action === "like") {
+        return ctx.prisma.commentVote.upsert({
+          create: userId_commentId,
+          update: userId_commentId,
+          where: { userId_commentId },
+        });
+      } else {
+        return ctx.prisma.commentVote
+          .delete({ where: { userId_commentId } })
+          .then(() => userId_commentId)
+          .catch(() => userId_commentId);
       }
     }),
   getPosts: publicProcedure
