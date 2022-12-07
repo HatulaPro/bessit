@@ -72,7 +72,7 @@ export const CommentLikeButton: React.FC<{ comment: UIComment }> = ({
   return (
     <button
       disabled={likeMutation.isLoading}
-      className="text-md m-2 flex items-center gap-2 p-2 text-red-400 hover:text-red-300 disabled:text-zinc-300"
+      className="text-md flex items-center gap-2 p-2 text-red-400 hover:text-red-300 disabled:text-zinc-300"
       onClick={() =>
         likeMutation.mutate({
           action: voted ? "unlike" : "like",

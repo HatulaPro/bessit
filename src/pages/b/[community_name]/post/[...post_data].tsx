@@ -194,7 +194,7 @@ const PostComments: React.FC<{
                   : undefined
               }
             >
-              <div className="mb-2 flex items-center gap-0.5 text-xs text-gray-400">
+              <div className="mb-1 flex items-center gap-0.5 text-xs text-gray-400">
                 <Link
                   className="group flex items-center hover:underline"
                   href="/"
@@ -224,15 +224,15 @@ const PostComments: React.FC<{
                   <div className="ml-8">
                     <Markdown source={comment.content} />
                   </div>
-                  <hr className="my-1.5 opacity-50" />
+                  <hr className="my-1 opacity-50" />
                   <div className="mx-auto flex max-w-sm justify-evenly">
-                    <button className="text-md m-2 hover:text-zinc-400">
+                    <button className="text-md hover:text-zinc-400">
                       <BsShare />
                     </button>
                     {authStatus === "authenticated" && (
                       <>
                         <button
-                          className="text-md m-2 text-blue-400 hover:text-blue-500"
+                          className="text-md text-blue-400 hover:text-blue-500"
                           onClick={() => {
                             setOpenCreateCommentId(
                               openCreateCommentId === comment.id
