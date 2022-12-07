@@ -187,7 +187,7 @@ export const postsRouter = router({
   getPosts: publicProcedure
     .input(
       z.object({
-        sort: z.enum(["new", "hot"]),
+        sort: z.enum(["new", "hot", "controversial"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
         community: z.string().min(4).max(24).nullable(),
@@ -208,11 +208,18 @@ export const postsRouter = router({
         }
         whereQuery = { communityId: community.id, isDeleted: false };
       }
+
+      const orderByMap: Record<
+        typeof input["sort"],
+        Parameters<typeof ctx.prisma.post.findMany>[0]
+      > = {
+        new: { orderBy: { createdAt: "desc" } },
+        hot: { orderBy: { votes: { _count: "desc" } } },
+        controversial: { orderBy: { comments: { _count: "desc" } } },
+      } as const;
+
       const posts = await ctx.prisma.post.findMany({
-        orderBy:
-          input.sort === "new"
-            ? { createdAt: "desc" }
-            : { votes: { _count: "desc" } },
+        orderBy: orderByMap[input.sort]?.orderBy,
         take: input.count + 1,
         where: whereQuery,
         cursor: input.cursor ? { id: input.cursor } : undefined,

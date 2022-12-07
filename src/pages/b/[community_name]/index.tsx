@@ -63,7 +63,7 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
         <div className="flex-[3]">
           <div className="m-4 flex justify-center gap-2">
-            {(["new", "hot"] as const).map((value) => (
+            {(["new", "hot", "controversial"] as const).map((value) => (
               <button
                 className={cx(
                   "rounded-full px-6 py-0.5 transition-all disabled:opacity-50 disabled:contrast-50",
