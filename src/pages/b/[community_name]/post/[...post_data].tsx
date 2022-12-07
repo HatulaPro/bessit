@@ -12,7 +12,7 @@ import { IoMdClose } from "react-icons/io";
 import type { CommunityPosts } from "../../../../hooks/useCommunityPosts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { cx, timeAgo } from "../../../../utils/general";
+import { cx, slugify, timeAgo } from "../../../../utils/general";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -480,9 +480,14 @@ const useCachedPost = () => {
       } else {
         copyPostData[2] = commentId as string;
       }
+      console.log({ ...router.query, post_data: copyPostData });
       router.push(
         { query: { ...router.query, post_data: copyPostData } },
-        undefined,
+        postQuery.data
+          ? `/b/${postQuery.data.community.name}/post/${
+              postQuery.data.id
+            }/${slugify(postQuery.data.title)}/${commentId ?? ""}`
+          : undefined,
         { shallow: true }
       );
     },
