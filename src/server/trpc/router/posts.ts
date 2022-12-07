@@ -85,7 +85,6 @@ export const postsRouter = router({
   getComments: publicProcedure
     .input(
       z.object({
-        sort: z.enum(["new"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
         mainCommentId: z.string().length(25).nullable(),

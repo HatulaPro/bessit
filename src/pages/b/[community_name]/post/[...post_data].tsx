@@ -416,7 +416,6 @@ const useCachedPost = () => {
     {
       post: queryData?.post_data[0] ?? "NOT_SENDABLE",
       count: 12,
-      sort: "new",
       mainCommentId: queryData?.post_data[2] ?? null,
     },
     {
