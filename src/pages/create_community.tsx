@@ -69,7 +69,6 @@ const CreateCommunityForm: React.FC = () => {
     createCommunityMutation
       .mutateAsync({ name: data.name, desc: data.desc })
       .then((com) => {
-        // TODO: trpc setQueryData?
         getCommunityQuery.refetch().then(() => router.push(`/b/${com.name}`));
       })
       .catch((reason) => {

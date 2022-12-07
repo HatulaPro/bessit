@@ -322,7 +322,7 @@ const CreateCommentForm: React.FC<{
   const utils = trpc.useContext();
   const createCommentMutation = trpc.post.createComment.useMutation({
     onSuccess: (data) => {
-      setCurrentParentCommentId(data.parentCommentId);
+      setCurrentParentCommentId(data.id);
       utils.post.getComments.invalidate();
       reset({ content: "" });
     },

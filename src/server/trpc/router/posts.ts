@@ -102,7 +102,6 @@ export const postsRouter = router({
           id: input.mainCommentId ?? undefined,
           isDeleted: false,
         },
-        // TODO: Rethink this stupid recursion thing
         select: {
           childComments: {
             orderBy: { createdAt: "desc" },
