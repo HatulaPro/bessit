@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { cx, slugify, timeAgo } from "../../../../utils/general";
 import { useSession } from "next-auth/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { BsDot, BsChatLeft, BsShare, BsArrowUpCircle } from "react-icons/bs";
 import Image from "next/image";
@@ -22,7 +22,7 @@ import { Markdown } from "../../../../components/Markdown";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 
 const PostPage: NextPage = () => {
-  // TODO: This var can be moved to a route path
+  const postTopRef = useRef<HTMLDivElement>(null);
   const {
     post,
     isLoading,
@@ -30,7 +30,7 @@ const PostPage: NextPage = () => {
     comments,
     currentMainCommentId: currentParentCommentId,
     setCurrentMainCommentId: setCurrentParentCommentId,
-  } = useCachedPost();
+  } = useCachedPost(postTopRef.current);
   const pageTitle = `Bessit | ${post?.title ?? "View Post"}`;
   const router = useRouter();
   return (
@@ -57,6 +57,10 @@ const PostPage: NextPage = () => {
             isLoadingComments={isLoading.comments}
           />
         )}
+        <div
+          className="absolute m-auto h-0 w-0 bg-black"
+          ref={postTopRef}
+        ></div>
 
         <button
           onClick={() => {
@@ -389,7 +393,7 @@ const postDataQuerySchema = z.object({
   post_data: z.array(z.string()).min(2).max(3),
   cached_post: z.string().optional(),
 });
-const useCachedPost = () => {
+const useCachedPost = (topElement: HTMLElement | null) => {
   const router = useRouter();
   const zodParsing = postDataQuerySchema.safeParse(router.query);
   const queryData = zodParsing.success ? zodParsing.data : undefined;
@@ -480,7 +484,7 @@ const useCachedPost = () => {
       } else {
         copyPostData[2] = commentId as string;
       }
-      console.log({ ...router.query, post_data: copyPostData });
+      topElement?.scrollIntoView({ behavior: "smooth", block: "end" });
       router.push(
         { query: { ...router.query, post_data: copyPostData } },
         postQuery.data
