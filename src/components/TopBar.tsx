@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
 import { CgComponents } from "react-icons/cg";
 import { cx } from "../utils/general";
-import { BsDot, BsSearch } from "react-icons/bs";
+import { BsDot, BsSearch, BsXLg } from "react-icons/bs";
 import { useDebounce } from "../hooks/useDebounce";
 import { trpc } from "../utils/trpc";
 import { CommunityLogo } from "./CommunityLogo";
@@ -134,7 +134,7 @@ const TopBarSearch: React.FC = () => {
       <BsSearch className="mx-2 rounded-full text-xl" />
       <input
         type="text"
-        className="w-full bg-transparent p-1 text-xl text-zinc-200 outline-none"
+        className="h-full w-full bg-transparent p-1 text-xl text-zinc-200 outline-none"
         placeholder="Search Bessit"
         value={queryInput}
         onChange={(e) => setQueryInput(e.currentTarget.value)}
@@ -160,6 +160,19 @@ const TopBarSearch: React.FC = () => {
         ref={searchQueryInputRef}
         onFocus={() => setFocused(true)}
       />
+      <button
+        className={cx(
+          "h-8 shrink-0 overflow-hidden rounded-full bg-white bg-opacity-0 text-center transition-all hover:bg-opacity-20",
+          queryInput.length === 0 ? "w-0" : "w-8"
+        )}
+        onClick={() => {
+          setQueryInput("");
+          searchQueryInputRef.current?.focus();
+        }}
+      >
+        <BsXLg className="m-auto text-lg" />
+      </button>
+
       <div
         className={cx(
           "absolute top-full w-full origin-top overflow-hidden rounded-b-sm bg-zinc-800 transition-all",
