@@ -32,7 +32,7 @@ export const createCommunitySchema = z.object({
     .string()
     .min(2, { message: "Name must have at least 2 characters" })
     .max(24, { message: "Name must have at most 24 characters" })
-    .regex(/^[a-zA-Z0-9_]*$/),
+    .regex(/^[a-z0-9_]*$/),
   desc: z.string(),
 });
 export type createCommunityForm = z.infer<typeof createCommunitySchema>;
@@ -99,15 +99,14 @@ const CreateCommunityForm: React.FC = () => {
           <Controller
             name="name"
             control={control}
-            rules={{ pattern: /^[a-zA-Z0-9_]*$/ }}
+            rules={{ pattern: /^[a-z0-9_]*$/ }}
             render={({ field, formState }) => (
               <input
                 {...field}
                 onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replaceAll(
-                    /[^a-zA-Z0-9_]*/g,
-                    ""
-                  );
+                  e.currentTarget.value = e.currentTarget.value
+                    .toLowerCase()
+                    .replaceAll(/[^a-z0-9_]*/g, "");
                 }}
                 className={cx(
                   "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
@@ -136,9 +135,9 @@ const CreateCommunityForm: React.FC = () => {
       <button
         type="submit"
         className={cx(
-          "mt-4 w-24 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400"
+          "mt-4 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
         )}
-        disabled={!formState.isValid}
+        disabled={!formState.isValid || createCommunityMutation.isLoading}
       >
         Create
       </button>

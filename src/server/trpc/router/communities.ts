@@ -14,7 +14,7 @@ export const communitiesRouter = router({
     .query(({ ctx, input }) => {
       return ctx.prisma.community
         .findMany({
-          where: { name: { contains: input.name } },
+          where: { name: { contains: input.name, mode: "insensitive" } },
           take: 12,
         })
         .then((values) => values);
@@ -26,7 +26,7 @@ export const communitiesRouter = router({
       return ctx.prisma.community
         .create({
           data: {
-            name: input.name,
+            name: input.name.toLowerCase(),
             desc: input.desc,
             image: null,
             logo: null,

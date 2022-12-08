@@ -56,9 +56,29 @@ export function useCommunityPosts(
     );
   }, [getPostsQuery]);
 
+  const getCommunityQuery = trpc.community.getCommunity.useQuery(
+    { name: input.community ?? "NOT_SENDABLE" },
+    {
+      enabled:
+        Boolean(input.community) &&
+        flattenedPosts.length === 0 &&
+        Boolean(getPostsQuery.data),
+      staleTime: Infinity,
+      cacheTime: Infinity,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      retry: 0,
+    }
+  );
   return {
     posts: flattenedPosts,
-    isLoading: getPostsQuery.isLoading || getPostsQuery.isFetching,
-    community: communityName ? flattenedPosts[0]?.community : null,
+    isLoading:
+      getPostsQuery.isLoading ||
+      getPostsQuery.isFetching ||
+      getCommunityQuery.isLoading ||
+      getCommunityQuery.isFetching,
+    community: communityName
+      ? (flattenedPosts[0]?.community ?? getCommunityQuery.data) || null
+      : null,
   };
 }

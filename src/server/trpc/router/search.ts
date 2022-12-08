@@ -26,7 +26,13 @@ export const searchRouter = router({
         users: query.username
           ? await ctx.prisma.user.findMany({
               take: 6,
-              where: { name: { contains: query.username, not: null } },
+              where: {
+                name: {
+                  contains: query.username,
+                  not: null,
+                  mode: "insensitive",
+                },
+              },
               select: { id: true, name: true, image: true },
             })
           : null,
@@ -34,7 +40,7 @@ export const searchRouter = router({
           ? await ctx.prisma.community.findMany({
               take: 6,
               where: {
-                name: { contains: query.community },
+                name: { contains: query.community, mode: "insensitive" },
                 // Hacky filter to make sure there is at least one post in the community before showing it
                 posts: { some: { title: { not: "" } } },
               },
