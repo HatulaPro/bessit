@@ -56,13 +56,14 @@ export function useCommunityPosts(
     );
   }, [getPostsQuery]);
 
+  const communityQueryEnabled =
+    Boolean(input.community) &&
+    flattenedPosts.length === 0 &&
+    Boolean(getPostsQuery.data);
   const getCommunityQuery = trpc.community.getCommunity.useQuery(
     { name: input.community ?? "NOT_SENDABLE" },
     {
-      enabled:
-        Boolean(input.community) &&
-        flattenedPosts.length === 0 &&
-        Boolean(getPostsQuery.data),
+      enabled: communityQueryEnabled,
       staleTime: Infinity,
       cacheTime: Infinity,
       refetchOnReconnect: false,
@@ -75,8 +76,8 @@ export function useCommunityPosts(
     isLoading:
       getPostsQuery.isLoading ||
       getPostsQuery.isFetching ||
-      getCommunityQuery.isLoading ||
-      getCommunityQuery.isFetching,
+      (communityQueryEnabled &&
+        (getCommunityQuery.isLoading || getCommunityQuery.isFetching)),
     community: communityName
       ? (flattenedPosts[0]?.community ?? getCommunityQuery.data) || null
       : null,
