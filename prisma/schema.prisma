@@ -78,7 +78,7 @@ model Post {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  @@index(fields: [createdAt])
+  @@index(fields: [createdAt, communityId])
 }
 
 model PostVote {
@@ -115,6 +115,8 @@ model Comment {
   childComments   Comment[]     @relation(name: "parent-child-comments")
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  @@index(fields: [createdAt, postId, parentCommentId])
 }
 
 model CommentVote {
