@@ -5,13 +5,14 @@ import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
 import { CgComponents } from "react-icons/cg";
 import { cx } from "../utils/general";
+import { BsSearch } from "react-icons/bs";
 
 export const TopBar: React.FC = () => {
   const session = useSession();
 
   return (
-    <div className="sticky top-0 z-50 flex w-full justify-between bg-zinc-700 p-2 text-white">
-      <div className="flex">
+    <div className="sticky top-0 z-50 flex w-full flex-row-reverse justify-between gap-3 bg-zinc-700 p-2 text-white md:flex-row">
+      <div className="hidden md:flex">
         <Link
           href="/"
           className="group relative flex items-center gap-2 pr-4 text-xl active:underline"
@@ -27,7 +28,8 @@ export const TopBar: React.FC = () => {
           <span>Bessit</span>
         </Link>
       </div>
-      <div className="relative flex items-center gap-2 rounded-md border-[1px] border-zinc-500 bg-zinc-800 p-1">
+      <TopBarSearch />
+      <div className="relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1">
         {session.data?.user ? (
           <>
             {session.data.user.image ? (
@@ -42,18 +44,36 @@ export const TopBar: React.FC = () => {
             ) : (
               <AiFillMeh className="h-9 w-9 rounded-full" />
             )}
-            <span className="text-lg">{session.data.user.name}</span>
+            <span className="hidden text-lg md:block">
+              {session.data.user.name}
+            </span>
             <TopBarUserMenu />
           </>
         ) : (
           <button
-            className="w-24 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-700"
+            className="hidden w-24 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-700 md:block"
             onClick={() => signIn()}
           >
             LOG IN
           </button>
         )}
       </div>
+    </div>
+  );
+};
+
+const TopBarSearch: React.FC = () => {
+  const [queryInput, setQueryInput] = useState<string>("");
+  return (
+    <div className="flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 focus-within:border-zinc-300 md:w-1/3">
+      <BsSearch className="mx-2 rounded-full text-xl" />
+      <input
+        type="text"
+        className="w-full bg-transparent p-1 text-lg text-zinc-200 outline-none"
+        placeholder="Search Bessit"
+        value={queryInput}
+        onChange={(e) => setQueryInput(e.currentTarget.value)}
+      />
     </div>
   );
 };
@@ -83,7 +103,7 @@ const TopBarUserMenu: React.FC = () => {
   return (
     <>
       <button
-        className="h-full px-2 transition-colors hover:bg-zinc-900"
+        className="hidden h-full px-2 transition-colors hover:bg-zinc-900 md:block"
         onClick={() => setMenuOpen((prev) => !prev)}
         ref={buttonRef}
       >
