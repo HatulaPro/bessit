@@ -30,7 +30,7 @@ export const TopBar: React.FC = () => {
       >
         <Link
           href="/"
-          className="group relative flex items-center gap-2 text-xl active:underline md:pr-4"
+          className="group relative flex items-center gap-2 text-xl decoration-indigo-500 hover:underline active:text-gray-300 md:pr-4"
         >
           <Image
             src="/bessit_logo.png"
