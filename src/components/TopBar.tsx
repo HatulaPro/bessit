@@ -129,7 +129,10 @@ const TopBarSearch: React.FC = () => {
           setFocused(false);
         }
       }}
-      className="relative flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 focus-within:rounded-b-none focus-within:border-zinc-300 md:w-1/3"
+      className={cx(
+        "relative flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 transition-all focus-within:rounded-b-none focus-within:border-zinc-300 md:w-1/3",
+        isFocused && "shrink-0 md:shrink"
+      )}
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center text-center text-xl">
         <BsSearch />
@@ -194,6 +197,11 @@ const TopBarSearch: React.FC = () => {
                 key={user.id}
                 tabIndex={index + 10}
                 ref={index === 0 ? firstUserRef : undefined}
+                onClick={(e) => {
+                  router.push("/");
+                  setQueryInput(`/u/${user.name}`);
+                  e.currentTarget.blur();
+                }}
                 onKeyDown={onKeyDown("/", `/u/${user.name}`)}
               >
                 {user.image ? (
@@ -221,9 +229,10 @@ const TopBarSearch: React.FC = () => {
                 <div
                   className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 outline-none transition-colors hover:bg-zinc-900 focus:bg-black"
                   key={community.id}
-                  onClick={() => {
+                  onClick={(e) => {
                     router.push(`/b/${community.name}`);
-                    setQueryInput("");
+                    setQueryInput(`/b/${community.name}`);
+                    e.currentTarget.blur();
                   }}
                   tabIndex={index + (searchQuery.data.users?.length || 0) + 10}
                   ref={index === 0 ? firstCommunityRef : undefined}
