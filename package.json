@@ -25,6 +25,9 @@
     "react-hook-form": "^7.40.0",
     "react-icons": "^4.7.1",
     "react-markdown": "^8.0.4",
+    "rehype-raw": "^6.1.1",
+    "rehype-sanitize": "^5.0.1",
+    "remark-gfm": "^3.0.1",
     "superjson": "1.9.1",
     "zod": "^3.18.0"
   },

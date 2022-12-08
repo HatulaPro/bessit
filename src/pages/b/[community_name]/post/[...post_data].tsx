@@ -339,7 +339,7 @@ const CreateCommentForm: React.FC<{
     <div
       className={cx(
         "mx-auto w-full max-w-3xl rounded bg-zinc-800 md:max-w-5xl",
-        parentCommentId === null ? "p-3" : "grow-on-mount"
+        parentCommentId === null ? "my-2 p-3" : "grow-on-mount"
       )}
     >
       <form onSubmit={handleSubmit(onSubmit)}>

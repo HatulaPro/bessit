@@ -12,8 +12,8 @@ export const Loading: React.FC<{
     <div
       className={cx(
         sizeOf[size].w,
-        "m-auto animate-spin rounded-full border-[3px] border-white border-t-slate-500 transition-all",
-        show ? sizeOf[size].h : "h-0 opacity-0"
+        "m-auto rounded-full border-[3px] border-white border-t-slate-500 transition-all",
+        show ? `${sizeOf[size].h} animate-spin` : "h-0 border-0 opacity-0"
       )}
     ></div>
   );
