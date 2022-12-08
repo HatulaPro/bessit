@@ -13,27 +13,43 @@ import { useRouter } from "next/router";
 
 export const TopBar: React.FC = () => {
   const session = useSession();
+  const [searchBarOpen, setSearchBarOpen] = useState<boolean>(false);
 
   return (
-    <div className="sticky top-0 z-50 flex w-full flex-row-reverse justify-between gap-3 bg-zinc-700 p-2 text-white md:flex-row">
-      <div className="hidden md:flex">
+    <div
+      className={cx(
+        "sticky top-0 z-50 flex w-full flex-row-reverse justify-between bg-zinc-700 p-2 text-white md:flex-row",
+        searchBarOpen ? "gap-0 md:gap-3" : "gap-3"
+      )}
+    >
+      <div
+        className={cx(
+          "flex transition-all",
+          searchBarOpen ? "shrink" : "shrink-0"
+        )}
+      >
         <Link
           href="/"
-          className="group relative flex items-center gap-2 pr-4 text-xl active:underline"
+          className="group relative flex items-center gap-2 text-xl active:underline md:pr-4"
         >
-          <div className="absolute -z-10 h-12 w-12 rounded-full bg-indigo-600 transition-all group-hover:w-full"></div>
+          <div className="-z-10 hidden h-8 w-8 rounded-full bg-indigo-600 transition-all group-hover:w-full md:absolute md:h-12 md:w-12"></div>
           <Image
             src="/bessit_logo.png"
             alt="Bessit's Logo"
             width={128}
             height={128}
-            className="h-12 w-12"
+            className="h-8 w-8 md:h-12 md:w-12"
           />
-          <span>Bessit</span>
+          <span className="hidden md:block">Bessit</span>
         </Link>
       </div>
-      <TopBarSearch />
-      <div className="relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1">
+      <TopBarSearch open={searchBarOpen} setOpen={setSearchBarOpen} />
+      <div
+        className={cx(
+          "relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1",
+          searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
+        )}
+      >
         {session.data?.user ? (
           <>
             {session.data.user.image ? (
@@ -66,9 +82,12 @@ export const TopBar: React.FC = () => {
   );
 };
 
-const TopBarSearch: React.FC = () => {
+const TopBarSearch: React.FC<{
+  open: boolean;
+  setOpen: (isOpen: boolean) => void;
+}> = ({ open, setOpen }) => {
   const [queryInput, setQueryInput] = useState<string>("");
-  const [isFocused, setFocused] = useState<boolean>(false);
+  // const [open, setOpen] = useState<boolean>(false);
   const debouncedQueryInput = useDebounce(queryInput, 500);
   const firstUserRef = useRef<HTMLDivElement>(null);
   const firstCommunityRef = useRef<HTMLDivElement>(null);
@@ -126,12 +145,12 @@ const TopBarSearch: React.FC = () => {
     <div
       onBlur={(e) => {
         if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
-          setFocused(false);
+          setOpen(false);
         }
       }}
       className={cx(
         "relative flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 transition-all focus-within:rounded-b-none focus-within:border-zinc-300 md:w-1/3",
-        isFocused && "shrink-0 md:shrink"
+        open && "shrink-0 md:shrink"
       )}
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center text-center text-xl">
@@ -163,7 +182,7 @@ const TopBarSearch: React.FC = () => {
           }
         }}
         ref={searchQueryInputRef}
-        onFocus={() => setFocused(true)}
+        onFocus={() => setOpen(true)}
       />
       <button
         className={cx(
@@ -181,11 +200,11 @@ const TopBarSearch: React.FC = () => {
       <div
         className={cx(
           "absolute top-full w-full origin-top overflow-hidden rounded-b-sm bg-zinc-800 transition-all",
-          isFocused ? "px-1" : "scale-y-0 px-0",
+          open ? "px-1" : "scale-y-0 px-0",
           ((searchQuery.data?.users && searchQuery.data?.users.length > 0) ||
             (searchQuery.data?.communities &&
               searchQuery.data?.communities.length > 0)) &&
-            (isFocused ? "py-1" : "")
+            (open ? "py-1" : "")
         )}
       >
         {searchQuery.data?.users && searchQuery.data.users.length > 0 && (
