@@ -131,7 +131,9 @@ const TopBarSearch: React.FC = () => {
       }}
       className="relative flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 focus-within:rounded-b-none focus-within:border-zinc-300 md:w-1/3"
     >
-      <BsSearch className="mx-2 rounded-full text-xl" />
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center text-center text-xl">
+        <BsSearch />
+      </div>
       <input
         type="text"
         className="h-full w-full bg-transparent p-1 text-xl text-zinc-200 outline-none"
