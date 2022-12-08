@@ -7,19 +7,11 @@ export const communitiesRouter = router({
   getCommunity: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(({ ctx, input }) => {
-      return ctx.prisma.community
-        .findUnique({ where: { name: input.name } })
-        .then((res) => {
-          return res;
-        })
-        .catch((reason) => {
-          throw new TRPCError(reason);
-        });
+      return ctx.prisma.community.findUnique({ where: { name: input.name } });
     }),
   findCommunity: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(({ ctx, input }) => {
-      console.log("name", input.name);
       return ctx.prisma.community
         .findMany({
           where: { name: { contains: input.name } },

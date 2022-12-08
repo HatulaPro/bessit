@@ -5,7 +5,11 @@ import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
 import { CgComponents } from "react-icons/cg";
 import { cx } from "../utils/general";
-import { BsSearch } from "react-icons/bs";
+import { BsDot, BsSearch } from "react-icons/bs";
+import { useDebounce } from "../hooks/useDebounce";
+import { trpc } from "../utils/trpc";
+import { CommunityLogo } from "./CommunityLogo";
+import { useRouter } from "next/router";
 
 export const TopBar: React.FC = () => {
   const session = useSession();
@@ -64,16 +68,170 @@ export const TopBar: React.FC = () => {
 
 const TopBarSearch: React.FC = () => {
   const [queryInput, setQueryInput] = useState<string>("");
+  const [isFocused, setFocused] = useState<boolean>(false);
+  const debouncedQueryInput = useDebounce(queryInput, 500);
+  const firstUserRef = useRef<HTMLDivElement>(null);
+  const firstCommunityRef = useRef<HTMLDivElement>(null);
+  const searchQueryInputRef = useRef<HTMLInputElement>(null);
+
+  const searchQuery = trpc.search.search.useQuery(
+    { q: debouncedQueryInput },
+    {
+      enabled: debouncedQueryInput.length > 0,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      keepPreviousData: true,
+    }
+  );
+  const router = useRouter();
+
+  function onKeyDown(link: string, nextQueryInput: string) {
+    return (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "ArrowUp") {
+        let next = e.currentTarget.previousElementSibling;
+        while (next && next?.tagName !== "DIV")
+          next = next.previousElementSibling;
+
+        if (!next) {
+          searchQueryInputRef.current?.focus();
+        } else {
+          (next as HTMLDivElement).focus();
+        }
+        e.preventDefault();
+      } else if (e.key === "ArrowDown") {
+        let next = e.currentTarget.nextElementSibling;
+        while (next && next?.tagName !== "DIV") next = next.nextElementSibling;
+
+        if (!next) {
+          searchQueryInputRef.current?.focus();
+        } else {
+          (next as HTMLDivElement).focus();
+        }
+        e.preventDefault();
+      } else if (e.key === "Enter" || e.key === " ") {
+        setQueryInput(nextQueryInput);
+        e.currentTarget.blur();
+        router.push(link);
+        e.preventDefault();
+      } else if (e.key === "Escape") {
+        e.currentTarget.blur();
+        e.preventDefault();
+      }
+    };
+  }
+
   return (
-    <div className="flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 focus-within:border-zinc-300 md:w-1/3">
+    <div
+      onBlur={(e) => {
+        if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
+          setFocused(false);
+        }
+      }}
+      className="relative flex w-full items-center rounded-md border-2 border-zinc-500 bg-zinc-800 focus-within:rounded-b-none focus-within:border-zinc-300 md:w-1/3"
+    >
       <BsSearch className="mx-2 rounded-full text-xl" />
       <input
         type="text"
-        className="w-full bg-transparent p-1 text-lg text-zinc-200 outline-none"
+        className="w-full bg-transparent p-1 text-xl text-zinc-200 outline-none"
         placeholder="Search Bessit"
         value={queryInput}
         onChange={(e) => setQueryInput(e.currentTarget.value)}
+        tabIndex={9}
+        autoComplete="off"
+        onKeyDown={(e) => {
+          const focusAt =
+            firstUserRef.current || firstCommunityRef.current || null;
+
+          if (!focusAt) return;
+          if (e.key === "ArrowDown") {
+            focusAt.focus();
+            e.preventDefault();
+          } else if (e.key === "ArrowUp") {
+            (
+              focusAt.parentElement?.children[
+                focusAt.parentElement.children.length - 1
+              ] as HTMLDivElement
+            ).focus();
+            e.preventDefault();
+          }
+        }}
+        ref={searchQueryInputRef}
+        onFocus={() => setFocused(true)}
       />
+      <div
+        className={cx(
+          "absolute top-full w-full origin-top overflow-hidden rounded-b-sm bg-zinc-800 transition-all",
+          isFocused ? "px-1" : "scale-y-0 px-0",
+          ((searchQuery.data?.users && searchQuery.data?.users.length > 0) ||
+            (searchQuery.data?.communities &&
+              searchQuery.data?.communities.length > 0)) &&
+            (isFocused ? "py-1" : "")
+        )}
+      >
+        {searchQuery.data?.users && searchQuery.data.users.length > 0 && (
+          <>
+            <h3 className="p-2 text-xl font-bold">Users</h3>
+            {searchQuery.data.users.map((user, index) => (
+              <div
+                className="flex cursor-pointer items-center gap-1 rounded px-2 py-0.5 outline-none transition-colors hover:bg-zinc-900 focus:bg-black"
+                key={user.id}
+                tabIndex={index + 10}
+                ref={index === 0 ? firstUserRef : undefined}
+                onKeyDown={onKeyDown("/", `/u/${user.name}`)}
+              >
+                {user.image ? (
+                  <Image
+                    className="rounded-full"
+                    loader={({ src }) => src}
+                    src={user.image}
+                    alt="Profile Image"
+                    width={28}
+                    height={28}
+                  />
+                ) : (
+                  <AiFillMeh className="h-7 w-7 rounded-full" />
+                )}
+                {user.name}
+              </div>
+            ))}
+          </>
+        )}
+        {searchQuery.data?.communities &&
+          searchQuery.data.communities.length > 0 && (
+            <>
+              <h3 className="p-2 text-xl font-bold">Communities</h3>
+              {searchQuery.data.communities.map((community, index) => (
+                <div
+                  className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 outline-none transition-colors hover:bg-zinc-900 focus:bg-black"
+                  key={community.id}
+                  onClick={() => {
+                    router.push(`/b/${community.name}`);
+                    setQueryInput("");
+                  }}
+                  tabIndex={index + (searchQuery.data.users?.length || 0) + 10}
+                  ref={index === 0 ? firstCommunityRef : undefined}
+                  onKeyDown={onKeyDown(
+                    `/b/${community.name}`,
+                    `/b/${community.name}`
+                  )}
+                >
+                  <CommunityLogo
+                    name={community.name}
+                    logo={community.logo}
+                    size="small"
+                  />
+                  <span>/b/{community.name}</span>
+                  <BsDot className="shrink-0 text-gray-400" />
+                  <span className="overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-gray-400">
+                    {community.desc}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+      </div>
     </div>
   );
 };

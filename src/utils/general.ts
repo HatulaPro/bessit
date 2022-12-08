@@ -1,4 +1,4 @@
-export const cx = (...args: (string | boolean)[]) => {
+export const cx = (...args: (string | boolean | null | undefined)[]) => {
   return args.filter((x) => x).join(" ");
 };
 

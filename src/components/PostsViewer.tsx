@@ -1,5 +1,4 @@
 import superjson from "superjson";
-import Image from "next/image";
 import Link from "next/link";
 import { Markdown } from "./Markdown";
 import { BsChatLeft, BsDot, BsShare } from "react-icons/bs";
@@ -8,6 +7,7 @@ import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { cx, slugify, timeAgo } from "../utils/general";
 import { PostLikeButton } from "./PostLikeButton";
 import { useSession } from "next-auth/react";
+import { CommunityLogo } from "./CommunityLogo";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -60,17 +60,11 @@ export const SinglePost: React.FC<{
             href={`/b/${post.community.name}`}
             className="group flex items-center gap-1 text-sm font-bold"
           >
-            <div className="flex h-4 w-4 flex-shrink-0 flex-col items-center justify-center rounded-full border-2 border-zinc-400 bg-indigo-800 text-center text-sm md:h-6 md:w-6">
-              {post.community.logo ? (
-                <Image
-                  src={post.community.logo}
-                  alt={`Community logo of ${post.community.name}`}
-                  fill
-                />
-              ) : (
-                post.community.name[0]?.toUpperCase()
-              )}
-            </div>
+            <CommunityLogo
+              name={post.community.name}
+              logo={post.community.logo}
+              size="small"
+            />
             <span className="text-gray-300 group-hover:underline">
               b/{post.community.name}
             </span>

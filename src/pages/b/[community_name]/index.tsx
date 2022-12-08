@@ -13,6 +13,7 @@ import { PostsViewer } from "../../../components/PostsViewer";
 import { SortBySection } from "../../../components/SortBySection";
 import type { SortingOptions } from "../../../components/SortBySection";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
+import { CommunityLogo } from "../../../components/CommunityLogo";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -88,17 +89,11 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
       </div>
       <div className="mb-2 flex w-full flex-col items-center justify-center bg-black">
         <div className="flex w-full max-w-xl -translate-y-1/3 items-center gap-6 md:max-w-3xl">
-          <div className="flex h-20 w-20 flex-shrink-0 flex-col items-center justify-center rounded-full border-2 border-zinc-400 bg-indigo-800 text-5xl md:h-24 md:w-24 md:text-7xl">
-            {community.logo ? (
-              <Image
-                src={community.logo}
-                alt={`Community logo of ${community.name}`}
-                fill
-              />
-            ) : (
-              community.name[0]?.toUpperCase()
-            )}
-          </div>
+          <CommunityLogo
+            name={community.name}
+            logo={community.logo}
+            size="large"
+          />
           <h1 className="text-3xl">{community.name}</h1>
         </div>
       </div>
