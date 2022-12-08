@@ -22,6 +22,7 @@ body {
 * {
   scrollbar-width: auto;
   scrollbar-color: var(--scroller) var(--scroller-bg);
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Chrome, Edge, and Safari */
@@ -52,12 +53,12 @@ body {
 .hidden-scroller {
   scrollbar-width: thin;
 }
-/* .hidden-scroller::-webkit-scrollbar-thumb {
+.hidden-scroller::-webkit-scrollbar-thumb {
   background: transparent;
 }
 .hidden-scroller::-webkit-scrollbar-track {
   background: transparent;
-} */
+}
 
 @keyframes RotatingBackgroundAnimation {
   0% {
