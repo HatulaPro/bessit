@@ -454,7 +454,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       )
         return;
       if (
-        window.innerHeight + window.scrollY + 200 >
+        window.innerHeight + window.scrollY + 800 >
         document.body.offsetHeight
       ) {
         commentsQuery.fetchNextPage();
