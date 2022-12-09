@@ -43,7 +43,7 @@ export const SortBySection: React.FC<{
   }, [sortBy, activeSortByRef, isLoading]);
 
   return (
-    <div className="w-full max-w-3xl bg-zinc-900 text-white">
+    <div className="w-full max-w-3xl bg-zinc-900 pb-2 text-white">
       <div
         className="relative ml-auto mr-2 mt-4 mb-3 w-32 text-base md:text-lg"
         onBlur={(e) => {
