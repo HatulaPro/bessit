@@ -14,6 +14,7 @@ import { SortBySection } from "../../../components/SortBySection";
 import type { SortingOptions } from "../../../components/SortBySection";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 import { CommunityLogo } from "../../../components/CommunityLogo";
+import { BsPencil } from "react-icons/bs";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -76,6 +77,9 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
 };
 
 const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
+  const [isOpen, setOpen] = useState<boolean>(false);
+  const { status: authStatus } = useSession();
+
   return (
     <>
       <div className="bg-rotate h-40 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
@@ -88,15 +92,32 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
         )}
       </div>
       <div className="mb-2 flex w-full flex-col items-center justify-center bg-black">
-        <div className="flex w-full max-w-xl -translate-y-1/3 items-center gap-6 md:max-w-3xl">
-          <CommunityLogo
-            name={community.name}
-            logo={community.logo}
-            size="large"
-          />
-          <h1 className="text-3xl">{community.name}</h1>
+        <div className="flex w-full max-w-xl justify-center">
+          <div className="flex w-full -translate-y-1/3 items-center gap-6 md:max-w-3xl">
+            <CommunityLogo
+              name={community.name}
+              logo={community.logo}
+              size="large"
+            />
+            <h1 className="text-3xl">{community.name}</h1>
+          </div>
+          {authStatus === "authenticated" && (
+            <button
+              onClick={() => setOpen(true)}
+              className="group relative m-2 self-end rounded-full p-2 text-lg text-white md:hidden"
+            >
+              <BsPencil />
+              <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
+            </button>
+          )}
         </div>
       </div>
+
+      {authStatus === "authenticated" && (
+        <Dialog close={() => setOpen(false)} isOpen={isOpen}>
+          <PostEditor defaultCommunity={community.name} defaultOpen />
+        </Dialog>
+      )}
     </>
   );
 };
