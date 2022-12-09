@@ -234,7 +234,7 @@ export const postsRouter = router({
     .input(
       z.object({
         postsFromLast: z.enum(["day", "week", "month", "year", "all time"]),
-        sort: z.enum(["new", "hot", "controversial"]),
+        sort: z.enum(["new", "hot", "moot"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
         community: z.string().min(4).max(24).nullable(),
@@ -294,7 +294,7 @@ export const postsRouter = router({
       > = {
         new: { orderBy: { createdAt: "desc" } },
         hot: { orderBy: { votes: { _count: "desc" } } },
-        controversial: { orderBy: { comments: { _count: "desc" } } },
+        moot: { orderBy: { comments: { _count: "desc" } } },
       } as const;
 
       const posts = await ctx.prisma.post.findMany({

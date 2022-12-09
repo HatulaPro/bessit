@@ -89,13 +89,13 @@ export const SortBySection: React.FC<{
       </div>
       <div className="hidden-scroller justify-left flex w-full flex-1 gap-2 overflow-scroll">
         <div className="w-[60%] shrink-0 basis-[60%]"></div>
-        {(["new", "hot", "controversial"] as const).map((value) => (
+        {(["new", "hot", "moot"] as const).map((value) => (
           <button
             className={cx(
-              "text-md rounded-full py-1 px-4 transition-all disabled:opacity-50 disabled:contrast-50 md:text-lg",
+              "text-md rounded-full py-1 px-5 transition-all disabled:opacity-50 disabled:contrast-50 md:px-6 md:text-lg",
               value === sortBy
                 ? "bg-zinc-100 text-black"
-                : "bg-zinc-700 text-white"
+                : "bg-zinc-600 text-white"
             )}
             key={value}
             onClick={() => {
