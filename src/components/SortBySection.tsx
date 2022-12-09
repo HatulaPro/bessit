@@ -31,7 +31,7 @@ export const SortBySection: React.FC<{
       {(["new", "hot", "controversial"] as const).map((value) => (
         <button
           className={cx(
-            "rounded-full px-6 py-0.5 transition-all disabled:opacity-50 disabled:contrast-50",
+            "rounded-full px-4 py-0.5 text-sm transition-all disabled:opacity-50 disabled:contrast-50 md:px-6 md:text-base",
             value === sortBy
               ? "bg-zinc-100 text-black"
               : "bg-zinc-700 text-white"
