@@ -45,7 +45,7 @@ export const SortBySection: React.FC<{
   return (
     <div className="w-full max-w-3xl bg-zinc-900 text-white">
       <div
-        className="relative ml-auto mr-2 mt-4 mb-2 w-24 text-xs md:text-sm"
+        className="relative ml-auto mr-2 mt-4 mb-3 w-28 text-base"
         onBlur={(e) => {
           if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
             setFocused(false);
@@ -61,8 +61,8 @@ export const SortBySection: React.FC<{
           )}
           disabled={isLoading}
         >
-          {TIME_FILTERS[timeFilter]}{" "}
-          <AiFillCaretDown className="text-xs md:text-sm" />
+          {TIME_FILTERS[timeFilter]}
+          <AiFillCaretDown className="text-sm md:text-base" />
         </button>
         <div
           className={cx(
@@ -92,7 +92,7 @@ export const SortBySection: React.FC<{
         {(["new", "hot", "controversial"] as const).map((value) => (
           <button
             className={cx(
-              "rounded-full py-0.5 px-4 text-sm transition-all disabled:opacity-50 disabled:contrast-50 md:text-base",
+              "text-md rounded-full py-1 px-4 transition-all disabled:opacity-50 disabled:contrast-50 md:text-lg",
               value === sortBy
                 ? "bg-zinc-100 text-black"
                 : "bg-zinc-700 text-white"
