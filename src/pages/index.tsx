@@ -29,7 +29,7 @@ const Home: NextPage = () => {
       <main className="min-h-screen bg-zinc-900">
         <div className="container my-2 mx-auto flex flex-col items-center justify-center px-0.5">
           <PostEditor defaultOpen={false} />
-          <hr className="my-4 block w-full max-w-3xl opacity-50 md:hidden" />
+          <hr className="block w-full max-w-3xl opacity-50 md:hidden" />
           <SortBySection
             isLoading={communityPosts.isLoading}
             sortBy={sortBy}
