@@ -100,7 +100,7 @@ export const PostEditor: React.FC<{
     >
       <div className="flex w-full items-center">
         {defaultOpen ? (
-          <h2 className="my-2 w-full text-xl text-white md:text-3xl">
+          <h2 className="my-2 w-full text-lg text-white md:text-2xl">
             Create a post
           </h2>
         ) : (
@@ -116,12 +116,14 @@ export const PostEditor: React.FC<{
                 className={cx("transition-transform", isOpen && "rotate-180")}
               />
             </span>
-            <h2 className="my-2 w-full text-3xl text-white">Create a post</h2>
+            <h2 className="my-2 w-full text-lg text-white md:text-2xl">
+              Create a post
+            </h2>
           </button>
         )}
         <button
           type="submit"
-          className="w-24 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400"
+          className="text-md w-16 rounded bg-indigo-700 p-1 text-white disabled:bg-indigo-500 disabled:text-gray-400 md:w-24 md:p-2 md:text-lg"
           disabled={!formState.isValid || createPostMutation.isLoading}
         >
           Create

@@ -6,12 +6,14 @@ export type CommunityPosts = ReturnType<typeof useCommunityPosts>;
 
 export function useCommunityPosts(
   communityName: string | null,
-  sort: RouterInputs["post"]["getPosts"]["sort"]
+  sort: RouterInputs["post"]["getPosts"]["sort"],
+  postsFromLast: RouterInputs["post"]["getPosts"]["postsFromLast"]
 ) {
   const input: RouterInputs["post"]["getPosts"] = {
     community: communityName ?? null,
     count: 12,
     sort,
+    postsFromLast: postsFromLast,
   };
   const getPostsQuery = trpc.post.getPosts.useInfiniteQuery(input, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,

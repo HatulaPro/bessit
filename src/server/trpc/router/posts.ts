@@ -1,4 +1,3 @@
-import type { Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPostSchema } from "../../../components/PostEditor";
@@ -179,13 +178,13 @@ export const postsRouter = router({
       });
       if (comments.length < input.count) {
         return {
-          comments,
+          comments: comments,
           nextCursor: undefined,
         };
       }
       const nextCursor = comments.length > 0 ? comments.pop()?.id : undefined;
       return {
-        comments,
+        comments: comments,
         nextCursor,
       };
     }),
@@ -234,6 +233,7 @@ export const postsRouter = router({
   getPosts: publicProcedure
     .input(
       z.object({
+        postsFromLast: z.enum(["day", "week", "month", "year", "all time"]),
         sort: z.enum(["new", "hot", "controversial"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
@@ -241,7 +241,9 @@ export const postsRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      let whereQuery: Partial<Post> = { isDeleted: false };
+      let whereQuery: Parameters<typeof ctx.prisma.post.findMany>[0] = {
+        where: { isDeleted: false },
+      };
       if (input.community) {
         const community = await ctx.prisma.community.findUnique({
           where: { name: input.community },
@@ -253,7 +255,37 @@ export const postsRouter = router({
             code: "BAD_REQUEST",
           });
         }
-        whereQuery = { communityId: community.id, isDeleted: false };
+        whereQuery = { where: { communityId: community.id, isDeleted: false } };
+      }
+
+      if (input.postsFromLast === "day") {
+        whereQuery.where = {
+          ...whereQuery.where,
+          createdAt: {
+            gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
+          },
+        };
+      } else if (input.postsFromLast === "week") {
+        whereQuery.where = {
+          ...whereQuery.where,
+          createdAt: {
+            gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7),
+          },
+        };
+      } else if (input.postsFromLast === "month") {
+        whereQuery.where = {
+          ...whereQuery.where,
+          createdAt: {
+            gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
+          },
+        };
+      } else if (input.postsFromLast === "year") {
+        whereQuery.where = {
+          ...whereQuery.where,
+          createdAt: {
+            gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 365),
+          },
+        };
       }
 
       const orderByMap: Record<
@@ -268,7 +300,7 @@ export const postsRouter = router({
       const posts = await ctx.prisma.post.findMany({
         orderBy: orderByMap[input.sort]?.orderBy,
         take: input.count + 1,
-        where: whereQuery,
+        where: whereQuery.where,
         cursor: input.cursor ? { id: input.cursor } : undefined,
         include: {
           community: true,
@@ -282,13 +314,13 @@ export const postsRouter = router({
       });
       if (posts.length < input.count) {
         return {
-          posts,
+          posts: posts,
           nextCursor: undefined,
         };
       }
       const nextCursor = posts.length > 0 ? posts.pop()?.id : undefined;
       return {
-        posts,
+        posts: posts,
         nextCursor,
       };
     }),

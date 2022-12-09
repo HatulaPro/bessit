@@ -1,21 +1,38 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cx } from "../utils/general";
+import { AiFillCaretDown } from "react-icons/ai";
 import type { RouterInputs } from "../utils/trpc";
 
 export type SortingOptions = RouterInputs["post"]["getPosts"]["sort"];
+export type PostsFromLastOptions =
+  RouterInputs["post"]["getPosts"]["postsFromLast"];
+
+const TIME_FILTERS: Record<PostsFromLastOptions, string> = {
+  day: "Today",
+  week: "This Week",
+  month: "This Month",
+  year: "This Year",
+  "all time": "All Time",
+};
+
 export const SortBySection: React.FC<{
   setSortBy: (val: SortingOptions) => void;
   sortBy: SortingOptions;
+  setTimeFilter: (val: PostsFromLastOptions) => void;
+  timeFilter: PostsFromLastOptions;
   isLoading: boolean;
-}> = ({ setSortBy, sortBy, isLoading }) => {
+}> = ({ timeFilter, setTimeFilter, setSortBy, sortBy, isLoading }) => {
   const activeSortByRef = useRef<HTMLButtonElement>(null);
+  const [isFocused, setFocused] = useState<boolean>(false);
 
   useEffect(() => {
     if (activeSortByRef.current) {
       const activeButton = activeSortByRef.current;
       const parent = activeButton.parentElement as HTMLDivElement;
       const buttonRect = activeButton.getBoundingClientRect();
-      const parentRect = parent.getBoundingClientRect();
+      const parentRect = (
+        parent.parentElement as HTMLDivElement
+      ).getBoundingClientRect();
       const desiredCenter = parentRect.width / 2 + parentRect.left;
       const buttonCenter = buttonRect.width / 2 + buttonRect.left;
       parent.scrollBy({
@@ -26,27 +43,72 @@ export const SortBySection: React.FC<{
   }, [sortBy, activeSortByRef, isLoading]);
 
   return (
-    <div className="hidden-scroller justify-left mt-4 flex w-full flex-1 gap-2 overflow-scroll">
-      <div className="w-[50%] shrink-0 basis-[50%]"></div>
-      {(["new", "hot", "controversial"] as const).map((value) => (
+    <div className="w-full max-w-3xl bg-zinc-900 text-white">
+      <div
+        className="relative ml-auto mr-2 mt-4 mb-2 w-24 text-xs md:text-sm"
+        onBlur={(e) => {
+          if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
+            setFocused(false);
+          }
+        }}
+      >
         <button
+          onClick={() => setFocused(!isFocused)}
           className={cx(
-            "rounded-full px-4 py-0.5 text-sm transition-all disabled:opacity-50 disabled:contrast-50 md:px-6 md:text-base",
-            value === sortBy
-              ? "bg-zinc-100 text-black"
-              : "bg-zinc-700 text-white"
+            "flex h-8 w-full items-center justify-evenly border-[1px] border-zinc-500 py-1 hover:enabled:bg-zinc-800",
+            isFocused ? "rounded-t" : "rounded",
+            isLoading && "contrast-50"
           )}
-          key={value}
-          onClick={() => {
-            setSortBy(value);
-          }}
-          ref={value === sortBy ? activeSortByRef : undefined}
           disabled={isLoading}
         >
-          {value}
+          {TIME_FILTERS[timeFilter]}{" "}
+          <AiFillCaretDown className="text-xs md:text-sm" />
         </button>
-      ))}
-      <div className="w-[50%] shrink-0 basis-[50%]"></div>
+        <div
+          className={cx(
+            "absolute top-full z-20 max-h-44 w-full origin-top overflow-y-auto rounded-b border-[1px] border-t-0 border-zinc-500 bg-zinc-900 transition-transform",
+            isFocused && !isLoading ? "scale-y-100" : "scale-y-0"
+          )}
+        >
+          {Object.entries(TIME_FILTERS).map(
+            ([apiName, displayName]) =>
+              apiName !== timeFilter && (
+                <button
+                  key={apiName}
+                  className="h-8 w-full py-1 hover:bg-zinc-800"
+                  onClick={() => {
+                    setTimeFilter(apiName as keyof typeof TIME_FILTERS);
+                    setFocused(false);
+                  }}
+                >
+                  {displayName}
+                </button>
+              )
+          )}
+        </div>
+      </div>
+      <div className="hidden-scroller justify-left flex w-full flex-1 gap-2 overflow-scroll">
+        <div className="w-[60%] shrink-0 basis-[60%]"></div>
+        {(["new", "hot", "controversial"] as const).map((value) => (
+          <button
+            className={cx(
+              "rounded-full py-0.5 px-4 text-sm transition-all disabled:opacity-50 disabled:contrast-50 md:text-base",
+              value === sortBy
+                ? "bg-zinc-100 text-black"
+                : "bg-zinc-700 text-white"
+            )}
+            key={value}
+            onClick={() => {
+              setSortBy(value);
+            }}
+            ref={value === sortBy ? activeSortByRef : undefined}
+            disabled={isLoading}
+          >
+            {value}
+          </button>
+        ))}
+        <div className="w-[60%] shrink-0 basis-[60%]"></div>
+      </div>
     </div>
   );
 };

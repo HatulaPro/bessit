@@ -10,7 +10,10 @@ import { Loading } from "../../../components/Loading";
 import { NotFoundMessage } from "../../../components/NotFoundMessage";
 import { PostEditor } from "../../../components/PostEditor";
 import { PostsViewer } from "../../../components/PostsViewer";
-import { SortBySection } from "../../../components/SortBySection";
+import {
+  type PostsFromLastOptions,
+  SortBySection,
+} from "../../../components/SortBySection";
 import type { SortingOptions } from "../../../components/SortBySection";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 import { CommunityLogo } from "../../../components/CommunityLogo";
@@ -50,7 +53,8 @@ export default CommunityPage;
 
 const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
   const [sortBy, setSortBy] = useState<SortingOptions>("new");
-  const communityPosts = useCommunityPosts(name, sortBy);
+  const [timeFilter, setTimeFilter] = useState<PostsFromLastOptions>("day");
+  const communityPosts = useCommunityPosts(name, sortBy, timeFilter);
 
   if (!communityPosts.community) {
     if (communityPosts.isLoading) {
@@ -62,11 +66,13 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
     <div className="w-full">
       <CommunityHeader community={communityPosts.community} />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
-        <div className="flex-[3]">
+        <div className="flex flex-[3] flex-col">
           <SortBySection
             isLoading={communityPosts.isLoading}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            timeFilter={timeFilter}
+            setTimeFilter={setTimeFilter}
           />
           <PostsViewer communityPosts={communityPosts} />
         </div>

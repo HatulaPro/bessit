@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PostEditor } from "../components/PostEditor";
 import { PostsViewer } from "../components/PostsViewer";
 import {
+  type PostsFromLastOptions,
   SortBySection,
   type SortingOptions,
 } from "../components/SortBySection";
@@ -11,7 +12,9 @@ import { useCommunityPosts } from "../hooks/useCommunityPosts";
 
 const Home: NextPage = () => {
   const [sortBy, setSortBy] = useState<SortingOptions>("hot");
-  const communityPosts = useCommunityPosts(null, sortBy);
+  const [timeFilter, setTimeFilter] = useState<PostsFromLastOptions>("day");
+
+  const communityPosts = useCommunityPosts(null, sortBy, timeFilter);
 
   return (
     <>
@@ -26,10 +29,13 @@ const Home: NextPage = () => {
       <main className="min-h-screen bg-zinc-900">
         <div className="container my-2 mx-auto flex flex-col items-center justify-center px-0.5">
           <PostEditor defaultOpen={false} />
+          <hr className="my-4 block w-full max-w-3xl opacity-50 md:hidden" />
           <SortBySection
             isLoading={communityPosts.isLoading}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            timeFilter={timeFilter}
+            setTimeFilter={setTimeFilter}
           />
           <PostsViewer communityPosts={communityPosts} />
         </div>
