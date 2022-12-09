@@ -123,7 +123,7 @@ export const PostEditor: React.FC<{
         )}
         <button
           type="submit"
-          className="text-md w-16 rounded bg-indigo-700 p-1 text-white disabled:bg-indigo-500 disabled:text-gray-400 md:w-24 md:p-2 md:text-lg"
+          className="text-md w-16 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400 md:w-24 md:text-lg"
           disabled={!formState.isValid || createPostMutation.isLoading}
         >
           Create
