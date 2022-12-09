@@ -45,7 +45,7 @@ export const SortBySection: React.FC<{
   return (
     <div className="w-full max-w-3xl bg-zinc-900 text-white">
       <div
-        className="relative ml-auto mr-2 mt-4 mb-3 w-28 text-base"
+        className="relative ml-auto mr-2 mt-4 mb-3 w-32 text-base md:text-lg"
         onBlur={(e) => {
           if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
             setFocused(false);
@@ -55,7 +55,7 @@ export const SortBySection: React.FC<{
         <button
           onClick={() => setFocused(!isFocused)}
           className={cx(
-            "flex h-8 w-full items-center justify-evenly border-[1px] border-zinc-500 py-1 hover:enabled:bg-zinc-800",
+            "flex w-full items-center justify-evenly border-[1px] border-zinc-500 py-1.5 hover:enabled:bg-zinc-800",
             isFocused ? "rounded-t" : "rounded",
             isLoading && "contrast-50"
           )}
@@ -75,7 +75,7 @@ export const SortBySection: React.FC<{
               apiName !== timeFilter && (
                 <button
                   key={apiName}
-                  className="h-8 w-full py-1 hover:bg-zinc-800"
+                  className="w-full border-t-[1px] border-t-zinc-700 py-1.5 hover:bg-zinc-800"
                   onClick={() => {
                     setTimeFilter(apiName as keyof typeof TIME_FILTERS);
                     setFocused(false);
