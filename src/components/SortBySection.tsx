@@ -26,7 +26,7 @@ export const SortBySection: React.FC<{
   }, [sortBy, activeSortByRef, isLoading]);
 
   return (
-    <div className="hidden-scroller justify-left m-4 flex gap-2 overflow-scroll">
+    <div className="hidden-scroller justify-left mt-4 flex w-full flex-1 gap-2 overflow-scroll">
       <div className="w-[50%] shrink-0 basis-[50%]"></div>
       {(["new", "hot", "controversial"] as const).map((value) => (
         <button
