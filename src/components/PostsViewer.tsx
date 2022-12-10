@@ -17,7 +17,9 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
       {communityPosts.posts.map((post) => (
         <SinglePost key={post.id} post={post} isMain={false} />
       ))}
+      <br />
       <Loading size="large" show={communityPosts.isLoading} />
+      <br />
     </div>
   );
 };
