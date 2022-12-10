@@ -181,7 +181,17 @@ const TopBarSearch: React.FC<{
           }
         }}
         ref={searchQueryInputRef}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setOpen(true);
+          setTimeout(() => {
+            (
+              searchQueryInputRef.current?.parentElement as HTMLDivElement
+            ).scrollIntoView({
+              behavior: "smooth",
+              block: "end",
+            });
+          }, 400);
+        }}
       />
       <button
         className={cx(
