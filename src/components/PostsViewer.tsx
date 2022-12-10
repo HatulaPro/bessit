@@ -102,7 +102,10 @@ export const SinglePost: React.FC<{
           <button className="p-2 text-zinc-400 hover:text-emerald-400">
             <BsShare className="text-xl" />
           </button>
-          {authStatus === "authenticated" && <PostLikeButton post={post} />}
+          <PostLikeButton
+            post={post}
+            loggedIn={authStatus === "authenticated"}
+          />
           <LinkToPost post={post}>
             <button className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500">
               <BsChatLeft className="text-2xl" />

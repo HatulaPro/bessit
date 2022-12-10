@@ -14,9 +14,10 @@ export type InfinityQueryKeyInput<T> = {
 
 export const PostLikeButton: React.FC<{
   post: CommunityPosts["posts"][number];
-}> = ({ post }) => {
+  loggedIn: boolean;
+}> = ({ post, loggedIn }) => {
   const utils = trpc.useContext();
-  const voted = post.votes.length > 0;
+  const voted = loggedIn && post.votes.length > 0;
   const queryClient = useQueryClient();
   const likeMutation = trpc.post.likePost.useMutation({
     onSuccess: (data) => {
@@ -85,17 +86,21 @@ export const PostLikeButton: React.FC<{
   });
   return (
     <button
-      onClick={() =>
-        likeMutation.mutate({
-          postId: post.id,
-          action: voted ? "unlike" : "like",
-        })
+      onClick={
+        loggedIn
+          ? () =>
+              likeMutation.mutate({
+                postId: post.id,
+                action: voted ? "unlike" : "like",
+              })
+          : undefined
       }
       className={cx(
-        "group relative flex items-center gap-2 p-2 text-lg hover:text-red-400 disabled:text-zinc-500",
-        voted ? "text-red-400" : "text-zinc-400"
+        "group relative flex items-center gap-2 p-2 text-lg",
+        voted ? "text-red-400" : "text-zinc-400",
+        loggedIn && "hover:text-red-400 disabled:text-zinc-500"
       )}
-      disabled={likeMutation.isLoading}
+      disabled={likeMutation.isLoading || !loggedIn}
     >
       {likeMutation.isLoading ? (
         <Loading show size="small" />

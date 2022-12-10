@@ -233,24 +233,22 @@ const PostComments: React.FC<{
                       <BsShare className="text-xl" />
                       Share
                     </button>
-                    {authStatus === "authenticated" && (
-                      <>
-                        <CommentLikeButton comment={comment} />
-                        <button
-                          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
-                          onClick={() => {
-                            setOpenCreateCommentId(
-                              openCreateCommentId === comment.id
-                                ? null
-                                : comment.id
-                            );
-                          }}
-                        >
-                          <BsChatLeft className="text-xl" />
-                          Reply
-                        </button>
-                      </>
-                    )}
+                    <CommentLikeButton
+                      comment={comment}
+                      loggedIn={authStatus === "authenticated"}
+                    />
+                    <button
+                      className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
+                      disabled={authStatus !== "authenticated"}
+                      onClick={() => {
+                        setOpenCreateCommentId(
+                          openCreateCommentId === comment.id ? null : comment.id
+                        );
+                      }}
+                    >
+                      <BsChatLeft className="text-xl" />
+                      Reply
+                    </button>
                   </div>
                   {authStatus === "authenticated" && (
                     <div

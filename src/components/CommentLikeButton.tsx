@@ -8,11 +8,12 @@ import { Loading } from "./Loading";
 import type { InfinityQueryKeyInput } from "./PostLikeButton";
 import { cx } from "../utils/general";
 
-export const CommentLikeButton: React.FC<{ comment: UIComment }> = ({
-  comment,
-}) => {
+export const CommentLikeButton: React.FC<{
+  comment: UIComment;
+  loggedIn: boolean;
+}> = ({ comment, loggedIn }) => {
   const queryClient = useQueryClient();
-  const voted = comment.votes.length > 0;
+  const voted = loggedIn && comment.votes.length > 0;
 
   const likeMutation = trpc.post.likeComment.useMutation({
     cacheTime: 0,
@@ -72,16 +73,20 @@ export const CommentLikeButton: React.FC<{ comment: UIComment }> = ({
 
   return (
     <button
-      disabled={likeMutation.isLoading}
+      disabled={likeMutation.isLoading || !loggedIn}
       className={cx(
-        "text-md group relative flex items-center gap-2 p-2 hover:text-red-400 disabled:text-zinc-500",
-        voted ? "text-red-400" : "text-zinc-400"
+        "text-md group relative flex items-center gap-2 p-2",
+        voted ? "text-red-400" : "text-zinc-400",
+        loggedIn && "hover:text-red-400disabled:text-zinc-500"
       )}
-      onClick={() =>
-        likeMutation.mutate({
-          action: voted ? "unlike" : "like",
-          commentId: comment.id,
-        })
+      onClick={
+        loggedIn
+          ? () =>
+              likeMutation.mutate({
+                action: voted ? "unlike" : "like",
+                commentId: comment.id,
+              })
+          : undefined
       }
     >
       {likeMutation.isLoading ? (
