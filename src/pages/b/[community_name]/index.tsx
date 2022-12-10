@@ -63,7 +63,7 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
     return <NotFoundMessage message="This community does not seem to exist" />;
   }
   return (
-    <div className="w-full">
+    <div className="w-full pt-12 md:pt-16">
       <CommunityHeader community={communityPosts.community} />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
         <div className="flex flex-[3] flex-col">

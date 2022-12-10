@@ -26,7 +26,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen bg-zinc-900">
+      <main className="bg-zinc-900 pt-12 md:pt-16">
         <div className="container my-2 mx-auto flex flex-col items-center justify-center px-0.5">
           <PostEditor defaultOpen={false} />
           <hr className="block w-full max-w-3xl opacity-50 md:hidden" />
