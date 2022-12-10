@@ -43,7 +43,7 @@ const PostPage: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="relative flex min-h-full w-full flex-col items-center bg-zinc-900 pb-2 text-white">
+      <main className="relative flex min-h-full w-full flex-col items-center bg-zinc-900 pt-12 pb-2 text-white md:pt-16">
         {isLoading.post && <Loading show size="large" />}
         {is404 && (
           <NotFoundMessage message="This post does not seem to exist" />
@@ -67,7 +67,7 @@ const PostPage: NextPage = () => {
             if (!post) return router.back();
             router.replace(`/b/${post.community.name}`);
           }}
-          className="absolute right-12 top-12 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
+          className="absolute right-12 top-20 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
         >
           <IoMdClose className="text-2xl" />
           <span className="text-sm">Back</span>
