@@ -88,29 +88,27 @@ export const PostLikeButton: React.FC<{
   });
   return (
     <LoggedOnlyButton
-      Child={(props) => {
-        return (
-          <button
-            {...props}
-            className={cx(
-              "group relative flex items-center gap-2 p-2 text-lg",
-              voted ? "text-red-400" : "text-zinc-400",
-              loggedIn && "hover:text-red-400 disabled:text-zinc-500"
-            )}
-            disabled={likeMutation.isLoading}
-          >
-            {likeMutation.isLoading ? (
-              <Loading show size="small" />
-            ) : voted ? (
-              <BsSuitHeartFill className="text-2xl" />
-            ) : (
-              <BsSuitHeart className="text-2xl" />
-            )}
-            {post._count.votes}
-            <div className="absolute inset-1 h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
-          </button>
-        );
-      }}
+      Child={(props) => (
+        <button
+          {...props}
+          className={cx(
+            "group relative flex items-center gap-2 p-2 text-lg",
+            voted ? "text-red-400" : "text-zinc-400",
+            loggedIn && "hover:text-red-400 disabled:text-zinc-500"
+          )}
+          disabled={likeMutation.isLoading}
+        >
+          {likeMutation.isLoading ? (
+            <Loading show size="small" />
+          ) : voted ? (
+            <BsSuitHeartFill className="text-2xl" />
+          ) : (
+            <BsSuitHeart className="text-2xl" />
+          )}
+          {post._count.votes}
+          <div className="absolute inset-1 h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
+        </button>
+      )}
       onClick={() =>
         likeMutation.mutate({
           postId: post.id,

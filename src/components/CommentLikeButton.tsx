@@ -7,6 +7,8 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { Loading } from "./Loading";
 import type { InfinityQueryKeyInput } from "./PostLikeButton";
 import { cx } from "../utils/general";
+import { LoggedOnlyButton } from "./LoggedOnlyButton";
+import Link from "next/link";
 
 export const CommentLikeButton: React.FC<{
   comment: UIComment;
@@ -72,32 +74,45 @@ export const CommentLikeButton: React.FC<{
   });
 
   return (
-    <button
-      disabled={likeMutation.isLoading || !loggedIn}
-      className={cx(
-        "text-md group relative flex items-center gap-2 p-2",
-        voted ? "text-red-400" : "text-zinc-400",
-        loggedIn && "hover:text-red-400disabled:text-zinc-500"
+    <LoggedOnlyButton
+      Child={(props) => (
+        <button
+          {...props}
+          disabled={likeMutation.isLoading}
+          className={cx(
+            "text-md group relative flex items-center gap-2 p-2",
+            voted ? "text-red-400" : "text-zinc-400",
+            loggedIn && "hover:text-red-400 disabled:text-zinc-500"
+          )}
+        >
+          {likeMutation.isLoading ? (
+            <Loading show size="small" />
+          ) : voted ? (
+            <BsSuitHeartFill className="text-lg" />
+          ) : (
+            <BsSuitHeart className="text-lg" />
+          )}
+          {comment._count.votes}
+          <div className="absolute top-1 bottom-1 left-[1px] h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
+        </button>
       )}
-      onClick={
-        loggedIn
-          ? () =>
-              likeMutation.mutate({
-                action: voted ? "unlike" : "like",
-                commentId: comment.id,
-              })
-          : undefined
+      onClick={() =>
+        likeMutation.mutate({
+          action: voted ? "unlike" : "like",
+          commentId: comment.id,
+        })
       }
-    >
-      {likeMutation.isLoading ? (
-        <Loading show size="small" />
-      ) : voted ? (
-        <BsSuitHeartFill className="text-lg" />
-      ) : (
-        <BsSuitHeart className="text-lg" />
-      )}
-      {comment._count.votes}
-      <div className="absolute top-1 bottom-1 left-[1px] h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
-    </button>
+      icon={<BsSuitHeartFill className="text-red-500" />}
+      title={
+        <>
+          Like{" "}
+          <Link href="/" className="font-bold hover:underline">
+            {comment.user.name}
+          </Link>
+          &apos;s wonderful comment
+        </>
+      }
+      content="Join Bessit to make the world a better place one like at the time"
+    />
   );
 };
