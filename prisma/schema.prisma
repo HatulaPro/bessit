@@ -146,10 +146,10 @@ model Notification {
   relatedPost      Post             @relation(fields: [relatedPostId], references: [id], onDelete: Cascade)
   relatedCommentId String?
   relatedComment   Comment?         @relation(fields: [relatedCommentId], references: [id], onDelete: Cascade)
-  metadata         Int
+  metadata         Int              @default(0)
   type             NotificationType
   updatedAt        DateTime         @updatedAt
-  seen             Boolean
+  seen             Boolean          @default(false)
 
   @@index(fields: [updatedAt, userId])
 }
