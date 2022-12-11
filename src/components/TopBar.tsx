@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
 import { CgComponents } from "react-icons/cg";
 import { cx } from "../utils/general";
-import { BsDot, BsSearch, BsXLg } from "react-icons/bs";
+import { BsBell, BsDot, BsSearch, BsXLg } from "react-icons/bs";
 import { useDebounce } from "../hooks/useDebounce";
 import { trpc } from "../utils/trpc";
 import { CommunityLogo } from "./CommunityLogo";
@@ -24,7 +24,7 @@ export const TopBar: React.FC = () => {
     >
       <div
         className={cx(
-          "flex transition-all",
+          "flex transition-all md:flex-1",
           searchBarOpen ? "shrink" : "shrink-0"
         )}
       >
@@ -43,38 +43,53 @@ export const TopBar: React.FC = () => {
         </Link>
       </div>
       <TopBarSearch open={searchBarOpen} setOpen={setSearchBarOpen} />
-      {session.data?.user ? (
-        <div
-          className={cx(
-            "relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1",
-            searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
-          )}
-        >
-          {session.data.user.image ? (
-            <Image
-              className="rounded-full"
-              loader={({ src }) => src}
-              src={session.data.user.image}
-              alt="Profile Image"
-              width={36}
-              height={36}
-            />
-          ) : (
-            <AiFillMeh className="h-9 w-9 rounded-full" />
-          )}
-          <span className="hidden text-lg md:block">
-            {session.data.user.name}
-          </span>
-          <TopBarUserMenu />
-        </div>
-      ) : (
+      <div
+        className={cx(
+          "flex flex-row-reverse items-center justify-between gap-2 md:flex-1 md:flex-row",
+          searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
+        )}
+      >
         <button
-          className="m-1 hidden w-24 rounded-lg border-[1px] border-zinc-500 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-900 md:block md:rounded-md"
-          onClick={() => signIn()}
+          className={cx(
+            "group mx-auto rounded-md bg-zinc-800 p-1.5 text-2xl",
+            searchBarOpen ? "hidden md:block" : "block"
+          )}
         >
-          Log In
+          <BsBell className="group-hover:animate-wiggle" />
         </button>
-      )}
+        {session.data?.user ? (
+          <div
+            className={cx(
+              "relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1",
+              searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
+            )}
+          >
+            {session.data.user.image ? (
+              <Image
+                className="rounded-full"
+                loader={({ src }) => src}
+                src={session.data.user.image}
+                alt="Profile Image"
+                width={36}
+                height={36}
+              />
+            ) : (
+              <AiFillMeh className="h-9 w-9 rounded-full" />
+            )}
+            <span className="hidden text-lg md:block">
+              {session.data.user.name}
+            </span>
+            <TopBarUserMenu />
+          </div>
+        ) : (
+          <button
+            className="m-1 hidden w-24 rounded-lg border-[1px] border-zinc-500 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-900 md:block md:rounded-md"
+            onClick={() => signIn()}
+          >
+            Log In
+          </button>
+        )}
+      </div>
     </div>
   );
 };
@@ -84,7 +99,6 @@ const TopBarSearch: React.FC<{
   setOpen: (isOpen: boolean) => void;
 }> = ({ open, setOpen }) => {
   const [queryInput, setQueryInput] = useState<string>("");
-  // const [open, setOpen] = useState<boolean>(false);
   const debouncedQueryInput = useDebounce(queryInput, 500);
   const firstUserRef = useRef<HTMLDivElement>(null);
   const firstCommunityRef = useRef<HTMLDivElement>(null);
