@@ -25,19 +25,21 @@ export function LoggedOnlyButton<T extends React.FC>({
     <>
       {!isLoggedIn && (
         <Dialog isOpen={isOpen} close={() => setOpen(false)}>
-          <div className="relative m-auto w-full max-w-md rounded bg-zinc-800 p-8 px-6 text-center text-white">
+          <div className="relative m-auto w-full max-w-xs rounded bg-zinc-800 px-4 py-5 text-center text-white md:max-w-sm md:py-8 md:px-6">
             <button
               className="absolute top-2 left-2 mr-auto rounded-full text-2xl text-white hover:bg-white hover:bg-opacity-20"
               onClick={() => setOpen(false)}
             >
               <IoMdClose />
             </button>
-            <div className="mx-auto mb-3 w-min text-center text-4xl">
+            <div className="mx-auto mb-3 w-min text-center text-2xl md:text-4xl">
               {icon}
             </div>
-            <h2 className="py-2 text-2xl">{title}</h2>
+            <h2 className="py-2 text-xl md:text-2xl">{title}</h2>
             <hr className="my-1.5 opacity-25" />
-            <p className="p-4 text-start text-zinc-400">{content}</p>
+            <p className="p-4 text-start text-sm text-zinc-400 md:text-base">
+              {content}
+            </p>
 
             <button
               className="w-full rounded bg-indigo-700 py-2 px-6 text-lg text-white"

@@ -21,7 +21,7 @@ export const Dialog: React.FC<{
         if (e.currentTarget === e.target) close();
       }}
       className={cx(
-        "fixed inset-0 z-50 flex max-h-screen items-start justify-center overflow-y-auto bg-zinc-900 bg-opacity-95 py-4 transition-all duration-200 md:top-16 md:bg-opacity-80",
+        "fixed inset-0 z-50 flex max-h-screen items-start justify-center overflow-y-auto bg-zinc-900 bg-opacity-95 py-4 transition-all duration-200 md:bg-opacity-80",
         isOpen && debouncedOpen
           ? "opacity-1 visible"
           : "invisible bottom-44 opacity-0"
