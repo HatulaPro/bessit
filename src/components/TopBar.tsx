@@ -51,11 +51,12 @@ export const TopBar: React.FC = () => {
       >
         <button
           className={cx(
-            "group mx-auto rounded-md bg-zinc-800 p-1.5 text-2xl",
+            "group relative mr-auto rounded-md bg-zinc-800 p-1.5 text-2xl",
             searchBarOpen ? "hidden md:block" : "block"
           )}
         >
           <BsBell className="group-hover:animate-wiggle" />
+          <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-zinc-800 bg-indigo-600 group-hover:opacity-0"></span>
         </button>
         {session.data?.user ? (
           <div
