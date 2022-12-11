@@ -43,40 +43,38 @@ export const TopBar: React.FC = () => {
         </Link>
       </div>
       <TopBarSearch open={searchBarOpen} setOpen={setSearchBarOpen} />
-      <div
-        className={cx(
-          "relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1",
-          searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
-        )}
-      >
-        {session.data?.user ? (
-          <>
-            {session.data.user.image ? (
-              <Image
-                className="rounded-full"
-                loader={({ src }) => src}
-                src={session.data.user.image}
-                alt="Profile Image"
-                width={36}
-                height={36}
-              />
-            ) : (
-              <AiFillMeh className="h-9 w-9 rounded-full" />
-            )}
-            <span className="hidden text-lg md:block">
-              {session.data.user.name}
-            </span>
-            <TopBarUserMenu />
-          </>
-        ) : (
-          <button
-            className="hidden w-24 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-700 md:block"
-            onClick={() => signIn()}
-          >
-            LOG IN
-          </button>
-        )}
-      </div>
+      {session.data?.user ? (
+        <div
+          className={cx(
+            "relative flex items-center gap-2 rounded-full border-zinc-500 bg-zinc-800 md:rounded-md md:border-[1px] md:p-1",
+            searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
+          )}
+        >
+          {session.data.user.image ? (
+            <Image
+              className="rounded-full"
+              loader={({ src }) => src}
+              src={session.data.user.image}
+              alt="Profile Image"
+              width={36}
+              height={36}
+            />
+          ) : (
+            <AiFillMeh className="h-9 w-9 rounded-full" />
+          )}
+          <span className="hidden text-lg md:block">
+            {session.data.user.name}
+          </span>
+          <TopBarUserMenu />
+        </div>
+      ) : (
+        <button
+          className="m-1 hidden w-24 rounded-lg border-[1px] border-zinc-500 bg-zinc-800 p-1 text-center transition-colors hover:bg-zinc-900 md:block md:rounded-md"
+          onClick={() => signIn()}
+        >
+          Log In
+        </button>
+      )}
     </div>
   );
 };
