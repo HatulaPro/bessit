@@ -441,7 +441,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
   const commentsQuery = trpc.post.getComments.useInfiniteQuery(
     {
       post: queryData?.post_data[0] ?? "NOT_SENDABLE",
-      count: 12,
+      count: 25,
       mainCommentId: queryData?.post_data[2] ?? null,
     },
     {

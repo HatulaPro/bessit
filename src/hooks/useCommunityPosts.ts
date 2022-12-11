@@ -11,7 +11,7 @@ export function useCommunityPosts(
 ) {
   const input: RouterInputs["post"]["getPosts"] = {
     community: communityName ?? null,
-    count: 12,
+    count: 25,
     sort,
     postsFromLast: postsFromLast,
   };
