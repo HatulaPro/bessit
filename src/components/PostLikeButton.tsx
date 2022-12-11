@@ -6,6 +6,8 @@ import { trpc } from "../utils/trpc";
 import type { RouterOutputs, RouterInputs } from "../utils/trpc";
 import { Loading } from "./Loading";
 import { cx } from "../utils/general";
+import { LoggedOnlyButton } from "./LoggedOnlyButton";
+import Link from "next/link";
 
 export type InfinityQueryKeyInput<T> = {
   input: T;
@@ -85,32 +87,47 @@ export const PostLikeButton: React.FC<{
     },
   });
   return (
-    <button
-      onClick={
-        loggedIn
-          ? () =>
-              likeMutation.mutate({
-                postId: post.id,
-                action: voted ? "unlike" : "like",
-              })
-          : undefined
+    <LoggedOnlyButton
+      Child={(props) => {
+        return (
+          <button
+            {...props}
+            className={cx(
+              "group relative flex items-center gap-2 p-2 text-lg",
+              voted ? "text-red-400" : "text-zinc-400",
+              loggedIn && "hover:text-red-400 disabled:text-zinc-500"
+            )}
+            disabled={likeMutation.isLoading}
+          >
+            {likeMutation.isLoading ? (
+              <Loading show size="small" />
+            ) : voted ? (
+              <BsSuitHeartFill className="text-2xl" />
+            ) : (
+              <BsSuitHeart className="text-2xl" />
+            )}
+            {post._count.votes}
+            <div className="absolute inset-1 h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
+          </button>
+        );
+      }}
+      onClick={() =>
+        likeMutation.mutate({
+          postId: post.id,
+          action: voted ? "unlike" : "like",
+        })
       }
-      className={cx(
-        "group relative flex items-center gap-2 p-2 text-lg",
-        voted ? "text-red-400" : "text-zinc-400",
-        loggedIn && "hover:text-red-400 disabled:text-zinc-500"
-      )}
-      disabled={likeMutation.isLoading || !loggedIn}
-    >
-      {likeMutation.isLoading ? (
-        <Loading show size="small" />
-      ) : voted ? (
-        <BsSuitHeartFill className="text-2xl" />
-      ) : (
-        <BsSuitHeart className="text-2xl" />
-      )}
-      {post._count.votes}
-      <div className="absolute inset-1 h-8 w-8 scale-0 rounded-full bg-red-600 bg-opacity-25 transition-all group-enabled:group-hover:scale-100"></div>
-    </button>
+      icon={<BsSuitHeartFill className="text-red-500" />}
+      title={
+        <>
+          Like{" "}
+          <Link href="/" className="font-bold hover:underline">
+            {post.user.name}
+          </Link>
+          &apos;s great post
+        </>
+      }
+      content="Join Bessit to let the world know of your appreciation of awesome content"
+    />
   );
 };
