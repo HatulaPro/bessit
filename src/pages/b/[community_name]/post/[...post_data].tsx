@@ -126,6 +126,7 @@ const PostPageContent: React.FC<{
           openCreateCommentId={openCreateCommentId}
           setOpenCreateCommentId={setOpenCreateCommentId}
           setCurrentParentCommentId={setCurrentParentCommentId}
+          main
         />
       )}
     </div>
@@ -152,12 +153,14 @@ const PostComments: React.FC<{
   openCreateCommentId: string | null;
   setOpenCreateCommentId: (x: string | null) => void;
   setCurrentParentCommentId: (x: string | null) => void;
+  main?: boolean;
 }> = ({
   postId,
   comments,
   openCreateCommentId,
   setOpenCreateCommentId,
   setCurrentParentCommentId,
+  main,
 }) => {
   const { status: authStatus } = useSession();
   const [closedComments, setClosedComments] = useState<Set<string>>(new Set());
@@ -174,7 +177,12 @@ const PostComments: React.FC<{
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl rounded bg-zinc-800 pr-1 pl-1 pt-2 md:max-w-5xl">
+    <div
+      className={cx(
+        "mx-auto w-full max-w-3xl rounded bg-zinc-800 pr-1 pl-1 pt-2 md:max-w-5xl",
+        main && "pb-3"
+      )}
+    >
       {comments.map((comment) => {
         return (
           <div key={comment.id} className="flex">
