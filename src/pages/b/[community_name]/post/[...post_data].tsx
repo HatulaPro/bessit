@@ -20,6 +20,7 @@ import { BsDot, BsChatLeft, BsShare, BsArrowUpCircle } from "react-icons/bs";
 import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
+import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
 
 const PostPage: NextPage = () => {
   const postTopRef = useRef<HTMLDivElement>(null);
@@ -237,18 +238,33 @@ const PostComments: React.FC<{
                       comment={comment}
                       loggedIn={authStatus === "authenticated"}
                     />
-                    <button
-                      className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
-                      disabled={authStatus !== "authenticated"}
+                    <LoggedOnlyButton
+                      Child={(props) => (
+                        <button
+                          {...props}
+                          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
+                        >
+                          <BsChatLeft className="text-xl" />
+                          Reply
+                        </button>
+                      )}
                       onClick={() => {
                         setOpenCreateCommentId(
                           openCreateCommentId === comment.id ? null : comment.id
                         );
                       }}
-                    >
-                      <BsChatLeft className="text-xl" />
-                      Reply
-                    </button>
+                      icon={<BsChatLeft className="text-blue-500" />}
+                      title={
+                        <>
+                          Reply to{" "}
+                          <Link href="/" className="font-bold hover:underline">
+                            {comment.user.name}
+                          </Link>
+                          &apos;s appreciable comment
+                        </>
+                      }
+                      content="Join Bessit to share your thoughts with our incredible community"
+                    />
                   </div>
                   {authStatus === "authenticated" && (
                     <div
