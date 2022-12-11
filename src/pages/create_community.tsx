@@ -8,8 +8,10 @@ import { trpc } from "../utils/trpc";
 import { useRouter } from "next/router";
 import { Loading } from "../components/Loading";
 import { useDebounce } from "../hooks/useDebounce";
+import { useLoggedOnly } from "../hooks/useLoggedOnly";
 
 const CreateCommunity: NextPage = () => {
+  useLoggedOnly("/");
   return (
     <>
       <Head>
