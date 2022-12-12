@@ -115,6 +115,15 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
     };
   }, [router, setOpen]);
 
+  const getNotificationsCountQuery =
+    trpc.notification.getNumberOfUnseenNotifications.useQuery(undefined, {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      refetchInterval: 1000 * 60 * 5,
+    });
+
   const getNotificationsQuery =
     trpc.notification.getNotifications.useInfiniteQuery(
       { count: 4 },
@@ -141,6 +150,22 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
     );
   }, [getNotificationsQuery]);
 
+  const setNotificationAsSeenMutation =
+    trpc.notification.setNotificationAsSeen.useMutation({
+      cacheTime: Infinity,
+      retry: 0,
+      onSuccess: () => {
+        utils.notification.getNumberOfUnseenNotifications.setData(
+          undefined,
+          (x) => {
+            if (!x) return x;
+            return x - 1;
+          }
+        );
+        utils.notification.getNotifications.invalidate();
+      },
+    });
+
   const utils = trpc.useContext();
   return (
     <>
@@ -152,13 +177,19 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
         )}
       >
         <BsBell className="group-hover:animate-wiggle" />
-        <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-zinc-800 bg-indigo-600 group-hover:opacity-0"></span>
+        {getNotificationsCountQuery.data !== undefined &&
+          getNotificationsCountQuery.data > 0 && (
+            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-zinc-800 bg-indigo-600 group-hover:opacity-0"></span>
+          )}
       </button>
       <Dialog isOpen={isOpen} close={() => setOpen(false)}>
         <div className="m-auto max-h-72 w-full max-w-xs overflow-y-scroll rounded bg-zinc-800 p-2 pt-0 text-left md:max-w-sm">
           <h2 className="sticky top-0 mb-4 flex justify-between border-b-2 border-zinc-700 bg-zinc-800 px-2 py-4 text-sm text-zinc-300">
             {/* TODO: Show the number of unread notifications here */}
-            Notifications
+            Notifications{" "}
+            {getNotificationsCountQuery.data
+              ? `(${getNotificationsCountQuery.data})`
+              : ""}
             <button
               className={cx(
                 "rounded-full p-1 text-lg transition-colors enabled:hover:bg-white enabled:hover:bg-opacity-25 disabled:animate-spin"
@@ -175,9 +206,13 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
           {flattenedNotifications.map((notification) => (
             <button
               key={notification.id}
-              className="block w-full rounded-md bg-zinc-800 px-3 py-4 text-left hover:bg-zinc-900"
+              className="relative block w-full rounded-md bg-zinc-800 px-3 py-3 pb-6 text-left hover:bg-zinc-900"
               onClick={() => {
-                // TODO: set notification as seen
+                if (!notification.seen) {
+                  setNotificationAsSeenMutation.mutate({
+                    notificationId: notification.id,
+                  });
+                }
                 router.push(
                   `/b/${notification.relatedPost.community.name}/post/${
                     notification.relatedPostId
@@ -227,6 +262,11 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                 <>likes on com</>
               ) : (
                 <>Unreachable</>
+              )}
+              {!notification.seen && (
+                <span className="absolute bottom-0.5 right-1 rounded-full bg-indigo-600 py-0.5 px-1.5 text-xs text-white">
+                  new
+                </span>
               )}
             </button>
           ))}

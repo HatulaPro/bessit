@@ -1,7 +1,31 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 
 export const notificationsRouter = router({
+  getNumberOfUnseenNotifications: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.notification.count({
+      where: { userId: ctx.session.user.id, seen: false },
+    });
+  }),
+  setNotificationAsSeen: protectedProcedure
+    .input(z.object({ notificationId: z.string().length(25) }))
+    .mutation(async ({ ctx, input }) => {
+      const notification = await ctx.prisma.notification.findUnique({
+        where: { id: input.notificationId },
+        select: { id: true, userId: true },
+      });
+      if (!notification || notification.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          message: "Notification not found",
+          code: "BAD_REQUEST",
+        });
+      }
+      return await ctx.prisma.notification.update({
+        where: { id: input.notificationId },
+        data: { seen: true },
+      });
+    }),
   getNotifications: protectedProcedure
     .input(
       z.object({
