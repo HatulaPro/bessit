@@ -25,7 +25,6 @@ export const notificationsRouter = router({
         await ctx.prisma.notification.update({
           where: { id: input.notificationId },
           data: { seen: true },
-          select: {},
         });
         return 1;
       } else {
