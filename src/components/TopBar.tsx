@@ -12,6 +12,7 @@ import {
   BsCheck2All,
   BsDot,
   BsSearch,
+  BsSuitHeartFill,
   BsXLg,
 } from "react-icons/bs";
 import { useDebounce } from "../hooks/useDebounce";
@@ -279,7 +280,20 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                   </p>
                 </>
               ) : notification.type === "LIKES_ON_POST" ? (
-                <>likes on post</>
+                <>
+                  <h3
+                    className={cx("text-sm", !notification.seen && "font-bold")}
+                  >
+                    <i>{notification.metadata}</i> Likes!
+                    <span className="pl-2 text-xs font-thin text-zinc-400">
+                      {timeAgo(notification.updatedAt)}
+                    </span>
+                  </h3>
+                  <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-zinc-400">
+                    <BsSuitHeartFill className="m-1 inline-block text-red-500" />
+                    See your post: <i>{notification.relatedPost.title}</i>
+                  </p>
+                </>
               ) : notification.type === "LIKES_ON_COMMENT" ? (
                 <>likes on com</>
               ) : (

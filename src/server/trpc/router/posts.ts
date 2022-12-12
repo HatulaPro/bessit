@@ -3,6 +3,8 @@ import { z } from "zod";
 import { createPostSchema } from "../../../components/PostEditor";
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 
+const NOTIFY_ON_NUMBERS = new Set([1, 2, 10, 100, 1000]);
+
 export const postsRouter = router({
   createPost: protectedProcedure
     .input(createPostSchema)
@@ -234,19 +236,54 @@ export const postsRouter = router({
     }),
   likePost: protectedProcedure
     .input(z.object({ postId: z.string(), action: z.enum(["like", "unlike"]) }))
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const userId_postId = {
         postId: input.postId,
         userId: ctx.session.user.id,
       };
+      const post = await ctx.prisma.post.findUnique({
+        where: { id: input.postId },
+        include: { _count: { select: { votes: true } } },
+      });
+      if (!post) {
+        throw new TRPCError({
+          message: "Post not found",
+          code: "BAD_REQUEST",
+        });
+      }
       if (input.action === "like") {
-        return ctx.prisma.postVote.upsert({
+        const votes = post._count.votes;
+        if (
+          NOTIFY_ON_NUMBERS.has(votes) &&
+          post.userId !== ctx.session.user.id
+        ) {
+          await ctx.prisma.notification.upsert({
+            where: {
+              userId_type_relatedPostId: {
+                relatedPostId: post.id,
+                type: "LIKES_ON_POST",
+                userId: post.userId,
+              },
+            },
+            create: {
+              relatedPostId: post.id,
+              type: "LIKES_ON_POST",
+              userId: post.userId,
+              metadata: votes,
+            },
+            update: {
+              metadata: votes,
+            },
+          });
+        }
+
+        return await ctx.prisma.postVote.upsert({
           create: userId_postId,
           update: userId_postId,
           where: { userId_postId },
         });
       } else {
-        return ctx.prisma.postVote
+        return await ctx.prisma.postVote
           .delete({ where: { userId_postId } })
           .then(() => userId_postId)
           .catch(() => userId_postId);
