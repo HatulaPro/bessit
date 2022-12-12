@@ -9,6 +9,7 @@ import {
   BsArrowRepeat,
   BsBell,
   BsChatLeft,
+  BsCheck2All,
   BsDot,
   BsSearch,
   BsXLg,
@@ -154,12 +155,15 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
     trpc.notification.setNotificationAsSeen.useMutation({
       cacheTime: Infinity,
       retry: 0,
-      onSuccess: () => {
+      onSuccess: (data, { notificationId }) => {
         utils.notification.getNumberOfUnseenNotifications.setData(
           undefined,
           (x) => {
             if (!x) return x;
-            return x - 1;
+            if (notificationId) {
+              return x - 1;
+            }
+            return 0;
           }
         );
         utils.notification.getNotifications.invalidate();
@@ -184,24 +188,42 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
       </button>
       <Dialog isOpen={isOpen} close={() => setOpen(false)}>
         <div className="m-auto max-h-72 w-full max-w-xs overflow-y-scroll rounded bg-zinc-800 p-2 pt-0 text-left md:max-w-sm">
-          <h2 className="sticky top-0 mb-4 flex justify-between border-b-2 border-zinc-700 bg-zinc-800 px-2 py-4 text-sm text-zinc-300">
+          <h2 className="sticky top-0 z-10 mb-4 flex justify-between border-b-2 border-zinc-700 bg-zinc-800 px-2 pt-4 pb-2 text-sm text-zinc-300">
             {/* TODO: Show the number of unread notifications here */}
             Notifications{" "}
             {getNotificationsCountQuery.data
               ? `(${getNotificationsCountQuery.data})`
               : ""}
-            <button
-              className={cx(
-                "rounded-full p-1 text-lg transition-colors enabled:hover:bg-white enabled:hover:bg-opacity-25 disabled:animate-spin"
-              )}
-              onClick={() => utils.notification.getNotifications.invalidate()}
-              disabled={
-                getNotificationsQuery.isLoading ||
-                getNotificationsQuery.isFetching
-              }
-            >
-              <BsArrowRepeat />
-            </button>
+            <div>
+              {getNotificationsCountQuery.data !== undefined &&
+                getNotificationsCountQuery.data > 0 && (
+                  <button
+                    className={cx(
+                      "rounded-full p-1 text-lg transition-colors enabled:hover:bg-white enabled:hover:bg-opacity-20 disabled:text-zinc-400"
+                    )}
+                    onClick={() =>
+                      setNotificationAsSeenMutation.mutate({
+                        notificationId: null,
+                      })
+                    }
+                    disabled={setNotificationAsSeenMutation.isLoading}
+                  >
+                    <BsCheck2All />
+                  </button>
+                )}
+              <button
+                className={cx(
+                  "rounded-full p-1 text-lg transition-colors enabled:hover:bg-white enabled:hover:bg-opacity-20 disabled:animate-spin"
+                )}
+                onClick={() => utils.notification.getNotifications.invalidate()}
+                disabled={
+                  getNotificationsQuery.isLoading ||
+                  getNotificationsQuery.isFetching
+                }
+              >
+                <BsArrowRepeat />
+              </button>
+            </div>
           </h2>
           {flattenedNotifications.map((notification) => (
             <button

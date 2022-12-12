@@ -9,22 +9,32 @@ export const notificationsRouter = router({
     });
   }),
   setNotificationAsSeen: protectedProcedure
-    .input(z.object({ notificationId: z.string().length(25) }))
+    .input(z.object({ notificationId: z.string().length(25).nullable() }))
     .mutation(async ({ ctx, input }) => {
-      const notification = await ctx.prisma.notification.findUnique({
-        where: { id: input.notificationId },
-        select: { id: true, userId: true },
-      });
-      if (!notification || notification.userId !== ctx.session.user.id) {
-        throw new TRPCError({
-          message: "Notification not found",
-          code: "BAD_REQUEST",
+      if (input.notificationId) {
+        const notification = await ctx.prisma.notification.findUnique({
+          where: { id: input.notificationId },
+          select: { id: true, userId: true },
         });
+        if (!notification || notification.userId !== ctx.session.user.id) {
+          throw new TRPCError({
+            message: "Notification not found",
+            code: "BAD_REQUEST",
+          });
+        }
+        await ctx.prisma.notification.update({
+          where: { id: input.notificationId },
+          data: { seen: true },
+          select: {},
+        });
+        return 1;
+      } else {
+        const res = await ctx.prisma.notification.updateMany({
+          where: { userId: ctx.session.user.id, seen: false },
+          data: { seen: true },
+        });
+        return res.count;
       }
-      return await ctx.prisma.notification.update({
-        where: { id: input.notificationId },
-        data: { seen: true },
-      });
     }),
   getNotifications: protectedProcedure
     .input(
