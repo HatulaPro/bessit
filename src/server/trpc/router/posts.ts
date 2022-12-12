@@ -42,7 +42,7 @@ export const postsRouter = router({
       const post = await ctx.prisma.post.findUnique({
         where: { id: input.postId },
       });
-      if (!post) {
+      if (!post || post.isDeleted) {
         throw new TRPCError({ message: "Post not found", code: "BAD_REQUEST" });
       }
       const parentComment =
@@ -51,7 +51,11 @@ export const postsRouter = router({
           where: { id: input.parentCommentId },
         }));
       if (input.parentCommentId) {
-        if (!parentComment || parentComment.postId !== input.postId) {
+        if (
+          !parentComment ||
+          parentComment.postId !== input.postId ||
+          parentComment.isDeleted
+        ) {
           throw new TRPCError({
             message: "Parent comment not found",
             code: "BAD_REQUEST",
@@ -149,6 +153,7 @@ export const postsRouter = router({
         },
         select: {
           childComments: {
+            where: { isDeleted: false },
             orderBy: { createdAt: "desc" },
             select: {
               content: true,
@@ -162,6 +167,7 @@ export const postsRouter = router({
                 take: 1,
               },
               childComments: {
+                where: { isDeleted: false },
                 orderBy: { createdAt: "desc" },
                 select: {
                   user: true,
@@ -175,6 +181,7 @@ export const postsRouter = router({
                     take: 1,
                   },
                   childComments: {
+                    where: { isDeleted: false },
                     orderBy: { createdAt: "desc" },
                     select: {
                       user: true,
@@ -188,6 +195,7 @@ export const postsRouter = router({
                         take: 1,
                       },
                       childComments: {
+                        where: { isDeleted: false },
                         orderBy: { createdAt: "desc" },
                         select: {
                           user: true,
@@ -245,7 +253,7 @@ export const postsRouter = router({
         where: { id: input.postId },
         include: { _count: { select: { votes: true } } },
       });
-      if (!post) {
+      if (!post || post.isDeleted) {
         throw new TRPCError({
           message: "Post not found",
           code: "BAD_REQUEST",
@@ -302,7 +310,7 @@ export const postsRouter = router({
         where: { id: input.commentId },
         include: { _count: { select: { votes: true } } },
       });
-      if (!comment) {
+      if (!comment || comment.isDeleted) {
         throw new TRPCError({
           message: "Post not found",
           code: "BAD_REQUEST",
