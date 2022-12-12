@@ -252,7 +252,7 @@ export const postsRouter = router({
         });
       }
       if (input.action === "like") {
-        const votes = post._count.votes;
+        const votes = post._count.votes + 1;
         if (
           NOTIFY_ON_NUMBERS.has(votes) &&
           post.userId !== ctx.session.user.id
@@ -293,19 +293,54 @@ export const postsRouter = router({
     .input(
       z.object({ commentId: z.string(), action: z.enum(["like", "unlike"]) })
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const userId_commentId = {
         commentId: input.commentId,
         userId: ctx.session.user.id,
       };
+      const comment = await ctx.prisma.comment.findUnique({
+        where: { id: input.commentId },
+        include: { _count: { select: { votes: true } } },
+      });
+      if (!comment) {
+        throw new TRPCError({
+          message: "Post not found",
+          code: "BAD_REQUEST",
+        });
+      }
       if (input.action === "like") {
-        return ctx.prisma.commentVote.upsert({
+        const votes = comment._count.votes + 1;
+        if (
+          NOTIFY_ON_NUMBERS.has(votes) &&
+          comment.userId !== ctx.session.user.id
+        ) {
+          await ctx.prisma.notification.upsert({
+            where: {
+              userId_type_relatedPostId: {
+                relatedPostId: comment.postId,
+                type: "LIKES_ON_COMMENT",
+                userId: comment.userId,
+              },
+            },
+            create: {
+              relatedPostId: comment.postId,
+              type: "LIKES_ON_COMMENT",
+              userId: comment.userId,
+              metadata: votes,
+              relatedCommentId: comment.id,
+            },
+            update: {
+              metadata: votes,
+            },
+          });
+        }
+        return await ctx.prisma.commentVote.upsert({
           create: userId_commentId,
           update: userId_commentId,
           where: { userId_commentId },
         });
       } else {
-        return ctx.prisma.commentVote
+        return await ctx.prisma.commentVote
           .delete({ where: { userId_commentId } })
           .then(() => userId_commentId)
           .catch(() => userId_commentId);
