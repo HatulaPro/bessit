@@ -104,20 +104,21 @@ model Community {
 }
 
 model Comment {
-  id              String         @id @default(cuid())
-  content         String
-  isDeleted       Boolean
-  userId          String
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId          String
-  post            Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
-  votes           CommentVote[]
-  parentCommentId String?
-  parentComment   Comment?       @relation(fields: [parentCommentId], references: [id], onDelete: Cascade, name: "parent-child-comments")
-  childComments   Comment[]      @relation(name: "parent-child-comments")
-  notifications   Notification[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                       String         @id @default(cuid())
+  content                  String
+  isDeleted                Boolean
+  userId                   String
+  user                     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId                   String
+  post                     Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  votes                    CommentVote[]
+  parentCommentId          String?
+  parentComment            Comment?       @relation(fields: [parentCommentId], references: [id], onDelete: Cascade, name: "parent-child-comments")
+  childComments            Comment[]      @relation(name: "parent-child-comments")
+  notifications            Notification[]
+  notificationsNewComments Notification[] @relation(name: "notifications-new-comments")
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
 
   @@index(fields: [createdAt, postId, parentCommentId])
 }
@@ -132,24 +133,29 @@ model CommentVote {
 }
 
 enum NotificationType {
-  LIKES_ON_POST // Related post + rounded likes count
-  LIKES_ON_COMMENT // Related comment + rounded likes count (+ related post?)
-  COMMENT_ON_POST // Related comment + related post
-  COMMENT_ON_COMMENT // Related comment + related post
+  LIKES_ON_POST
+  LIKES_ON_COMMENT
+  COMMENT_ON_POST
+  COMMENT_ON_COMMENT
 }
 
 model Notification {
-  id               String           @id @default(cuid())
+  id               String   @id @default(cuid())
   userId           String
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   relatedPostId    String
-  relatedPost      Post             @relation(fields: [relatedPostId], references: [id], onDelete: Cascade)
+  relatedPost      Post     @relation(fields: [relatedPostId], references: [id], onDelete: Cascade)
   relatedCommentId String?
-  relatedComment   Comment?         @relation(fields: [relatedCommentId], references: [id], onDelete: Cascade)
-  metadata         Int              @default(0)
-  type             NotificationType
-  updatedAt        DateTime         @updatedAt
-  seen             Boolean          @default(false)
+  relatedComment   Comment? @relation(fields: [relatedCommentId], references: [id], onDelete: Cascade)
 
-  @@index(fields: [updatedAt, userId])
+  newComment   Comment? @relation(fields: [newCommentId], references: [id], onDelete: Cascade, name: "notifications-new-comments")
+  newCommentId String?
+
+  metadata  Int              @default(0)
+  type      NotificationType
+  updatedAt DateTime         @updatedAt
+  seen      Boolean          @default(false)
+
+  @@unique([userId, type, relatedPostId])
+  @@index(fields: [updatedAt, userId, seen])
 }

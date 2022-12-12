@@ -43,10 +43,12 @@ export const postsRouter = router({
       if (!post) {
         throw new TRPCError({ message: "Post not found", code: "BAD_REQUEST" });
       }
-      if (input.parentCommentId !== null) {
-        const parentComment = await ctx.prisma.comment.findUnique({
+      const parentComment =
+        !!input.parentCommentId &&
+        (await ctx.prisma.comment.findUnique({
           where: { id: input.parentCommentId },
-        });
+        }));
+      if (input.parentCommentId) {
         if (!parentComment || parentComment.postId !== input.postId) {
           throw new TRPCError({
             message: "Parent comment not found",
@@ -54,7 +56,7 @@ export const postsRouter = router({
           });
         }
       }
-      return await ctx.prisma.comment.create({
+      const newComment = await ctx.prisma.comment.create({
         data: {
           content: input.content,
           isDeleted: false,
@@ -63,6 +65,48 @@ export const postsRouter = router({
           userId: ctx.session.user.id,
         },
       });
+
+      if (parentComment) {
+        // Informing the user of the parent comment of new comment
+        await ctx.prisma.notification.upsert({
+          where: {
+            userId_type_relatedPostId: {
+              type: "COMMENT_ON_COMMENT",
+              userId: parentComment.userId,
+              relatedPostId: newComment.postId,
+            },
+          },
+          update: { newCommentId: newComment.id, seen: false },
+          create: {
+            relatedCommentId: parentComment.id,
+            type: "COMMENT_ON_COMMENT",
+            userId: parentComment.userId,
+            newCommentId: newComment.id,
+            relatedPostId: newComment.postId,
+          },
+        });
+      } else {
+        // Informing the original poster of new comment
+        await ctx.prisma.notification.upsert({
+          where: {
+            userId_type_relatedPostId: {
+              relatedPostId: post.id,
+              type: "COMMENT_ON_POST",
+              userId: post.userId,
+            },
+          },
+          update: { newCommentId: newComment.id, seen: false },
+          create: {
+            relatedCommentId: undefined,
+            type: "COMMENT_ON_POST",
+            userId: post.userId,
+            newCommentId: newComment.id,
+            relatedPostId: post.id,
+          },
+        });
+      }
+
+      return newComment;
     }),
   getPost: publicProcedure
     .input(z.object({ post_id: z.string() }))
