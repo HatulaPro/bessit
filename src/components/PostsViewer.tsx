@@ -8,7 +8,6 @@ import { cx, slugify, timeAgo } from "../utils/general";
 import { PostLikeButton } from "./PostLikeButton";
 import { useSession } from "next-auth/react";
 import { CommunityLogo } from "./CommunityLogo";
-import type { Post } from "@prisma/client";
 import { useState } from "react";
 import { Dialog } from "./Dialog";
 import { useForm, Controller } from "react-hook-form";
@@ -135,7 +134,9 @@ export const SinglePost: React.FC<{
   );
 };
 
-const EditPostButton: React.FC<{ post: Post }> = ({ post }) => {
+const EditPostButton: React.FC<{ post: CommunityPosts["posts"][number] }> = ({
+  post,
+}) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   return (
     <>
@@ -162,10 +163,10 @@ const editPostSchema = z.object({
     .max(4096, { message: "Content must have at most 4096 characters" }),
 });
 type editPostForm = z.infer<typeof editPostSchema>;
-const EditPostForm: React.FC<{ post: Post; close: () => void }> = ({
-  post,
-  close,
-}) => {
+const EditPostForm: React.FC<{
+  post: CommunityPosts["posts"][number];
+  close: () => void;
+}> = ({ post, close }) => {
   const { control, handleSubmit, formState } = useForm<editPostForm>({
     mode: "onTouched",
     resolver: zodResolver(editPostSchema),
@@ -175,17 +176,17 @@ const EditPostForm: React.FC<{ post: Post; close: () => void }> = ({
     },
   });
 
-  const editPostMutation = trpc.post.editPost.useMutation({
-    onSuccess: (data) => {
-      utils.post.getPosts.invalidate();
-      utils.post.getPost.setData({ post_id: post.id }, () => data);
-      close();
-    },
-  });
+  const editPostMutation = trpc.post.editPost.useMutation();
   const utils = trpc.useContext();
 
   const onSubmit = (data: editPostForm) => {
     editPostMutation.mutate({ ...data, postId: post.id });
+    utils.post.getPosts.invalidate();
+    utils.post.getPost.setData({ post_id: post.id }, () => ({
+      ...post,
+      ...data,
+    }));
+    close();
   };
 
   return (
