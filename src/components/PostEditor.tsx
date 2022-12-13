@@ -1,5 +1,5 @@
 import { useForm, Controller } from "react-hook-form";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { useDebounce } from "../hooks/useDebounce";
 import { cx, slugify } from "../utils/general";
@@ -11,6 +11,7 @@ import { Loading } from "./Loading";
 import { Markdown } from "./Markdown";
 import { AiFillCaretDown } from "react-icons/ai";
 import { signIn, useSession } from "next-auth/react";
+import { ImageHidesOnError } from "./ImageHidesOnError";
 
 export const createPostSchema = z.object({
   title: z
@@ -80,6 +81,10 @@ export const PostEditor: React.FC<{
       },
     }
   );
+
+  const currentCommunity = useMemo(() => {
+    return searchCommunityQuery.data?.find((com) => com.name === debouncedName);
+  }, [debouncedName, searchCommunityQuery]);
 
   const trpcContext = trpc.useContext();
 
@@ -168,36 +173,49 @@ export const PostEditor: React.FC<{
                 >
                   {fieldState.error?.message}
                 </div>
-                <input
-                  autoComplete="off"
-                  type="text"
-                  className={cx(
-                    "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
-                    fieldState.error
-                      ? "border-red-600"
-                      : "border-zinc-500 focus:border-zinc-300"
+                <div className="flex w-full gap-1">
+                  {currentCommunity?.logo && (
+                    <div className="relative h-8 w-8">
+                      <ImageHidesOnError
+                        loader={({ src }) => src}
+                        src={currentCommunity.logo}
+                        alt={`Community logo of /b/${currentCommunity.name}`}
+                        fill
+                        className="rounded-full object-cover"
+                      />
+                    </div>
                   )}
-                  placeholder="Choose community..."
-                  {...field}
-                  onFocus={() => setFocused(true)}
-                  onKeyDown={(e) => {
-                    if (!optionsDivRef.current?.children.length) return;
-                    if (e.key === "ArrowDown") {
-                      (
-                        optionsDivRef.current?.children[0] as HTMLDivElement
-                      ).focus();
-                      e.preventDefault();
-                    } else if (e.key === "ArrowUp") {
-                      (
-                        optionsDivRef.current?.children[
-                          optionsDivRef.current?.children.length - 1
-                        ] as HTMLDivElement
-                      ).focus();
-                      e.preventDefault();
-                    }
-                  }}
-                  ref={searchInputRef}
-                />
+                  <input
+                    autoComplete="off"
+                    type="text"
+                    className={cx(
+                      "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+                      fieldState.error
+                        ? "border-red-600"
+                        : "border-zinc-500 focus:border-zinc-300"
+                    )}
+                    placeholder="Choose community..."
+                    {...field}
+                    onFocus={() => setFocused(true)}
+                    onKeyDown={(e) => {
+                      if (!optionsDivRef.current?.children.length) return;
+                      if (e.key === "ArrowDown") {
+                        (
+                          optionsDivRef.current?.children[0] as HTMLDivElement
+                        ).focus();
+                        e.preventDefault();
+                      } else if (e.key === "ArrowUp") {
+                        (
+                          optionsDivRef.current?.children[
+                            optionsDivRef.current?.children.length - 1
+                          ] as HTMLDivElement
+                        ).focus();
+                        e.preventDefault();
+                      }
+                    }}
+                    ref={searchInputRef}
+                  />
+                </div>
               </>
             )}
           />
