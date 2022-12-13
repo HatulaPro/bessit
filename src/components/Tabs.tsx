@@ -25,14 +25,14 @@ export function Tabs<T extends Record<string, JSX.Element>>({
 
   return (
     <div className="w-full">
-      <div className="mt-2 flex justify-center overflow-hidden rounded-t-xl bg-zinc-700 bg-opacity-50 text-lg text-white">
+      <div className="justify-left mt-2 flex overflow-hidden border-b-2 border-zinc-700 text-lg text-white">
         {Object.keys(data).map((key) => {
           if (!data.hasOwnProperty(key)) return null;
           return (
             <button
               className={cx(
-                "flex-1 p-1 hover:bg-zinc-700",
-                currentTab === key && "underline decoration-cyan-500"
+                "border-2 border-b-0 px-2 py-1 transition-colors first:rounded-tl-md last:rounded-tr-md hover:bg-zinc-800",
+                currentTab === key ? "border-zinc-700" : "border-transparent"
               )}
               key={key}
               onClick={(e) => {
