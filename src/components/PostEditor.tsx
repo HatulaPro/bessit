@@ -173,7 +173,7 @@ export const PostEditor: React.FC<{
                 >
                   {fieldState.error?.message}
                 </div>
-                <div className="flex w-full gap-1">
+                <div className="flex w-full items-center gap-1">
                   {currentCommunity?.logo && (
                     <div className="relative h-8 w-8">
                       <ImageHidesOnError
