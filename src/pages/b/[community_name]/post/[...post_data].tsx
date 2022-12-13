@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Loading } from "../../../../components/Loading";
 import { NotFoundMessage } from "../../../../components/NotFoundMessage";
 import { SinglePost } from "../../../../components/PostsViewer";
-import { trpc } from "../../../../utils/trpc";
+import { type RouterOutputs, trpc } from "../../../../utils/trpc";
 import superjson from "superjson";
 import { IoMdClose } from "react-icons/io";
 import type { CommunityPosts } from "../../../../hooks/useCommunityPosts";
@@ -21,6 +21,7 @@ import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
+import type { InfiniteData } from "@tanstack/react-query";
 
 const PostPage: NextPage = () => {
   const postTopRef = useRef<HTMLDivElement>(null);
@@ -45,7 +46,6 @@ const PostPage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="relative flex min-h-full w-full flex-col items-center bg-zinc-900 pt-12 pb-2 text-white md:pt-16">
-        {isLoading.post && <Loading show size="large" />}
         {is404 && (
           <NotFoundMessage message="This post does not seem to exist" />
         )}
@@ -435,6 +435,34 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       refetchOnReconnect: false,
       staleTime: Infinity,
       cacheTime: Infinity,
+      // TODO: Build infra so this doesn't look like shit
+      // placeholderData: {
+      //   communityId: "",
+      //   community: {
+      //     ownerId: "",
+      //     name: "",
+      //     desc: "",
+      //     id: "",
+      //     image: null,
+      //     logo: null,
+      //   },
+      //   content: "",
+      //   createdAt: new Date(),
+      //   id: "",
+      //   isDeleted: false,
+      //   title: "",
+      //   updatedAt: new Date(),
+      //   user: {
+      //     email: "",
+      //     emailVerified: new Date(),
+      //     id: "",
+      //     image: null,
+      //     name: "",
+      //   },
+      //   userId: "",
+      //   votes: [],
+      //   _count: { comments: 0, votes: 0 },
+      // } as RouterOutputs["post"]["getPost"],
     }
   );
 
@@ -453,6 +481,9 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       cacheTime: Infinity,
       notifyOnChangeProps: "all",
       keepPreviousData: true,
+      placeholderData: { pages: [], pageParams: [] } as InfiniteData<
+        RouterOutputs["post"]["getComments"]
+      >,
     }
   );
 
