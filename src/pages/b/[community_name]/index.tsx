@@ -2,7 +2,6 @@ import type { Community } from "@prisma/client";
 import type { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Dialog } from "../../../components/Dialog";
@@ -17,7 +16,8 @@ import {
 import type { SortingOptions } from "../../../components/SortBySection";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 import { CommunityLogo } from "../../../components/CommunityLogo";
-import { BsPencil } from "react-icons/bs";
+import { BsGearFill, BsPencil } from "react-icons/bs";
+import { ImageHidesOnError } from "../../../components/ImageHidesOnError";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -90,9 +90,10 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
     <>
       <div className="bg-rotate h-40 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
         {community.image && (
-          <Image
+          <ImageHidesOnError
             src={community.image}
             alt={`Community image of ${community.name}`}
+            className="object-cover"
             fill
           />
         )}
@@ -130,20 +131,29 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
 
 const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
-  const { status: authStatus } = useSession();
+  const session = useSession();
 
   return (
     <div className="sticky top-20 my-4 hidden flex-1 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
-      <h2 className="text-center text-xl text-zinc-400">About Community</h2>
+      <h2 className="mb-2 text-center text-xl text-zinc-400">
+        About Community
+      </h2>
       <p>{community.desc}</p>
       <hr className="m-2" />
-      {authStatus === "authenticated" ? (
-        <button
-          onClick={() => setOpen(true)}
-          className="mx-auto block w-2/3 rounded-lg bg-zinc-300 p-1 text-center font-bold text-black hover:bg-zinc-400 active:bg-zinc-500"
-        >
-          Create Post
-        </button>
+      {session.status === "authenticated" ? (
+        <>
+          <button
+            onClick={() => setOpen(true)}
+            className="mx-auto block w-2/3 rounded-lg bg-zinc-300 p-1 text-center font-bold text-black hover:bg-zinc-400 active:bg-zinc-500"
+          >
+            Create Post
+          </button>
+          {session.data.user?.id === community.ownerId && (
+            <div className="mt-6 flex cursor-pointer items-center gap-2 text-sm hover:underline">
+              <BsGearFill /> Edit Community
+            </div>
+          )}
+        </>
       ) : (
         <p className="w-full text-left text-sm">
           <button
