@@ -54,7 +54,8 @@ export default CommunityPage;
 
 const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
   const [sortBy, setSortBy] = useState<SortingOptions>("new");
-  const [timeFilter, setTimeFilter] = useState<PostsFromLastOptions>("day");
+  const [timeFilter, setTimeFilter] =
+    useState<PostsFromLastOptions>("all time");
   const communityPosts = useCommunityPosts(name, sortBy, timeFilter);
 
   if (!communityPosts.community) {
