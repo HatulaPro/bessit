@@ -65,21 +65,20 @@ export const SinglePost: React.FC<{
           isMain && "container max-w-3xl md:max-w-5xl"
         )}
       >
-        <div className="flex items-center">
-          <Link
-            href={`/b/${post.community.name}`}
-            className="group flex items-center gap-1 text-sm font-bold"
-          >
-            <CommunityLogo
-              name={post.community.name}
-              logo={post.community.logo}
-              size="small"
-            />
-            <span className="text-gray-300 group-hover:underline">
-              b/{post.community.name}
-            </span>
-          </Link>
-          <BsDot className="text-xs text-gray-400" />
+        <Link
+          href={`/b/${post.community.name}`}
+          className="group flex items-center gap-1 text-sm font-bold"
+        >
+          <CommunityLogo
+            name={post.community.name}
+            logo={post.community.logo}
+            size="small"
+          />
+          <span className="text-gray-300 group-hover:underline">
+            b/{post.community.name}
+          </span>
+        </Link>
+        <div className="flex items-center pl-0 sm:pl-6">
           <div className="text-xs text-gray-400">
             Posted by {/* TODO: User profile page */}
             <Link href="/" className="hover:underline">
@@ -97,7 +96,7 @@ export const SinglePost: React.FC<{
         {isMain ? (
           <h3
             className={
-              "my-6 text-center text-3xl underline decoration-indigo-600"
+              "my-6 text-center text-2xl underline decoration-indigo-600 md:text-3xl"
             }
           >
             {post.title}
