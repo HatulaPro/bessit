@@ -56,6 +56,7 @@ const PostPage: NextPage = () => {
             comments={comments}
             post={post}
             isLoadingComments={isLoading.comments}
+            placeholder={isLoading.post}
           />
         )}
         <div
@@ -86,12 +87,14 @@ const PostPageContent: React.FC<{
   setCurrentParentCommentId: (x: string | null) => void;
   currentParentCommentId: string | null;
   isLoadingComments: boolean;
+  placeholder: boolean;
 }> = ({
   post,
   comments,
   setCurrentParentCommentId,
   currentParentCommentId,
   isLoadingComments,
+  placeholder,
 }) => {
   const { status: authStatus } = useSession();
   const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
@@ -100,7 +103,7 @@ const PostPageContent: React.FC<{
 
   return (
     <div className="w-full">
-      <SinglePost post={post} isMain={true} />
+      <SinglePost placeholder={placeholder} post={post} isMain={true} />
       {currentParentCommentId !== null && (
         <button
           className="text-md m-2 mx-auto flex flex-col items-center justify-center gap-2 text-center hover:underline"
@@ -436,33 +439,33 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       staleTime: Infinity,
       cacheTime: Infinity,
       // TODO: Build infra so this doesn't look like shit
-      // placeholderData: {
-      //   communityId: "",
-      //   community: {
-      //     ownerId: "",
-      //     name: "",
-      //     desc: "",
-      //     id: "",
-      //     image: null,
-      //     logo: null,
-      //   },
-      //   content: "",
-      //   createdAt: new Date(),
-      //   id: "",
-      //   isDeleted: false,
-      //   title: "",
-      //   updatedAt: new Date(),
-      //   user: {
-      //     email: "",
-      //     emailVerified: new Date(),
-      //     id: "",
-      //     image: null,
-      //     name: "",
-      //   },
-      //   userId: "",
-      //   votes: [],
-      //   _count: { comments: 0, votes: 0 },
-      // } as RouterOutputs["post"]["getPost"],
+      placeholderData: {
+        communityId: "",
+        community: {
+          ownerId: "",
+          name: "",
+          desc: "",
+          id: "",
+          image: null,
+          logo: null,
+        },
+        content: "",
+        createdAt: new Date(),
+        id: "",
+        isDeleted: false,
+        title: "",
+        updatedAt: new Date(),
+        user: {
+          email: "",
+          emailVerified: new Date(),
+          id: "",
+          image: null,
+          name: "",
+        },
+        userId: "",
+        votes: [],
+        _count: { comments: 0, votes: 0 },
+      } as RouterOutputs["post"]["getPost"],
     }
   );
 

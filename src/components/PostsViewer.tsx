@@ -54,7 +54,8 @@ const LinkToPost: React.FC<{
 export const SinglePost: React.FC<{
   post: CommunityPosts["posts"][number];
   isMain: boolean;
-}> = ({ post, isMain }) => {
+  placeholder?: boolean;
+}> = ({ post, isMain, placeholder }) => {
   const session = useSession();
   return (
     <>
@@ -73,14 +74,26 @@ export const SinglePost: React.FC<{
             logo={post.community.logo}
             size="small"
           />
-          <span className="text-gray-300 group-hover:underline">
+          <span
+            className={cx(
+              "text-gray-300 group-hover:underline",
+              placeholder && "w-12 animate-pulse rounded bg-zinc-600"
+            )}
+          >
             b/{post.community.name}
           </span>
         </Link>
         <div className="flex items-center pl-0 sm:pl-6">
           <div className="text-xs text-gray-400">
             Posted by {/* TODO: User profile page */}
-            <Link href="/" className="hover:underline">
+            <Link
+              href="/"
+              className={cx(
+                "hover:underline",
+                placeholder &&
+                  "inline-block w-12 animate-pulse rounded bg-zinc-600"
+              )}
+            >
               u/{post.user.name}
             </Link>
           </div>
@@ -94,21 +107,31 @@ export const SinglePost: React.FC<{
         </div>
         {isMain ? (
           <h3
-            className={
-              "my-6 text-center text-2xl underline decoration-indigo-600 md:text-3xl"
-            }
+            className={cx(
+              "my-6 text-center text-2xl underline decoration-indigo-600 md:text-3xl",
+              placeholder && "w-full animate-pulse rounded bg-zinc-600"
+            )}
           >
-            {post.title}
+            {post.title || "..."}
           </h3>
         ) : (
           <LinkToPost post={post}>
-            <h3 className={"my-2 cursor-pointer text-2xl hover:underline"}>
-              {post.title}
+            <h3
+              className={cx(
+                "my-2 cursor-pointer text-2xl hover:underline",
+                placeholder && "w-full animate-pulse rounded bg-zinc-600"
+              )}
+            >
+              {post.title || "..."}
             </h3>
           </LinkToPost>
         )}
         <div className="text-sm text-gray-400">
-          <Markdown source={post.content} simplify={!isMain} />
+          {placeholder ? (
+            <p className="h-16 w-full animate-pulse bg-zinc-600"></p>
+          ) : (
+            <Markdown source={post.content || "..."} simplify={!isMain} />
+          )}
         </div>
         <hr className="my-2 opacity-50" />
         <div className="mx-auto flex max-w-md justify-evenly pb-2">
