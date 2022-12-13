@@ -13,8 +13,13 @@ import { AiFillCaretDown } from "react-icons/ai";
 import { signIn, useSession } from "next-auth/react";
 
 export const createPostSchema = z.object({
-  title: z.string().min(2).max(256),
-  content: z.string().max(4096),
+  title: z
+    .string()
+    .min(2, { message: "Title must have at least 2 characters" })
+    .max(256, { message: "Title must have at most 256 characters" }),
+  content: z
+    .string()
+    .max(4096, { message: "Content must have at most 4096 characters" }),
   communityName: z.string(),
 });
 
