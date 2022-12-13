@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useForm, Controller } from "react-hook-form";
+import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { CommunityLogo } from "../../../../components/CommunityLogo";
 import { ImageHidesOnError } from "../../../../components/ImageHidesOnError";
@@ -42,6 +43,17 @@ const CommunitySettingsPage: NextPage = () => {
         {getCommunityQuery.data && (
           <EditCommunityForm community={getCommunityQuery.data} />
         )}
+
+        <button
+          onClick={() => {
+            if (!getCommunityQuery.data) return router.back();
+            router.replace(`/b/${getCommunityQuery.data.name}`);
+          }}
+          className="absolute right-12 top-20 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
+        >
+          <IoMdClose className="text-2xl" />
+          <span className="text-sm">Back</span>
+        </button>
       </main>
     </>
   );
@@ -59,7 +71,8 @@ const CommunityPreview: React.FC<{
   logo: string | null;
 }> = ({ name, image, logo, desc }) => {
   return (
-    <div className="w-full max-w-xs rounded-md border-2 border-zinc-500 p-2">
+    <div className="group relative w-full max-w-xs cursor-pointer rounded-md border-2 border-zinc-500 p-2">
+      <div className="absolute inset-0 h-full w-full bg-zinc-200 bg-opacity-0 transition-colors group-hover:bg-opacity-10"></div>
       <div className="bg-rotate relative h-12 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-20">
         {image && (
           <ImageHidesOnError
