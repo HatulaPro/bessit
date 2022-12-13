@@ -30,6 +30,36 @@ export const postsRouter = router({
         },
       });
     }),
+  editPost: protectedProcedure
+    .input(
+      z.object({
+        title: z.string().min(2).max(256),
+        content: z.string().max(4096),
+        postId: z.string().length(25),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const post = await ctx.prisma.post.findUnique({
+        where: { id: input.postId },
+      });
+      if (!post || post.userId !== userId) {
+        throw new TRPCError({ message: "Post not found", code: "BAD_REQUEST" });
+      }
+      return await ctx.prisma.post.update({
+        where: { id: post.id },
+        data: { title: input.title, content: input.content },
+        include: {
+          community: true,
+          user: true,
+          _count: { select: { votes: true, comments: true } },
+          votes: {
+            where: { userId: ctx.session?.user?.id },
+            take: 1,
+          },
+        },
+      });
+    }),
   createComment: protectedProcedure
     .input(
       z.object({
