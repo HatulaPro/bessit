@@ -88,25 +88,26 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
 
   return (
     <>
-      <div className="bg-rotate h-40 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
+      <div className="bg-rotate relative h-40 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
         {community.image && (
           <ImageHidesOnError
             src={community.image}
+            loader={({ src }) => src}
             alt={`Community image of ${community.name}`}
             className="object-cover"
             fill
           />
         )}
       </div>
-      <div className="mb-2 flex w-full flex-col items-center justify-center bg-black">
+      <div className="mb-2 flex w-full flex-col items-center justify-center bg-zinc-700 bg-opacity-80">
         <div className="flex w-full max-w-xl justify-center">
-          <div className="flex w-full -translate-y-1/3 items-center gap-6 md:max-w-3xl">
+          <div className="flex w-full -translate-y-1/4 items-center gap-4 md:max-w-3xl">
             <CommunityLogo
               name={community.name}
               logo={community.logo}
               size="large"
             />
-            <h1 className="text-3xl">{community.name}</h1>
+            <h1 className="text-3xl font-bold">{community.name}</h1>
           </div>
           {authStatus === "authenticated" && (
             <button

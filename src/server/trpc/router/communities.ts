@@ -19,6 +19,41 @@ export const communitiesRouter = router({
         })
         .then((values) => values);
     }),
+  editCommunity: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(2).max(24),
+        desc: z.string(),
+        image: z.union([
+          z.string().startsWith("https://").url(),
+          z
+            .string()
+            .length(0)
+            .transform(() => null),
+        ]),
+        logo: z.union([
+          z.string().startsWith("https://").url(),
+          z
+            .string()
+            .length(0)
+            .transform(() => null),
+        ]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const community = await ctx.prisma.community.findUnique({
+        where: { name: input.name },
+      });
+      if (!community || community.ownerId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      const result = await ctx.prisma.community.update({
+        where: { id: community.id },
+        data: input,
+      });
+      return result;
+    }),
   createCommunity: protectedProcedure
     .input(createCommunitySchema)
     .mutation(({ ctx, input }) => {
@@ -43,4 +78,5 @@ export const communitiesRouter = router({
           });
         });
     }),
+  // updateCommunitySettings: protectedProcedure.input(z.object({}))
 });

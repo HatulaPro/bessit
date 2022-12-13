@@ -6,6 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { CommunityLogo } from "../../../../components/CommunityLogo";
 import { ImageHidesOnError } from "../../../../components/ImageHidesOnError";
+import { Loading } from "../../../../components/Loading";
 import { useLoggedOnly } from "../../../../hooks/useLoggedOnly";
 import { cx } from "../../../../utils/general";
 import { trpc, type RouterOutputs } from "../../../../utils/trpc";
@@ -81,17 +82,11 @@ const CommunityPreview: React.FC<{
 const editCommunitySchema = z.object({
   desc: z.string(),
   image: z.union([
-    z
-      .string()
-      .url()
-      .refine((value) => value.endsWith("jpg")),
+    z.string().startsWith("https://").url(),
     z.string().length(0),
   ]),
   logo: z.union([
-    z
-      .string()
-      .url()
-      .refine((value) => value.endsWith("jpg")),
+    z.string().startsWith("https://").url(),
     z.string().length(0),
   ]),
 });
@@ -111,8 +106,20 @@ const EditCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
       },
     });
 
+  const router = useRouter();
+  const utils = trpc.useContext();
+  const editComunityMutation = trpc.community.editCommunity.useMutation({
+    onSuccess: (data) => {
+      utils.community.invalidate();
+      utils.post.invalidate();
+      utils.search.invalidate();
+      utils.community.getCommunity.setData({ name: data.name }, () => data);
+      router.push(`/b/${data.name}`);
+    },
+  });
+
   const onSubmit = (data: editCommunityForm) => {
-    console.log(data);
+    editComunityMutation.mutate({ ...data, name: community.name });
   };
 
   const [inputDesc, inputImage, inputLogo] = watch(["desc", "image", "logo"]);
@@ -210,10 +217,11 @@ const EditCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
         className={cx(
           "mt-4 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
         )}
-        disabled={!formState.isValid}
+        disabled={!formState.isValid || editComunityMutation.isLoading}
       >
         Save
       </button>
+      <Loading size="small" show={editComunityMutation.isLoading} />
     </form>
   );
 };
