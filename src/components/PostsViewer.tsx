@@ -88,6 +88,11 @@ export const SinglePost: React.FC<{
           </div>
           <BsDot className="text-xs text-gray-400" />
           <div className="text-xs text-gray-400">{timeAgo(post.createdAt)}</div>
+          {isMain && post.updatedAt.getTime() !== post.createdAt.getTime() && (
+            <div className="mx-1 text-xs text-gray-400">
+              (edited {timeAgo(post.updatedAt)} ago)
+            </div>
+          )}
         </div>
         {isMain ? (
           <h3
