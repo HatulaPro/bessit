@@ -19,6 +19,7 @@ import { CommunityLogo } from "../../../components/CommunityLogo";
 import { BsGearFill, BsPencil } from "react-icons/bs";
 import { ImageHidesOnError } from "../../../components/ImageHidesOnError";
 import Link from "next/link";
+import { cx } from "../../../utils/general";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -59,14 +60,18 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
   const communityPosts = useCommunityPosts(name, sortBy, timeFilter);
 
   if (!communityPosts.community) {
-    if (communityPosts.isLoading) {
-      return <Loading size="large" show />;
-    }
     return <NotFoundMessage message="This community does not seem to exist" />;
   }
+
+  const showPlaceholder =
+    communityPosts.isLoading && communityPosts.posts.length === 1;
+
   return (
     <div className="w-full pt-12 md:pt-16">
-      <CommunityHeader community={communityPosts.community} />
+      <CommunityHeader
+        placeholder={showPlaceholder}
+        community={communityPosts.community}
+      />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
         <div className="flex flex-[3] flex-col">
           <SortBySection
@@ -76,15 +81,21 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
             timeFilter={timeFilter}
             setTimeFilter={setTimeFilter}
           />
-          <PostsViewer communityPosts={communityPosts} />
+          {!showPlaceholder && <PostsViewer communityPosts={communityPosts} />}
         </div>
-        <AboutCommunity community={communityPosts.community} />
+        <AboutCommunity
+          community={communityPosts.community}
+          placeholder={showPlaceholder}
+        />
       </div>
     </div>
   );
 };
 
-const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
+const CommunityHeader: React.FC<{
+  community: Community;
+  placeholder: boolean;
+}> = ({ community, placeholder }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   const { status: authStatus } = useSession();
 
@@ -98,6 +109,7 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
             alt={`Community image of ${community.name}`}
             className="object-cover"
             fill
+            priority
           />
         )}
       </div>
@@ -105,11 +117,19 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
         <div className="flex w-full max-w-xl justify-center">
           <div className="flex w-full -translate-y-1/4 items-center gap-4 md:max-w-3xl">
             <CommunityLogo
+              placeholder={placeholder}
               name={community.name}
               logo={community.logo}
               size="large"
             />
-            <h1 className="text-3xl font-bold">{community.name}</h1>
+            <h1
+              className={cx(
+                "text-3xl font-bold",
+                placeholder && "h-9 w-16 animate-pulse rounded bg-zinc-600"
+              )}
+            >
+              {community.name}
+            </h1>
           </div>
           {authStatus === "authenticated" && (
             <button
@@ -132,7 +152,10 @@ const CommunityHeader: React.FC<{ community: Community }> = ({ community }) => {
   );
 };
 
-const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
+const AboutCommunity: React.FC<{
+  community: Community;
+  placeholder: boolean;
+}> = ({ community, placeholder }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   const session = useSession();
 
@@ -141,12 +164,19 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
       <h2 className="mb-2 text-center text-xl text-zinc-300">
         About Community
       </h2>
-      <p>{community.desc}</p>
+      <p
+        className={cx(
+          placeholder && "h-16 w-full animate-pulse rounded bg-zinc-600"
+        )}
+      >
+        {community.desc}
+      </p>
       <hr className="m-2" />
       {session.status === "authenticated" ? (
         <>
           <button
             onClick={() => setOpen(true)}
+            disabled={placeholder}
             className="mx-auto block w-2/3 rounded-lg bg-zinc-300 p-1 text-center font-bold text-black hover:bg-zinc-400 active:bg-zinc-500"
           >
             Create Post

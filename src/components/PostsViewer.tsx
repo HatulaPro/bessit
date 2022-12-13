@@ -22,7 +22,14 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   return (
     <div className="container max-w-3xl">
       {communityPosts.posts.map((post) => (
-        <SinglePost key={post.id} post={post} isMain={false} />
+        <SinglePost
+          key={post.id}
+          post={post}
+          isMain={false}
+          placeholder={
+            communityPosts.isLoading && communityPosts.posts.length === 1
+          }
+        />
       ))}
       <br />
       <Loading size="large" show={communityPosts.isLoading} />
@@ -130,7 +137,7 @@ export const SinglePost: React.FC<{
           {placeholder ? (
             <p className="h-16 w-full animate-pulse bg-zinc-600"></p>
           ) : (
-            <Markdown source={post.content || "..."} simplify={!isMain} />
+            <Markdown source={post.content} simplify={!isMain} />
           )}
         </div>
         <hr className="my-2 opacity-50" />
