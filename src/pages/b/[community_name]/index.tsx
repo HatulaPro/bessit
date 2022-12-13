@@ -18,6 +18,7 @@ import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 import { CommunityLogo } from "../../../components/CommunityLogo";
 import { BsGearFill, BsPencil } from "react-icons/bs";
 import { ImageHidesOnError } from "../../../components/ImageHidesOnError";
+import Link from "next/link";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -136,7 +137,7 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
 
   return (
     <div className="sticky top-20 my-4 hidden flex-1 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
-      <h2 className="mb-2 text-center text-xl text-zinc-400">
+      <h2 className="mb-2 text-center text-xl text-zinc-300">
         About Community
       </h2>
       <p>{community.desc}</p>
@@ -150,9 +151,12 @@ const AboutCommunity: React.FC<{ community: Community }> = ({ community }) => {
             Create Post
           </button>
           {session.data.user?.id === community.ownerId && (
-            <div className="mt-6 flex cursor-pointer items-center gap-2 text-sm hover:underline">
+            <Link
+              href={`/b/${community.name}/community_settings`}
+              className="mt-6 flex cursor-pointer items-center gap-2 text-sm hover:underline"
+            >
               <BsGearFill /> Edit Community
-            </div>
+            </Link>
           )}
         </>
       ) : (
