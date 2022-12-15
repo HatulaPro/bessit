@@ -151,6 +151,7 @@ const PostPageContent: React.FC<{
 export type UIComment = {
   id: string;
   createdAt: Date;
+  updatedAt: Date;
   user: User;
   content: string;
   postId: string;
@@ -252,6 +253,12 @@ const PostComments: React.FC<{
                 </Link>
                 <BsDot />
                 {timeAgo(comment.createdAt)}
+                {comment.updatedAt.getTime() !==
+                  comment.createdAt.getTime() && (
+                  <div className="mx-1 text-xs text-gray-400">
+                    (edited {timeAgo(comment.updatedAt)} ago)
+                  </div>
+                )}
               </div>
               {!closedComments.has(comment.id) && (
                 <div className="w-full">

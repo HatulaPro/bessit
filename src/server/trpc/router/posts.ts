@@ -211,6 +211,7 @@ export const postsRouter = router({
             select: {
               content: true,
               createdAt: true,
+              updatedAt: true,
               postId: true,
               id: true,
               user: true,
@@ -226,6 +227,7 @@ export const postsRouter = router({
                   user: true,
                   content: true,
                   createdAt: true,
+                  updatedAt: true,
                   postId: true,
                   id: true,
                   _count: { select: { childComments: true, votes: true } },
@@ -241,6 +243,7 @@ export const postsRouter = router({
                       content: true,
                       postId: true,
                       createdAt: true,
+                      updatedAt: true,
                       id: true,
                       _count: { select: { childComments: true, votes: true } },
                       votes: {
@@ -255,6 +258,7 @@ export const postsRouter = router({
                           content: true,
                           postId: true,
                           createdAt: true,
+                          updatedAt: true,
                           id: true,
                           _count: {
                             select: { childComments: true, votes: true },
@@ -273,6 +277,7 @@ export const postsRouter = router({
           },
           content: true,
           createdAt: true,
+          updatedAt: true,
           id: true,
           user: true,
           postId: true,
