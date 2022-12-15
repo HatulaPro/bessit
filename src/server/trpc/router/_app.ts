@@ -4,6 +4,7 @@ import { communitiesRouter } from "./communities";
 import { postsRouter } from "./posts";
 import { searchRouter } from "./search";
 import { notificationsRouter } from "./notifications";
+import { userRouter } from "./user";
 
 export const appRouter = router({
   auth: authRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   post: postsRouter,
   search: searchRouter,
   notification: notificationsRouter,
+  user: userRouter,
 });
 
 // export type definition of API
