@@ -103,25 +103,27 @@ export const postsRouter = router({
       });
 
       if (parentComment) {
-        // Informing the user of the parent comment of new comment
-        await ctx.prisma.notification.upsert({
-          where: {
-            userId_type_relatedPostId: {
+        if (parentComment.userId !== ctx.session.user.id) {
+          // Informing the user of the parent comment of new comment
+          await ctx.prisma.notification.upsert({
+            where: {
+              userId_type_relatedPostId: {
+                type: "COMMENT_ON_COMMENT",
+                userId: parentComment.userId,
+                relatedPostId: newComment.postId,
+              },
+            },
+            update: { newCommentId: newComment.id, seen: false },
+            create: {
+              relatedCommentId: parentComment.id,
               type: "COMMENT_ON_COMMENT",
               userId: parentComment.userId,
+              newCommentId: newComment.id,
               relatedPostId: newComment.postId,
             },
-          },
-          update: { newCommentId: newComment.id, seen: false },
-          create: {
-            relatedCommentId: parentComment.id,
-            type: "COMMENT_ON_COMMENT",
-            userId: parentComment.userId,
-            newCommentId: newComment.id,
-            relatedPostId: newComment.postId,
-          },
-        });
-      } else {
+          });
+        }
+      } else if (post.userId !== ctx.session.user.id) {
         // Informing the original poster of new comment
         await ctx.prisma.notification.upsert({
           where: {
