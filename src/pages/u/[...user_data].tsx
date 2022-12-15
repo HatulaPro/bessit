@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { AiFillMeh } from "react-icons/ai";
 import { BsSuitHeartFill } from "react-icons/bs";
+import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { Loading } from "../../components/Loading";
 import { NotFoundMessage } from "../../components/NotFoundMessage";
@@ -151,12 +152,28 @@ const UserDataSection: React.FC<{
   );
 };
 
+const GoBackButton: React.FC = () => {
+  const router = useRouter();
+  return (
+    <button
+      onClick={() => {
+        router.back();
+      }}
+      className="absolute right-12 top-8 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
+    >
+      <IoMdClose className="text-2xl" />
+      <span className="text-sm">Back</span>
+    </button>
+  );
+};
+
 const UserProfileContent: React.FC<{
   user: FullUser;
 }> = ({ user }) => {
   return (
-    <>
+    <div className="relative w-full">
+      <GoBackButton />
       <UserDataSection user={user} />
-    </>
+    </div>
   );
 };
