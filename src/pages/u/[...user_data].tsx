@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
 import { BsDot, BsSuitHeartFill } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
@@ -19,6 +19,9 @@ const ProfilePage: NextPage = () => {
     isLoadingUser: isLoading,
     is404,
     posts,
+    comments,
+    currentlyViewing,
+    setCurrentlyViewing,
     isLoadingPosts,
   } = useUserProfileData();
   const pageTitle = `Bessit | ${user?.name || "User Profile"}`;
@@ -43,6 +46,9 @@ const ProfilePage: NextPage = () => {
             isLoadingPosts={isLoadingPosts}
             user={user}
             posts={posts}
+            comments={comments}
+            currentlyViewing={currentlyViewing}
+            setCurrentlyViewing={setCurrentlyViewing}
           />
         ) : (
           <Loading size="large" show />
@@ -58,6 +64,9 @@ const userDataQuerySchema = z.object({
   user_data: z.array(z.string()).length(2),
 });
 const useUserProfileData = () => {
+  const [currentlyViewing, setCurrentlyViewing] = useState<
+    "posts" | "comments"
+  >("posts");
   const router = useRouter();
   const zodParsing = userDataQuerySchema.safeParse(router.query);
   const queryData = zodParsing.success ? zodParsing.data : undefined;
@@ -78,7 +87,20 @@ const useUserProfileData = () => {
   );
 
   const getUserPostsQuery = trpc.user.getUserPosts.useInfiniteQuery(
-    { userId: queryData?.user_data[0] ?? "NOT_SENDABLE", count: 5 },
+    { userId: queryData?.user_data[0] ?? "NOT_SENDABLE", count: 25 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: Boolean(queryData),
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      retry: false,
+    }
+  );
+
+  const getUserCommentsQuery = trpc.user.getUserComments.useInfiniteQuery(
+    { userId: queryData?.user_data[0] ?? "NOT_SENDABLE", count: 25 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: Boolean(queryData),
@@ -91,18 +113,20 @@ const useUserProfileData = () => {
   );
 
   useEffect(() => {
+    const relevantQuery =
+      currentlyViewing === "posts" ? getUserPostsQuery : getUserCommentsQuery;
     const listener = () => {
       if (
-        getUserPostsQuery.isLoading ||
-        getUserPostsQuery.isFetchingNextPage ||
-        !getUserPostsQuery.hasNextPage
+        relevantQuery.isLoading ||
+        relevantQuery.isFetchingNextPage ||
+        !relevantQuery.hasNextPage
       )
         return;
       if (
         window.innerHeight + window.scrollY + 800 >
         document.body.offsetHeight
       ) {
-        getUserPostsQuery.fetchNextPage();
+        relevantQuery.fetchNextPage();
       }
     };
     window.addEventListener("scroll", listener);
@@ -110,7 +134,7 @@ const useUserProfileData = () => {
     return () => {
       window.removeEventListener("scroll", listener);
     };
-  }, [getUserPostsQuery]);
+  }, [getUserPostsQuery, getUserCommentsQuery, currentlyViewing]);
 
   const flattenedUserPosts = useMemo(() => {
     return (
@@ -123,12 +147,30 @@ const useUserProfileData = () => {
     );
   }, [getUserPostsQuery]);
 
+  const flattenedUserComments = useMemo(() => {
+    return (
+      getUserCommentsQuery.data?.pages.reduce<
+        typeof getUserCommentsQuery["data"]["pages"][number]["comments"]
+      >((acc, cur) => {
+        acc.push(...cur.comments);
+        return acc;
+      }, []) || []
+    );
+  }, [getUserCommentsQuery]);
+
   return {
     is404: !getUserQuery.isLoading && !getUserQuery.data,
     user: getUserQuery.data || null,
     isLoadingUser: getUserQuery.isLoading,
-    isLoadingPosts: getUserPostsQuery.isLoading || getUserPostsQuery.isFetching,
+    isLoadingPosts:
+      getUserPostsQuery.isLoading ||
+      getUserPostsQuery.isFetching ||
+      getUserCommentsQuery.isLoading ||
+      getUserCommentsQuery.isFetching,
     posts: flattenedUserPosts,
+    comments: flattenedUserComments,
+    currentlyViewing,
+    setCurrentlyViewing,
   };
 };
 
@@ -227,30 +269,92 @@ const GoBackButton: React.FC = () => {
 };
 
 const UserProfilePosts: React.FC<{
-  posts: RouterOutputs["user"]["getUserPosts"]["posts"];
   isLoadingPosts: boolean;
-}> = ({ posts, isLoadingPosts }) => {
+  posts: RouterOutputs["user"]["getUserPosts"]["posts"];
+  comments: RouterOutputs["user"]["getUserComments"]["comments"];
+  currentlyViewing: "posts" | "comments";
+  setCurrentlyViewing: (x: "posts" | "comments") => void;
+}> = ({
+  posts,
+  comments,
+  isLoadingPosts,
+  currentlyViewing,
+  setCurrentlyViewing,
+}) => {
   return (
     <>
       <div className="my-1 mx-auto flex w-full max-w-sm flex-col md:max-w-md">
-        {posts.map((p) => (
-          <Link
-            key={p.id}
-            className="block border-2 border-b-0 border-zinc-600 p-3 last:border-b-2 hover:bg-zinc-800"
-            href={`/b/${p.community.name}/post/${p.id}/${slugify(p.title)}`}
+        <div className="justify-left mt-4 mb-2 flex w-full max-w-3xl flex-1 items-center gap-2 bg-zinc-800 px-0.5 py-3 text-white md:rounded-md md:px-2">
+          <button
+            className={cx(
+              "my-0.5 flex items-center gap-1 rounded-full py-0.5 px-2 text-base font-bold transition-all disabled:opacity-50 disabled:contrast-50 md:px-3 md:text-lg",
+              currentlyViewing === "posts"
+                ? "bg-zinc-700 text-white"
+                : "bg-transparent text-zinc-500 hover:bg-zinc-700"
+            )}
+            onClick={() => {
+              setCurrentlyViewing("posts");
+            }}
+            disabled={isLoadingPosts}
           >
-            <h2 className="flex items-center text-lg">
-              {p.title}
-              <BsDot className="text-sm text-zinc-400" />
-              <span className="text-sm text-zinc-400">
-                {timeAgo(p.createdAt)}
-              </span>
-            </h2>
-            <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
-              {p.content}
-            </p>
-          </Link>
-        ))}
+            Posts
+          </button>
+          <button
+            className={cx(
+              "my-0.5 flex items-center gap-1 rounded-full py-0.5 px-2 text-base font-bold transition-all disabled:opacity-50 disabled:contrast-50 md:px-3 md:text-lg",
+              currentlyViewing === "comments"
+                ? "bg-zinc-700 text-white"
+                : "bg-transparent text-zinc-500 hover:bg-zinc-700"
+            )}
+            onClick={() => {
+              setCurrentlyViewing("comments");
+            }}
+            disabled={isLoadingPosts}
+          >
+            Comments
+          </button>
+        </div>
+        {currentlyViewing === "posts" &&
+          posts.map((p) => (
+            <Link
+              key={p.id}
+              className="block border-2 border-b-0 border-zinc-600 p-3 last:border-b-2 hover:bg-zinc-800"
+              href={`/b/${p.community.name}/post/${p.id}/${slugify(p.title)}`}
+            >
+              <h2 className="flex items-center text-lg">
+                {p.title}
+                <BsDot className="text-sm text-zinc-400" />
+                <span className="text-sm text-zinc-400">
+                  {timeAgo(p.createdAt)}
+                </span>
+              </h2>
+              <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
+                {p.content}
+              </p>
+            </Link>
+          ))}
+
+        {currentlyViewing === "comments" &&
+          comments.map((c) => (
+            <Link
+              key={c.id}
+              className="block border-2 border-b-0 border-zinc-600 p-3 last:border-b-2 hover:bg-zinc-800"
+              href={`/b/${c.post.community.name}/post/${c.post.id}/${slugify(
+                c.post.title
+              )}/${c.id}`}
+            >
+              <h2 className="flex items-center text-lg">
+                {c.post.title}
+                <BsDot className="text-sm text-zinc-400" />
+                <span className="text-sm text-zinc-400">
+                  {timeAgo(c.createdAt)}
+                </span>
+              </h2>
+              <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
+                {c.content}
+              </p>
+            </Link>
+          ))}
       </div>
       <Loading show={isLoadingPosts} size="large" />
     </>
@@ -261,12 +365,28 @@ const UserProfileContent: React.FC<{
   user: FullUser;
   posts: RouterOutputs["user"]["getUserPosts"]["posts"];
   isLoadingPosts: boolean;
-}> = ({ user, posts, isLoadingPosts }) => {
+  comments: RouterOutputs["user"]["getUserComments"]["comments"];
+  currentlyViewing: "posts" | "comments";
+  setCurrentlyViewing: (x: "posts" | "comments") => void;
+}> = ({
+  user,
+  posts,
+  isLoadingPosts,
+  comments,
+  currentlyViewing,
+  setCurrentlyViewing,
+}) => {
   return (
     <div className="relative w-full">
       <GoBackButton />
       <UserDataSection user={user} />
-      <UserProfilePosts isLoadingPosts={isLoadingPosts} posts={posts} />
+      <UserProfilePosts
+        isLoadingPosts={isLoadingPosts}
+        posts={posts}
+        comments={comments}
+        currentlyViewing={currentlyViewing}
+        setCurrentlyViewing={setCurrentlyViewing}
+      />
     </div>
   );
 };

@@ -65,4 +65,33 @@ export const userRouter = router({
         nextCursor,
       };
     }),
+
+  getUserComments: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().length(25),
+        count: z.number().min(4).max(50),
+        cursor: z.string().nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const comments = await ctx.prisma.comment.findMany({
+        orderBy: { createdAt: "desc" },
+        take: input.count + 1,
+        where: { userId: input.userId },
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+        include: { post: { include: { community: true } } },
+      });
+      if (comments.length < input.count) {
+        return {
+          comments: comments,
+          nextCursor: undefined,
+        };
+      }
+      const nextCursor = comments.length > 0 ? comments.pop()?.id : undefined;
+      return {
+        comments: comments,
+        nextCursor,
+      };
+    }),
 });
