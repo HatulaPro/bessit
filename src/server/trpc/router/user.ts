@@ -37,4 +37,32 @@ export const userRouter = router({
           return result;
         });
     }),
+  getUserPosts: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().length(25),
+        count: z.number().min(4).max(50),
+        cursor: z.string().nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.prisma.post.findMany({
+        orderBy: { createdAt: "desc" },
+        take: input.count + 1,
+        where: { userId: input.userId },
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+        include: { community: true },
+      });
+      if (posts.length < input.count) {
+        return {
+          posts: posts,
+          nextCursor: undefined,
+        };
+      }
+      const nextCursor = posts.length > 0 ? posts.pop()?.id : undefined;
+      return {
+        posts: posts,
+        nextCursor,
+      };
+    }),
 });

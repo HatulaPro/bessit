@@ -1,19 +1,20 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { AiFillMeh } from "react-icons/ai";
-import { BsSuitHeartFill } from "react-icons/bs";
+import { BsDot, BsSuitHeartFill } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { Loading } from "../../components/Loading";
 import { NotFoundMessage } from "../../components/NotFoundMessage";
-import { cx } from "../../utils/general";
+import { cx, slugify, timeAgo } from "../../utils/general";
 import { type RouterOutputs, trpc } from "../../utils/trpc";
 
 const ProfilePage: NextPage = () => {
-  const { user, isLoading, is404 } = useUserProfileData();
+  const { user, isLoading, is404, posts } = useUserProfileData();
   const pageTitle = `Bessit | ${user?.name || "User Profile"}`;
 
   return (
@@ -32,7 +33,7 @@ const ProfilePage: NextPage = () => {
         ) : is404 ? (
           <NotFoundMessage message="This user does not seem to exist" />
         ) : user ? (
-          <UserProfileContent user={user} />
+          <UserProfileContent user={user} posts={posts} />
         ) : (
           <Loading size="large" show />
         )}
@@ -66,10 +67,57 @@ const useUserProfileData = () => {
     }
   );
 
+  const getUserPostsQuery = trpc.user.getUserPosts.useInfiniteQuery(
+    { userId: queryData?.user_data[0] ?? "NOT_SENDABLE", count: 5 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: Boolean(queryData),
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      retry: false,
+    }
+  );
+
+  useEffect(() => {
+    const listener = () => {
+      if (
+        getUserPostsQuery.isLoading ||
+        getUserPostsQuery.isFetchingNextPage ||
+        !getUserPostsQuery.hasNextPage
+      )
+        return;
+      if (
+        window.innerHeight + window.scrollY + 800 >
+        document.body.offsetHeight
+      ) {
+        getUserPostsQuery.fetchNextPage();
+      }
+    };
+    window.addEventListener("scroll", listener);
+
+    return () => {
+      window.removeEventListener("scroll", listener);
+    };
+  }, [getUserPostsQuery]);
+
+  const flattenedUserPosts = useMemo(() => {
+    return (
+      getUserPostsQuery.data?.pages.reduce<
+        typeof getUserPostsQuery["data"]["pages"][number]["posts"]
+      >((acc, cur) => {
+        acc.push(...cur.posts);
+        return acc;
+      }, []) || []
+    );
+  }, [getUserPostsQuery]);
+
   return {
     is404: !getUserQuery.isLoading && !getUserQuery.data,
     user: getUserQuery.data || null,
     isLoading: getUserQuery.isLoading,
+    posts: flattenedUserPosts,
   };
 };
 
@@ -167,13 +215,42 @@ const GoBackButton: React.FC = () => {
   );
 };
 
+const UserProfilePosts: React.FC<{
+  posts: RouterOutputs["user"]["getUserPosts"]["posts"];
+}> = ({ posts }) => {
+  return (
+    <div className="mx-auto flex w-full max-w-sm flex-col md:max-w-md">
+      {posts.map((p) => (
+        <Link
+          key={p.id}
+          className="block border-2 border-b-0 border-zinc-600 p-3 last:border-b-2 hover:bg-zinc-800"
+          href={`/b/${p.community.name}/post/${p.id}/${slugify(p.title)}`}
+        >
+          <h2 className="flex items-center text-lg">
+            {p.title}
+            <BsDot className="text-sm text-zinc-400" />
+            <span className="text-sm text-zinc-400">
+              {timeAgo(p.createdAt)}
+            </span>
+          </h2>
+          <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
+            {p.content}
+          </p>
+        </Link>
+      ))}
+    </div>
+  );
+};
+
 const UserProfileContent: React.FC<{
   user: FullUser;
-}> = ({ user }) => {
+  posts: RouterOutputs["user"]["getUserPosts"]["posts"];
+}> = ({ user, posts }) => {
   return (
     <div className="relative w-full">
       <GoBackButton />
       <UserDataSection user={user} />
+      <UserProfilePosts posts={posts} />
     </div>
   );
 };
