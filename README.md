@@ -11,17 +11,18 @@ Users can create communities, post about whatever they want, comment on posts, e
 
 ## Plans
 
-* [ ] Editing posts/comments
-* [ ] Notifications system
+* [X] Editing posts
+* [X] Notifications system
   - New comment
   - Many likes
+* [ ] Editing comments
 * [ ] Sharing options
 * [ ] Profile pages
 * [ ] Adding moderating options
-  - Removing posts
-  - Editing community info
-  - Creating "infra" for community rules
-  - Global mods
-  - Community mods
+  - [X] Editing community info
+  - [ ] Removing posts
+  - [ ] Creating "infra" for community rules
+  - [ ] Global mods
+  - [ ] Community mods
 * [ ] Making every user a millionaire
 
