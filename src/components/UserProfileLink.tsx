@@ -2,7 +2,7 @@ import Link from "next/link";
 import { type LinkProps } from "next/link";
 import { cx, slugify } from "../utils/general";
 
-type MinimalUser = { id: string; name: string | null };
+type MinimalUser = { id: string; name?: string | null };
 
 export const UserProfileLink: React.FC<
   Omit<LinkProps, "href"> & {

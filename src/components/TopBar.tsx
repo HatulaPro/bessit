@@ -21,6 +21,7 @@ import { CommunityLogo } from "./CommunityLogo";
 import { useRouter } from "next/router";
 import { Dialog } from "./Dialog";
 import { Loading } from "./Loading";
+import { UserProfileLink } from "./UserProfileLink";
 
 export const TopBar: React.FC = () => {
   const session = useSession();
@@ -69,21 +70,28 @@ export const TopBar: React.FC = () => {
                 searchBarOpen ? "shrink md:shrink-0" : "shrink-0"
               )}
             >
-              {session.data.user.image ? (
-                <Image
-                  className="rounded-full"
-                  loader={({ src }) => src}
-                  src={session.data.user.image}
-                  alt="Profile Image"
-                  width={36}
-                  height={36}
-                />
-              ) : (
-                <AiFillMeh className="h-9 w-9 rounded-full" />
-              )}
-              <span className="hidden text-lg md:block">
-                {session.data.user.name}
-              </span>
+              <UserProfileLink
+                user={session.data.user}
+                className="flex items-center gap-2"
+              >
+                <>
+                  {session.data.user.image ? (
+                    <Image
+                      className="rounded-full"
+                      loader={({ src }) => src}
+                      src={session.data.user.image}
+                      alt="Profile Image"
+                      width={36}
+                      height={36}
+                    />
+                  ) : (
+                    <AiFillMeh className="h-9 w-9 rounded-full" />
+                  )}
+                  <span className="hidden text-lg md:block">
+                    {session.data.user.name}
+                  </span>
+                </>
+              </UserProfileLink>
               <TopBarUserMenu />
             </div>
           </>
