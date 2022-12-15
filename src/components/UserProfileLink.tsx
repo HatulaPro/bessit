@@ -14,7 +14,12 @@ export const UserProfileLink: React.FC<
   return (
     <Link
       {...rest}
-      href={`/u/${user.id}/${slugify(user.name ?? "anon")}`}
+      href={
+        (user.id &&
+          user.name &&
+          `/u/${user.id}/${slugify(user.name ?? "anon")}`) ||
+        "/"
+      }
       className={cx("font-bold hover:underline ", className)}
     >
       {children ?? (user.name ? `u/${user.name}` : "u/anon")}

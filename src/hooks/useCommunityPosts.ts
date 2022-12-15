@@ -38,7 +38,7 @@ export function useCommunityPosts(
                 id: "",
                 image: null,
                 logo: null,
-                name: "",
+                name: "community",
                 ownerId: "",
               },
               content: "",
