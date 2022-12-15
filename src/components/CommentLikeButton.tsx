@@ -8,7 +8,7 @@ import { Loading } from "./Loading";
 import type { InfinityQueryKeyInput } from "./PostLikeButton";
 import { cx } from "../utils/general";
 import { LoggedOnlyButton } from "./LoggedOnlyButton";
-import Link from "next/link";
+import { UserProfileLink } from "./UserProfileLink";
 
 export const CommentLikeButton: React.FC<{
   comment: UIComment;
@@ -105,10 +105,7 @@ export const CommentLikeButton: React.FC<{
       icon={<BsSuitHeartFill className="text-red-500" />}
       title={
         <>
-          Like{" "}
-          <Link href="/" className="font-bold hover:underline">
-            {comment.user.name}
-          </Link>
+          Like <UserProfileLink user={comment.user} />
           &apos;s wonderful comment
         </>
       }

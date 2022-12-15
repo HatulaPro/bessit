@@ -28,6 +28,7 @@ import { Markdown } from "../../../../components/Markdown";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
 import type { InfiniteData } from "@tanstack/react-query";
+import { UserProfileLink } from "../../../../components/UserProfileLink";
 
 const PostPage: NextPage = () => {
   const postTopRef = useRef<HTMLDivElement>(null);
@@ -230,27 +231,28 @@ const PostComments: React.FC<{
               }
             >
               <div className="mb-1 flex items-center gap-0.5 text-xs text-gray-400">
-                <Link
-                  className="group flex items-center hover:underline"
-                  href="/"
+                <UserProfileLink
+                  user={comment.user}
+                  className="flex items-center hover:underline"
                 >
-                  <div className="h-10 w-10">
-                    {comment.user.image ? (
-                      <Image
-                        className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
-                        loader={({ src }) => src}
-                        src={comment.user.image}
-                        alt={`Profile image of ${comment.user.name}`}
-                        width="128"
-                        height="128"
-                      />
-                    ) : (
-                      comment.user.name?.charAt(0).toUpperCase() ?? ""
-                    )}
-                  </div>
-                  {/* TODO: user profile */}
-                  u/{comment.user.name}
-                </Link>
+                  <>
+                    <div className="h-10 w-10">
+                      {comment.user.image ? (
+                        <Image
+                          className="rounded-[50%] p-1 transition-all group-hover:rounded-lg"
+                          loader={({ src }) => src}
+                          src={comment.user.image}
+                          alt={`Profile image of ${comment.user.name}`}
+                          width="128"
+                          height="128"
+                        />
+                      ) : (
+                        comment.user.name?.charAt(0).toUpperCase() ?? ""
+                      )}
+                    </div>
+                    u/{comment.user.name}
+                  </>
+                </UserProfileLink>
                 <BsDot />
                 {timeAgo(comment.createdAt)}
                 {comment.updatedAt.getTime() !==

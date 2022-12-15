@@ -7,7 +7,7 @@ import type { RouterOutputs, RouterInputs } from "../utils/trpc";
 import { Loading } from "./Loading";
 import { cx } from "../utils/general";
 import { LoggedOnlyButton } from "./LoggedOnlyButton";
-import Link from "next/link";
+import { UserProfileLink } from "./UserProfileLink";
 
 export type InfinityQueryKeyInput<T> = {
   input: T;
@@ -118,11 +118,7 @@ export const PostLikeButton: React.FC<{
       icon={<BsSuitHeartFill className="text-red-500" />}
       title={
         <>
-          Like{" "}
-          <Link href="/" className="font-bold hover:underline">
-            {post.user.name}
-          </Link>
-          &apos;s great post
+          Like <UserProfileLink user={post.user} /> &apos;s great post
         </>
       }
       content="Join Bessit to let the world know of your appreciation of awesome content"

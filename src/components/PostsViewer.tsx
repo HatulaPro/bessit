@@ -15,6 +15,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
 import { trpc } from "../utils/trpc";
+import { UserProfileLink } from "./UserProfileLink";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -92,17 +93,14 @@ export const SinglePost: React.FC<{
         </Link>
         <div className="flex items-center pl-0 sm:pl-6">
           <div className="text-xs text-gray-400">
-            Posted by {/* TODO: User profile page */}
-            <Link
-              href="/"
+            Posted by
+            <UserProfileLink
+              user={post.user}
               className={cx(
-                "hover:underline",
                 placeholder &&
                   "inline-block w-12 animate-pulse rounded bg-zinc-600"
               )}
-            >
-              u/{post.user.name}
-            </Link>
+            />
           </div>
           <BsDot className="text-xs text-gray-400" />
           <div className="text-xs text-gray-400">{timeAgo(post.createdAt)}</div>
