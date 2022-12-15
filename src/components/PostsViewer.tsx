@@ -142,7 +142,20 @@ export const SinglePost: React.FC<{
         </div>
         <hr className="my-2 opacity-50" />
         <div className="mx-auto flex max-w-md justify-evenly pb-2">
-          <button className="p-2 text-zinc-400 hover:text-emerald-400">
+          <button
+            className="p-2 text-zinc-400 hover:text-emerald-400"
+            onClick={() => {
+              if (typeof navigator !== undefined && navigator.share) {
+                navigator.share({
+                  text: `View this fantastic Bessit post by /u/${post.user.name}!`,
+                  url: `${document.location.origin}/b/${
+                    post.community.name
+                  }/post/${post.id}/${slugify(post.title)}`,
+                  title: post.title,
+                });
+              }
+            }}
+          >
             <BsShare className="text-xl" />
           </button>
           <PostLikeButton

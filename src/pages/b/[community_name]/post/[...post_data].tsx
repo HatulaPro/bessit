@@ -125,7 +125,7 @@ const PostPageContent: React.FC<{
       {comments && comments.length > 0 && (
         <PostComments
           comments={comments}
-          postId={post.id}
+          post={post}
           openCreateCommentId={openCreateCommentId}
           setOpenCreateCommentId={setOpenCreateCommentId}
           setCurrentParentCommentId={setCurrentParentCommentId}
@@ -151,14 +151,14 @@ export type UIComment = {
 };
 
 const PostComments: React.FC<{
-  postId: string;
+  post: CommunityPosts["posts"][number];
   comments: UIComment[];
   openCreateCommentId: string | null;
   setOpenCreateCommentId: (x: string | null) => void;
   setCurrentParentCommentId: (x: string | null) => void;
   main?: boolean;
 }> = ({
-  postId,
+  post,
   comments,
   openCreateCommentId,
   setOpenCreateCommentId,
@@ -241,7 +241,22 @@ const PostComments: React.FC<{
                     <Markdown source={comment.content} />
                   </div>
                   <div className="ml-8 flex gap-8 md:gap-12">
-                    <button className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-emerald-400">
+                    <button
+                      onClick={() => {
+                        if (typeof navigator !== undefined && navigator.share) {
+                          navigator.share({
+                            text: `View this fantastic Bessit comment by /u/${comment.user.name}!`,
+                            url: `${document.location.origin}/b/${
+                              post.community.name
+                            }/post/${post.id}/${slugify(post.title)}/${
+                              comment.id
+                            }`,
+                            title: `/u/${comment.user.name} has a wholesome opinion regarding "${post.title}"`,
+                          });
+                        }
+                      }}
+                      className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-emerald-400"
+                    >
                       <BsShare className="text-xl" />
                       Share
                     </button>
@@ -289,7 +304,7 @@ const PostComments: React.FC<{
                       {openCreateCommentId === comment.id && (
                         <CreateCommentForm
                           parentCommentId={openCreateCommentId}
-                          postId={postId}
+                          postId={post.id}
                           setCurrentParentCommentId={setCurrentParentCommentId}
                         />
                       )}
@@ -298,7 +313,7 @@ const PostComments: React.FC<{
 
                   {comment.childComments && comment.childComments.length > 0 ? (
                     <PostComments
-                      postId={postId}
+                      post={post}
                       comments={comment.childComments}
                       openCreateCommentId={openCreateCommentId}
                       setOpenCreateCommentId={setOpenCreateCommentId}
