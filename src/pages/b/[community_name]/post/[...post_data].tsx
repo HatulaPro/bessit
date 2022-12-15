@@ -16,7 +16,13 @@ import { cx, slugify, timeAgo } from "../../../../utils/general";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { BsDot, BsChatLeft, BsShare, BsArrowUpCircle } from "react-icons/bs";
+import {
+  BsDot,
+  BsChatLeft,
+  BsShare,
+  BsArrowUpCircle,
+  BsPencil,
+} from "react-icons/bs";
 import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
@@ -97,9 +103,13 @@ const PostPageContent: React.FC<{
   placeholder,
 }) => {
   const { status: authStatus } = useSession();
-  const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
-    null
-  );
+  // const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
+  //   null
+  // );
+  const [editCommentOptions, setEditCommentOptions] = useState<{
+    commentId: string | null;
+    editOrCreate: "edit" | "create";
+  }>({ commentId: null, editOrCreate: "create" });
 
   return (
     <div className="w-full">
@@ -117,6 +127,8 @@ const PostPageContent: React.FC<{
         <CreateCommentForm
           parentCommentId={null}
           postId={post.id}
+          commentContent=""
+          editOrCreate={editCommentOptions.editOrCreate}
           setCurrentParentCommentId={setCurrentParentCommentId}
         />
       )}
@@ -126,8 +138,8 @@ const PostPageContent: React.FC<{
         <PostComments
           comments={comments}
           post={post}
-          openCreateCommentId={openCreateCommentId}
-          setOpenCreateCommentId={setOpenCreateCommentId}
+          editCommentOptions={editCommentOptions}
+          setEditCommentOptions={setEditCommentOptions}
           setCurrentParentCommentId={setCurrentParentCommentId}
           main
         />
@@ -153,19 +165,25 @@ export type UIComment = {
 const PostComments: React.FC<{
   post: CommunityPosts["posts"][number];
   comments: UIComment[];
-  openCreateCommentId: string | null;
-  setOpenCreateCommentId: (x: string | null) => void;
+  editCommentOptions: {
+    commentId: string | null;
+    editOrCreate: "create" | "edit";
+  };
+  setEditCommentOptions: (x: {
+    commentId: string | null;
+    editOrCreate: "create" | "edit";
+  }) => void;
   setCurrentParentCommentId: (x: string | null) => void;
   main?: boolean;
 }> = ({
   post,
   comments,
-  openCreateCommentId,
-  setOpenCreateCommentId,
+  editCommentOptions,
+  setEditCommentOptions,
   setCurrentParentCommentId,
   main,
 }) => {
-  const { status: authStatus } = useSession();
+  const session = useSession();
   const [closedComments, setClosedComments] = useState<Set<string>>(new Set());
 
   function closeOrOpenComment(commentId: string) {
@@ -262,7 +280,7 @@ const PostComments: React.FC<{
                     </button>
                     <CommentLikeButton
                       comment={comment}
-                      loggedIn={authStatus === "authenticated"}
+                      loggedIn={session.status === "authenticated"}
                     />
                     <LoggedOnlyButton
                       Child={(props) => (
@@ -275,8 +293,10 @@ const PostComments: React.FC<{
                         </button>
                       )}
                       onClick={() => {
-                        setOpenCreateCommentId(
-                          openCreateCommentId === comment.id ? null : comment.id
+                        setEditCommentOptions(
+                          editCommentOptions.commentId === comment.id
+                            ? { editOrCreate: "create", commentId: null }
+                            : { editOrCreate: "create", commentId: comment.id }
                         );
                       }}
                       icon={<BsChatLeft className="text-blue-500" />}
@@ -291,19 +311,46 @@ const PostComments: React.FC<{
                       }
                       content="Join Bessit to share your thoughts with our incredible community"
                     />
+                    {session.data?.user?.id === comment.user.id && (
+                      <button
+                        onClick={() => {
+                          setEditCommentOptions(
+                            editCommentOptions.commentId === comment.id
+                              ? { editOrCreate: "edit", commentId: null }
+                              : { editOrCreate: "edit", commentId: comment.id }
+                          );
+                        }}
+                        className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white"
+                      >
+                        <BsPencil className="text-xl" />
+                        Edit
+                      </button>
+                    )}
                   </div>
-                  {authStatus === "authenticated" && (
+                  {session.status === "authenticated" && (
                     <div
                       className={cx(
                         "w-full transition-all",
-                        openCreateCommentId === comment.id
+                        editCommentOptions.commentId === comment.id
                           ? "min-h-[9rem]"
                           : "min-h-0"
                       )}
                     >
-                      {openCreateCommentId === comment.id && (
+                      {editCommentOptions.commentId === comment.id && (
                         <CreateCommentForm
-                          parentCommentId={openCreateCommentId}
+                          parentCommentId={editCommentOptions.commentId}
+                          commentContent={
+                            editCommentOptions.editOrCreate === "edit"
+                              ? comment.content
+                              : ""
+                          }
+                          close={() =>
+                            setEditCommentOptions({
+                              commentId: null,
+                              editOrCreate: "edit",
+                            })
+                          }
+                          editOrCreate={editCommentOptions.editOrCreate}
                           postId={post.id}
                           setCurrentParentCommentId={setCurrentParentCommentId}
                         />
@@ -315,8 +362,8 @@ const PostComments: React.FC<{
                     <PostComments
                       post={post}
                       comments={comment.childComments}
-                      openCreateCommentId={openCreateCommentId}
-                      setOpenCreateCommentId={setOpenCreateCommentId}
+                      editCommentOptions={editCommentOptions}
+                      setEditCommentOptions={setEditCommentOptions}
                       setCurrentParentCommentId={setCurrentParentCommentId}
                     />
                   ) : (
@@ -350,13 +397,23 @@ type createCommentForm = z.infer<typeof createCommentSchema>;
 const CreateCommentForm: React.FC<{
   postId: string;
   parentCommentId: string | null;
+  commentContent: string;
   setCurrentParentCommentId: (x: string | null) => void;
-}> = ({ postId, parentCommentId, setCurrentParentCommentId }) => {
+  editOrCreate: "edit" | "create";
+  close?: () => void;
+}> = ({
+  postId,
+  parentCommentId,
+  setCurrentParentCommentId,
+  editOrCreate,
+  commentContent,
+  close,
+}) => {
   const { control, handleSubmit, reset } = useForm<createCommentForm>({
     mode: "onSubmit",
     resolver: zodResolver(createCommentSchema),
     defaultValues: {
-      content: "",
+      content: commentContent,
     },
   });
   const utils = trpc.useContext();
@@ -364,15 +421,33 @@ const CreateCommentForm: React.FC<{
     onSuccess: (data) => {
       setCurrentParentCommentId(data.id);
       utils.post.getComments.invalidate();
-      reset({ content: "" });
+      reset({ content: commentContent });
     },
   });
+
+  const editCommentMutation = trpc.post.editComment.useMutation({
+    onSuccess: (data) => {
+      setCurrentParentCommentId(data.id);
+      if (close) close();
+      utils.post.getComments.invalidate();
+      reset({ content: commentContent });
+    },
+  });
+
   const onSubmit = (data: createCommentForm) => {
-    createCommentMutation.mutate({
-      postId,
-      content: data.content,
-      parentCommentId,
-    });
+    if (editOrCreate === "create") {
+      createCommentMutation.mutate({
+        postId,
+        content: data.content,
+        parentCommentId,
+      });
+    } else {
+      if (parentCommentId === null) return;
+      editCommentMutation.mutate({
+        commentId: parentCommentId,
+        content: data.content,
+      });
+    }
   };
 
   return (
@@ -408,19 +483,29 @@ const CreateCommentForm: React.FC<{
                     : "border-zinc-500 focus:border-zinc-300"
                 )}
                 placeholder="Your nice, helpful and engaging comment"
-                disabled={createCommentMutation.isLoading}
+                disabled={
+                  createCommentMutation.isLoading ||
+                  editCommentMutation.isLoading
+                }
               ></textarea>
             </>
           )}
         />
         <div className="ml-auto flex w-32 justify-end">
-          <Loading show={createCommentMutation.isLoading} size="small" />
+          <Loading
+            show={
+              createCommentMutation.isLoading || editCommentMutation.isLoading
+            }
+            size="small"
+          />
           <button
-            disabled={createCommentMutation.isLoading}
+            disabled={
+              createCommentMutation.isLoading || editCommentMutation.isLoading
+            }
             type="submit"
             className="my-2 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
           >
-            Submit
+            {editOrCreate === "create" ? "Submit" : "Save"}
           </button>
         </div>
       </form>

@@ -144,6 +144,29 @@ export const postsRouter = router({
 
       return newComment;
     }),
+  editComment: protectedProcedure
+    .input(
+      z.object({
+        content: z.string().min(4).max(4096),
+        commentId: z.string().length(25),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const comment = await ctx.prisma.comment.findUnique({
+        where: { id: input.commentId },
+      });
+      if (!comment || comment.userId !== userId) {
+        throw new TRPCError({
+          message: "Comment not found",
+          code: "BAD_REQUEST",
+        });
+      }
+      return await ctx.prisma.comment.update({
+        where: { id: comment.id },
+        data: { content: input.content },
+      });
+    }),
   getPost: publicProcedure
     .input(z.object({ post_id: z.string() }))
     .query(({ ctx, input }) => {
