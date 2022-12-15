@@ -276,7 +276,7 @@ const PostComments: React.FC<{
                       className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-emerald-400"
                     >
                       <BsShare className="text-xl" />
-                      Share
+                      <span className="hidden md:block">Share</span>
                     </button>
                     <CommentLikeButton
                       comment={comment}
@@ -289,7 +289,7 @@ const PostComments: React.FC<{
                           className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
                         >
                           <BsChatLeft className="text-xl" />
-                          Reply
+                          <span className="hidden md:block">Reply</span>
                         </button>
                       )}
                       onClick={() => {
@@ -323,7 +323,7 @@ const PostComments: React.FC<{
                         className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white"
                       >
                         <BsPencil className="text-xl" />
-                        Edit
+                        <span className="hidden md:block">Edit</span>
                       </button>
                     )}
                   </div>
