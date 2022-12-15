@@ -77,6 +77,18 @@ type FullUser = Exclude<RouterOutputs["user"]["getUser"], null>;
 const UserDataSection: React.FC<{
   user: FullUser;
 }> = ({ user }) => {
+  function randomlyGeneratedGoodAdjective() {
+    const WORDS = [
+      "Wholesome",
+      "Fantastic",
+      "Great",
+      "Wonderful",
+      "Valuable",
+      "Well Appreciated",
+    ];
+    return WORDS[Math.floor(Math.random() * WORDS.length)];
+  }
+
   return (
     <div className="container relative mx-auto my-4 max-w-sm rounded border-2 border-zinc-500 bg-zinc-800 p-3 md:max-w-md">
       <div className="absolute inset-0 h-32 w-full bg-indigo-700"></div>
@@ -126,13 +138,13 @@ const UserDataSection: React.FC<{
           <span className="text-lg font-bold underline decoration-indigo-500">
             #{user._count.posts}
           </span>{" "}
-          Posts Contributed
+          {randomlyGeneratedGoodAdjective()} Posts
         </span>
         <span>
           <span className="text-lg font-bold underline decoration-indigo-500">
             #{user._count.comment}
           </span>{" "}
-          Comments Contributed
+          {randomlyGeneratedGoodAdjective()} Comments
         </span>
       </div>
     </div>
