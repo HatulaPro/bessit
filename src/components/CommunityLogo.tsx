@@ -29,7 +29,7 @@ export const CommunityLogo: React.FC<{
           priority
         />
       ) : placeholder ? (
-        "B"
+        "?"
       ) : (
         name[0]?.toUpperCase()
       )}

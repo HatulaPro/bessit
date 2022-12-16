@@ -125,7 +125,7 @@ const CommunityHeader: React.FC<{
             <h1
               className={cx(
                 "text-3xl font-bold",
-                placeholder && "h-9 w-16 animate-pulse rounded bg-zinc-600"
+                placeholder && "h-9 min-w-0 animate-pulse rounded bg-zinc-600"
               )}
             >
               {community.name}

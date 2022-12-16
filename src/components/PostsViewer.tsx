@@ -85,7 +85,7 @@ export const SinglePost: React.FC<{
           <span
             className={cx(
               "text-gray-300 group-hover:underline",
-              placeholder && "w-12 animate-pulse rounded bg-zinc-600"
+              placeholder && "min-w-0 animate-pulse rounded bg-zinc-600"
             )}
           >
             b/{post.community.name}
@@ -98,7 +98,7 @@ export const SinglePost: React.FC<{
               user={post.user}
               className={cx(
                 placeholder &&
-                  "inline-block w-12 animate-pulse rounded bg-zinc-600"
+                  "inline-block min-w-0 animate-pulse rounded bg-zinc-600"
               )}
             />
           </div>
