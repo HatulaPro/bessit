@@ -55,6 +55,7 @@ model User {
   postVotes     PostVote[]
   commentVotes  CommentVote[]
   notifications Notification[]
+  moderation    Moderator[]
 }
 
 model VerificationToken {
@@ -93,14 +94,15 @@ model PostVote {
 }
 
 model Community {
-  id      String  @id @default(cuid())
-  name    String  @unique
-  desc    String
-  ownerId String
-  owner   User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  logo    String?
-  image   String?
-  posts   Post[]
+  id         String      @id @default(cuid())
+  name       String      @unique
+  desc       String
+  ownerId    String
+  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  logo       String?
+  image      String?
+  posts      Post[]
+  moderators Moderator[]
 }
 
 model Comment {
@@ -158,4 +160,15 @@ model Notification {
 
   @@unique([userId, type, relatedPostId])
   @@index(fields: [updatedAt, userId, seen])
+}
+
+model Moderator {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@index(fields: [userId, communityId])
 }
