@@ -218,6 +218,7 @@ const UserDataSection: React.FC<{
           ></span>{" "}
           u/{user.name}
         </h1>
+        <span className="text-sm font-normal text-zinc-400">ID: {user.id}</span>
         <div className="mt-4 flex w-full justify-evenly">
           <div className="flex flex-col text-center">
             <span>Post Likes</span>

@@ -295,7 +295,6 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
             >
               <BsX />
             </button>
-            {/* {mod.user.name} */}
             <UserProfileLink user={mod.user} />{" "}
             <span className="ml-auto hidden text-sm font-normal text-zinc-400 md:block">
               {mod.userId}
