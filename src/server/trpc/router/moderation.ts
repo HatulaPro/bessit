@@ -51,4 +51,53 @@ export const moderationRouter = router({
           return community;
         });
     }),
+  removeModerator: protectedProcedure
+    .input(
+      z.object({
+        communityId: z.string().length(25),
+        moderatorId: z.string().length(25),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const community = await ctx.prisma.community.findUnique({
+        where: { id: input.communityId },
+        include: { moderators: { include: { user: true } } },
+      });
+
+      if (!community || community.ownerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          message: "Community not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      // If the user is already not a mod do nothing
+      if (
+        !new Set(community.moderators.map((mod) => mod.userId)).has(
+          input.moderatorId
+        )
+      ) {
+        return community;
+      }
+
+      return await ctx.prisma.moderator
+        .delete({
+          where: {
+            userId_communityId: {
+              communityId: input.communityId,
+              userId: input.moderatorId,
+            },
+          },
+        })
+        .then((mod) => {
+          community.moderators = community.moderators.filter(
+            (cur) => cur.userId !== mod.userId
+          );
+          return community;
+        })
+        .catch(() => {
+          // Pretend nothing happened on error
+          return community;
+        });
+    }),
 });

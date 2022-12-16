@@ -4,7 +4,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { BsPlus } from "react-icons/bs";
+import { BsPlus, BsX } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { CommunityLogo } from "../../../../components/CommunityLogo";
@@ -264,6 +264,13 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
       });
     },
   });
+  const removeModMutation = trpc.moderator.removeModerator.useMutation({
+    onSuccess: (data) => {
+      utils.community.getCommunity.setData({ name: community.name }, () => {
+        return data;
+      });
+    },
+  });
 
   return (
     <div className="my-8 w-full">
@@ -271,9 +278,29 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
 
       <div className="w-full">
         {community.moderators.map((mod) => (
-          <UserProfileLink key={mod.userId} user={mod.user}>
-            <div>{mod.user.name}</div>
-          </UserProfileLink>
+          <div
+            key={mod.userId}
+            className="my-1 flex items-center gap-2 rounded border-2 border-zinc-500 p-1"
+          >
+            <button
+              type="button"
+              className="rounded p-1 text-2xl text-red-500 transition-colors hover:bg-black disabled:text-zinc-300"
+              disabled={removeModMutation.isLoading}
+              onClick={() =>
+                removeModMutation.mutate({
+                  communityId: community.id,
+                  moderatorId: mod.userId,
+                })
+              }
+            >
+              <BsX />
+            </button>
+            {/* {mod.user.name} */}
+            <UserProfileLink user={mod.user} />{" "}
+            <span className="ml-auto hidden text-sm font-normal text-zinc-400 md:block">
+              {mod.userId}
+            </span>
+          </div>
         ))}
       </div>
       <span
@@ -284,10 +311,13 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
       >
         {newModError && "Invalid User ID"}
       </span>
-      <Loading size="small" show={addModMutation.isLoading} />
+      <Loading
+        size="small"
+        show={addModMutation.isLoading || removeModMutation.isLoading}
+      />
       <form
         className={cx(
-          "flex items-center gap-1 rounded border-2 p-1",
+          "mt-1 flex items-center gap-1 rounded border-2 p-1",
           newModError
             ? "border-red-500"
             : "border-zinc-500 focus-within:border-zinc-300"
@@ -309,7 +339,7 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
       >
         <button
           type="submit"
-          className="p-1 text-2xl text-white transition-colors hover:bg-black disabled:text-zinc-300"
+          className="rounded p-1 text-2xl text-white transition-colors hover:bg-black disabled:text-zinc-300"
           disabled={addModMutation.isLoading}
         >
           <BsPlus />
