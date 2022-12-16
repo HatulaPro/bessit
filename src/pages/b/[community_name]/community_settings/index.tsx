@@ -2,12 +2,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { BsPlus } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { CommunityLogo } from "../../../../components/CommunityLogo";
 import { ImageHidesOnError } from "../../../../components/ImageHidesOnError";
 import { Loading } from "../../../../components/Loading";
+import { UserProfileLink } from "../../../../components/UserProfileLink";
 import { useLoggedOnly } from "../../../../hooks/useLoggedOnly";
 import { cx } from "../../../../utils/general";
 import { trpc, type RouterOutputs } from "../../../../utils/trpc";
@@ -39,9 +42,12 @@ const CommunitySettingsPage: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen w-full items-center bg-zinc-900 pt-16 pb-2 text-white md:pt-20">
+      <main className="flex min-h-screen w-full flex-col items-center bg-zinc-900 pt-16 pb-2 text-white md:pt-20">
         {getCommunityQuery.data && (
-          <EditCommunityForm community={getCommunityQuery.data} />
+          <div className="mb-10 w-full max-w-3xl rounded border-2 border-zinc-800 p-8">
+            <EditCommunityForm community={getCommunityQuery.data} />
+            <EditCommunityModerators community={getCommunityQuery.data} />
+          </div>
         )}
 
         <button
@@ -143,7 +149,7 @@ const EditCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 p-8"
+      className="flex w-full flex-col items-center gap-2"
     >
       <div className="w-full">
         <h2 className="my-2 w-full text-3xl text-white">Community Settings</h2>
@@ -239,6 +245,86 @@ const EditCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
       </button>
       <Loading size="small" show={editComunityMutation.isLoading} />
     </form>
+  );
+};
+
+const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
+  community,
+}) => {
+  const [newModId, setNewModId] = useState<string>("");
+  const [clicked, setClicked] = useState<boolean>(false);
+  const newModError =
+    clicked && newModId.length !== 0 && newModId.length !== 25;
+
+  const utils = trpc.useContext();
+  const addModMutation = trpc.moderator.addModerator.useMutation({
+    onSuccess: (data) => {
+      utils.community.getCommunity.setData({ name: community.name }, () => {
+        return data;
+      });
+    },
+  });
+
+  return (
+    <div className="my-8 w-full">
+      <h2 className="my-2 w-full text-3xl text-white">Community Moderators</h2>
+
+      <div className="w-full">
+        {community.moderators.map((mod) => (
+          <UserProfileLink key={mod.userId} user={mod.user}>
+            <div>{mod.user.name}</div>
+          </UserProfileLink>
+        ))}
+      </div>
+      <span
+        className={cx(
+          "block overflow-hidden text-red-500 transition-all",
+          newModError ? "h-7" : "h-0"
+        )}
+      >
+        {newModError && "Invalid User ID"}
+      </span>
+      <Loading size="small" show={addModMutation.isLoading} />
+      <form
+        className={cx(
+          "flex items-center gap-1 rounded border-2 p-1",
+          newModError
+            ? "border-red-500"
+            : "border-zinc-500 focus-within:border-zinc-300"
+        )}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (newModId.length === 0) return;
+          if (newModId.length === 25) {
+            addModMutation.mutate({
+              communityId: community.id,
+              moderatorId: newModId,
+            });
+            setClicked(false);
+            setNewModId("");
+            return;
+          }
+          setClicked(true);
+        }}
+      >
+        <button
+          type="submit"
+          className="p-1 text-2xl text-white transition-colors hover:bg-black disabled:text-zinc-300"
+          disabled={addModMutation.isLoading}
+        >
+          <BsPlus />
+        </button>
+        <input
+          type="text"
+          placeholder="User ID of new mod"
+          className="w-full border-none bg-transparent text-zinc-200 outline-none"
+          value={newModId}
+          onChange={(e) =>
+            setNewModId(e.currentTarget.value.replaceAll(/[^a-z0-9]*/g, ""))
+          }
+        />
+      </form>
+    </div>
   );
 };
 
