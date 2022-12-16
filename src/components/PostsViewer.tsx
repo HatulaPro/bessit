@@ -93,7 +93,7 @@ export const SinglePost: React.FC<{
         </Link>
         <div className="flex items-center pl-0 sm:pl-6">
           <div className="text-xs text-gray-400">
-            Posted by
+            Posted by{" "}
             <UserProfileLink
               user={post.user}
               className={cx(
