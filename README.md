@@ -17,7 +17,7 @@ Users can create communities, post about whatever they want, comment on posts, e
   - Many likes
 * [X] Editing comments
 * [X] Sharing options
-* [ ] Profile pages
+* [X] Profile pages
 * [ ] Adding moderating options
   - [X] Editing community info
   - [ ] Removing posts
