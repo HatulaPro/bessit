@@ -7,7 +7,10 @@ export const communitiesRouter = router({
   getCommunity: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(({ ctx, input }) => {
-      return ctx.prisma.community.findUnique({ where: { name: input.name } });
+      return ctx.prisma.community.findUnique({
+        where: { name: input.name },
+        include: { moderators: { include: { user: true } } },
+      });
     }),
   findCommunity: publicProcedure
     .input(z.object({ name: z.string() }))

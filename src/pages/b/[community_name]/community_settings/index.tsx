@@ -126,7 +126,10 @@ const EditCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
       utils.community.invalidate();
       utils.post.invalidate();
       utils.search.invalidate();
-      utils.community.getCommunity.setData({ name: data.name }, () => data);
+      utils.community.getCommunity.setData({ name: data.name }, (prev) => {
+        if (!prev) return community;
+        return { ...prev, ...data };
+      });
       router.push(`/b/${data.name}`);
     },
   });
