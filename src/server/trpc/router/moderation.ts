@@ -100,4 +100,42 @@ export const moderationRouter = router({
           return community;
         });
     }),
+  setPostDeleted: protectedProcedure
+    .input(
+      z.object({ postId: z.string().length(25), newDeletedStatus: z.boolean() })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const post = await ctx.prisma.post.findUnique({
+        where: { id: input.postId },
+        include: {
+          community: { include: { moderators: { include: { user: true } } } },
+        },
+      });
+      if (!post) {
+        throw new TRPCError({
+          message: "Post not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+      const isMod =
+        post.community.ownerId === ctx.session.user.id ||
+        Boolean(
+          post.community.moderators.find(
+            (m) => m.userId === ctx.session.user.id
+          )
+        );
+      if (!isMod) {
+        throw new TRPCError({
+          message: "Not moderator.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      await ctx.prisma.post.update({
+        where: { id: input.postId },
+        data: { isDeleted: input.newDeletedStatus, updatedAt: post.updatedAt },
+      });
+      post.isDeleted = input.newDeletedStatus;
+      return post;
+    }),
 });

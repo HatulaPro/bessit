@@ -40,6 +40,7 @@ export function useCommunityPosts(
                 logo: null,
                 name: "community",
                 ownerId: "",
+                moderators: [],
               },
               content: "",
               createdAt: new Date(),

@@ -1,4 +1,4 @@
-import type { CommentVote, Community, Post, User } from "@prisma/client";
+import type { CommentVote, User } from "@prisma/client";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -104,9 +104,6 @@ const PostPageContent: React.FC<{
   placeholder,
 }) => {
   const { status: authStatus } = useSession();
-  // const [openCreateCommentId, setOpenCreateCommentId] = useState<string | null>(
-  //   null
-  // );
   const [editCommentOptions, setEditCommentOptions] = useState<{
     commentId: string | null;
     editOrCreate: "edit" | "create";
@@ -537,10 +534,9 @@ const useCachedPost = (topElement: HTMLElement | null) => {
     {
       initialData:
         queryData && queryData.cached_post
-          ? (superjson.parse(queryData.cached_post) as Post & {
-              user: User;
-              community: Community;
-            })
+          ? (superjson.parse(
+              queryData.cached_post
+            ) as RouterOutputs["post"]["getPost"])
           : undefined,
       enabled: Boolean(queryData),
       refetchOnWindowFocus: false,
@@ -557,6 +553,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
           id: "",
           image: null,
           logo: null,
+          moderators: [],
         },
         content: "",
         createdAt: new Date(),

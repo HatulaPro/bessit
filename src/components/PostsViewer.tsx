@@ -1,14 +1,23 @@
 import superjson from "superjson";
 import Link from "next/link";
 import { Markdown } from "./Markdown";
-import { BsChatLeft, BsDot, BsPencil, BsShare } from "react-icons/bs";
+import {
+  BsArrowCounterclockwise,
+  BsChatLeft,
+  BsDot,
+  BsFillExclamationTriangleFill,
+  BsPencil,
+  BsShare,
+  BsThreeDotsVertical,
+  BsTrashFill,
+} from "react-icons/bs";
 import { Loading } from "./Loading";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { cx, slugify, timeAgo } from "../utils/general";
 import { PostLikeButton } from "./PostLikeButton";
 import { useSession } from "next-auth/react";
 import { CommunityLogo } from "./CommunityLogo";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog } from "./Dialog";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -65,6 +74,19 @@ export const SinglePost: React.FC<{
   placeholder?: boolean;
 }> = ({ post, isMain, placeholder }) => {
   const session = useSession();
+
+  const showModeratorTools = useMemo<boolean>(() => {
+    if (placeholder) return false;
+    if (!isMain) return false;
+    if (session.status !== "authenticated" || !session.data?.user) return false;
+    const uid = session.data.user.id;
+    if (uid === post.community.ownerId) return true;
+    for (let i = 0; i < post.community.moderators.length; ++i) {
+      if (uid === post.community.moderators[i]?.userId) return true;
+    }
+    return false;
+  }, [post.community, isMain, placeholder, session.data?.user, session.status]);
+
   return (
     <>
       <div
@@ -111,14 +133,17 @@ export const SinglePost: React.FC<{
           )}
         </div>
         {isMain ? (
-          <h3
-            className={cx(
-              "my-6 text-center text-2xl underline decoration-indigo-600 md:text-3xl",
-              placeholder && "w-full animate-pulse rounded bg-zinc-600"
-            )}
-          >
-            {post.title || "..."}
-          </h3>
+          <>
+            <h3
+              className={cx(
+                "my-6 text-center text-2xl underline decoration-indigo-600 md:text-3xl",
+                placeholder && "w-full animate-pulse rounded bg-zinc-600"
+              )}
+            >
+              {post.title || "..."}
+            </h3>
+            {showModeratorTools && <PostModeratorTools post={post} />}
+          </>
         ) : (
           <LinkToPost post={post}>
             <h3
@@ -139,39 +164,132 @@ export const SinglePost: React.FC<{
           )}
         </div>
         <hr className="my-2 opacity-50" />
-        <div className="mx-auto flex max-w-md justify-evenly pb-2">
-          <button
-            className="p-2 text-zinc-400 hover:text-emerald-400"
-            onClick={() => {
-              if (typeof navigator !== undefined && navigator.share) {
-                navigator.share({
-                  text: `View this fantastic Bessit post by /u/${post.user.name}!`,
-                  url: `${document.location.origin}/b/${
-                    post.community.name
-                  }/post/${post.id}/${slugify(post.title)}`,
-                  title: post.title,
-                });
-              }
-            }}
-          >
-            <BsShare className="text-xl" />
-          </button>
-          <PostLikeButton
-            post={post}
-            loggedIn={session.status === "authenticated"}
-          />
-          <LinkToPost post={post}>
-            <button className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500">
-              <BsChatLeft className="text-2xl" />
-              {post._count.comments}
+        {post.isDeleted ? (
+          <div className="flex items-center justify-center gap-2 p-1 text-base text-zinc-200">
+            <BsFillExclamationTriangleFill className="text-red-500" />
+            This post has been erased from the public eye.
+          </div>
+        ) : (
+          <div className="mx-auto flex max-w-md justify-evenly pb-2">
+            <button
+              className="p-2 text-zinc-400 hover:text-emerald-400"
+              onClick={() => {
+                if (typeof navigator !== undefined && navigator.share) {
+                  navigator.share({
+                    text: `View this fantastic Bessit post by /u/${post.user.name}!`,
+                    url: `${document.location.origin}/b/${
+                      post.community.name
+                    }/post/${post.id}/${slugify(post.title)}`,
+                    title: post.title,
+                  });
+                }
+              }}
+            >
+              <BsShare className="text-xl" />
             </button>
-          </LinkToPost>
-          {session.data?.user?.id === post.userId && isMain && (
-            <EditPostButton post={post} />
-          )}
-        </div>
+            <PostLikeButton
+              post={post}
+              loggedIn={session.status === "authenticated"}
+            />
+            <LinkToPost post={post}>
+              <button className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500">
+                <BsChatLeft className="text-2xl" />
+                {post._count.comments}
+              </button>
+            </LinkToPost>
+            {session.data?.user?.id === post.userId && isMain && (
+              <EditPostButton post={post} />
+            )}
+          </div>
+        )}
       </div>
     </>
+  );
+};
+
+const PostModeratorTools: React.FC<{
+  post: CommunityPosts["posts"][number];
+}> = ({ post }) => {
+  const [isOpen, setOpen] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const utils = trpc.useContext();
+  const deletePostMutation = trpc.moderator.setPostDeleted.useMutation({
+    onSuccess: (data) => {
+      utils.post.getPosts.invalidate();
+      utils.post.getPost.setData({ post_id: data.id }, () => {
+        return { ...post, isDeleted: data.isDeleted };
+      });
+    },
+  });
+
+  useEffect(() => {
+    const listener = (e: MouseEvent) => {
+      if (!isOpen) return;
+      if (!e.target || !menuRef.current || !buttonRef.current) return;
+      if (
+        !menuRef.current.contains(e.target as Node) &&
+        e.target !== menuRef.current &&
+        !buttonRef.current.contains(e.target as Node) &&
+        e.target !== buttonRef.current
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", listener);
+    return () => document.removeEventListener("mousedown", listener);
+  }, [menuRef, buttonRef, isOpen, setOpen]);
+
+  return (
+    <div className="absolute top-3 right-3 text-white">
+      <button
+        ref={buttonRef}
+        className="text-xl"
+        onClick={() => setOpen(!isOpen)}
+      >
+        {deletePostMutation.isLoading ? (
+          <Loading size="small" show />
+        ) : (
+          <BsThreeDotsVertical />
+        )}
+      </button>
+      <div
+        className={cx(
+          "absolute right-full -top-4 flex w-32 origin-right translate-y-full flex-col rounded bg-zinc-900 p-1 text-sm transition-transform duration-75",
+          isOpen ? "scale-x-100" : "scale-x-0"
+        )}
+        ref={menuRef}
+      >
+        {post.isDeleted ? (
+          <button
+            onClick={() => {
+              deletePostMutation.mutate({
+                postId: post.id,
+                newDeletedStatus: false,
+              });
+              setOpen(false);
+            }}
+            className="flex items-center justify-center gap-1.5 rounded p-1 transition-colors hover:bg-zinc-700"
+          >
+            <BsArrowCounterclockwise className="text-green-500" /> Restore Post
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              deletePostMutation.mutate({
+                postId: post.id,
+                newDeletedStatus: true,
+              });
+              setOpen(false);
+            }}
+            className="flex items-center justify-center gap-1.5 rounded p-1 transition-colors hover:bg-zinc-700"
+          >
+            <BsTrashFill className="text-red-500" /> Delete Post
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 

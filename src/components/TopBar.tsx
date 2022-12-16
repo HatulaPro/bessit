@@ -579,7 +579,7 @@ const TopBarUserMenu: React.FC = () => {
     };
     document.addEventListener("mousedown", listener);
     return () => document.removeEventListener("mousedown", listener);
-  }, [menuRef, isMenuOpen, setMenuOpen]);
+  }, [menuRef, isMenuOpen, buttonRef, setMenuOpen]);
 
   return (
     <>

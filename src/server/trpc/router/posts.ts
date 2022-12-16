@@ -176,7 +176,7 @@ export const postsRouter = router({
       return ctx.prisma.post.findUnique({
         where: { id: input.post_id },
         include: {
-          community: true,
+          community: { include: { moderators: { include: { user: true } } } },
           user: true,
           _count: { select: { votes: true, comments: true } },
           votes: {
@@ -487,7 +487,7 @@ export const postsRouter = router({
         where: whereQuery.where,
         cursor: input.cursor ? { id: input.cursor } : undefined,
         include: {
-          community: true,
+          community: { include: { moderators: { include: { user: true } } } },
           user: true,
           _count: { select: { votes: true, comments: true } },
           votes: {
