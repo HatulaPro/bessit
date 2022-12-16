@@ -116,7 +116,11 @@ export function useCommunityPosts(
       (communityQueryEnabled &&
         (getCommunityQuery.isLoading || getCommunityQuery.isFetching)),
     community: communityName
-      ? (getCommunityQuery.data ?? flattenedPosts[0]?.community) || null
+      ? (getCommunityQuery.data ??
+          (flattenedPosts[0]
+            ? { ...flattenedPosts[0]?.community, moderators: [] }
+            : null)) ||
+        null
       : null,
   };
 }
