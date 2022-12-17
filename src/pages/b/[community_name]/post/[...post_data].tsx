@@ -121,7 +121,7 @@ const PostPageContent: React.FC<{
           Back to main thread
         </button>
       )}
-      {authStatus === "authenticated" && (
+      {authStatus === "authenticated" && !post.isDeleted && (
         <CreateCommentForm
           parentCommentId={null}
           postId={post.id}
@@ -288,35 +288,43 @@ const PostComments: React.FC<{
                       comment={comment}
                       loggedIn={session.status === "authenticated"}
                     />
-                    <LoggedOnlyButton
-                      Child={(props) => (
-                        <button
-                          {...props}
-                          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
-                        >
-                          <BsChatLeft className="text-xl" />
-                          <span className="hidden md:block">Reply</span>
-                        </button>
-                      )}
-                      onClick={() => {
-                        setEditCommentOptions(
-                          editCommentOptions.commentId === comment.id
-                            ? { editOrCreate: "create", commentId: null }
-                            : { editOrCreate: "create", commentId: comment.id }
-                        );
-                      }}
-                      icon={<BsChatLeft className="text-blue-500" />}
-                      title={
-                        <>
-                          Reply to{" "}
-                          <Link href="/" className="font-bold hover:underline">
-                            {comment.user.name}
-                          </Link>
-                          &apos;s appreciable comment
-                        </>
-                      }
-                      content="Join Bessit to share your thoughts with our incredible community"
-                    />
+                    {!post.isDeleted && (
+                      <LoggedOnlyButton
+                        Child={(props) => (
+                          <button
+                            {...props}
+                            className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-blue-500"
+                          >
+                            <BsChatLeft className="text-xl" />
+                            <span className="hidden md:block">Reply</span>
+                          </button>
+                        )}
+                        onClick={() => {
+                          setEditCommentOptions(
+                            editCommentOptions.commentId === comment.id
+                              ? { editOrCreate: "create", commentId: null }
+                              : {
+                                  editOrCreate: "create",
+                                  commentId: comment.id,
+                                }
+                          );
+                        }}
+                        icon={<BsChatLeft className="text-blue-500" />}
+                        title={
+                          <>
+                            Reply to{" "}
+                            <Link
+                              href="/"
+                              className="font-bold hover:underline"
+                            >
+                              {comment.user.name}
+                            </Link>
+                            &apos;s appreciable comment
+                          </>
+                        }
+                        content="Join Bessit to share your thoughts with our incredible community"
+                      />
+                    )}
                     {session.data?.user?.id === comment.user.id && (
                       <button
                         onClick={() => {
@@ -342,25 +350,28 @@ const PostComments: React.FC<{
                           : "min-h-0"
                       )}
                     >
-                      {editCommentOptions.commentId === comment.id && (
-                        <CreateCommentForm
-                          parentCommentId={editCommentOptions.commentId}
-                          commentContent={
-                            editCommentOptions.editOrCreate === "edit"
-                              ? comment.content
-                              : ""
-                          }
-                          close={() =>
-                            setEditCommentOptions({
-                              commentId: null,
-                              editOrCreate: "edit",
-                            })
-                          }
-                          editOrCreate={editCommentOptions.editOrCreate}
-                          postId={post.id}
-                          setCurrentParentCommentId={setCurrentParentCommentId}
-                        />
-                      )}
+                      {editCommentOptions.commentId === comment.id &&
+                        !post.isDeleted && (
+                          <CreateCommentForm
+                            parentCommentId={editCommentOptions.commentId}
+                            commentContent={
+                              editCommentOptions.editOrCreate === "edit"
+                                ? comment.content
+                                : ""
+                            }
+                            close={() =>
+                              setEditCommentOptions({
+                                commentId: null,
+                                editOrCreate: "edit",
+                              })
+                            }
+                            editOrCreate={editCommentOptions.editOrCreate}
+                            postId={post.id}
+                            setCurrentParentCommentId={
+                              setCurrentParentCommentId
+                            }
+                          />
+                        )}
                     </div>
                   )}
 
