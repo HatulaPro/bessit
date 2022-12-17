@@ -22,7 +22,7 @@ Users can create communities, post about whatever they want, comment on posts, e
   - [X] Editing community info
   - [X] Removing posts
   - [X] Community mods
-  - [ ] Creating "infra" for community rules
+  - [X] Creating "infra" for community rules
   - [ ] Global mods
 * [ ] Making every user a millionaire
 
