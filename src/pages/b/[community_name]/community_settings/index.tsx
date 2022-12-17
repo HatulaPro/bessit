@@ -8,6 +8,7 @@ import { BsPlus, BsX } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { CommunityLogo } from "../../../../components/CommunityLogo";
+import { Dialog } from "../../../../components/Dialog";
 import { ImageHidesOnError } from "../../../../components/ImageHidesOnError";
 import { Loading } from "../../../../components/Loading";
 import { UserProfileLink } from "../../../../components/UserProfileLink";
@@ -47,6 +48,7 @@ const CommunitySettingsPage: NextPage = () => {
           <div className="mb-10 w-full max-w-3xl rounded border-2 border-zinc-800 p-8">
             <EditCommunityForm community={getCommunityQuery.data} />
             <EditCommunityModerators community={getCommunityQuery.data} />
+            <EditCommunityRules community={getCommunityQuery.data} />
           </div>
         )}
 
@@ -354,6 +356,208 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
         />
       </form>
     </div>
+  );
+};
+
+const EditCommunityRules: React.FC<{ community: CommunityReturnType }> = ({
+  community,
+}) => {
+  const [currentRuleIndex, setCurrentRuleIndex] = useState<number>(-1);
+  const [isOpen, setOpen] = useState<boolean>(false);
+
+  return (
+    <div className="mt-8 w-full">
+      <h2 className="my-2 w-full text-3xl text-white">Community Rules</h2>
+      {community.rules.map(
+        (_, index) =>
+          index % 2 === 0 && (
+            <button
+              key={index}
+              onClick={() => {
+                setCurrentRuleIndex(index / 2);
+                setOpen(true);
+              }}
+              className="my-1 flex w-full items-center gap-2 rounded border-2 border-zinc-500 p-1 hover:bg-zinc-700 hover:bg-opacity-20"
+            >
+              <b>{index / 2 + 1}.</b> {community.rules[index]}
+              <span className="ml-auto hidden max-w-[8rem] overflow-hidden overflow-ellipsis whitespace-nowrap text-sm font-normal text-zinc-400 md:block">
+                {community.rules[index + 1]}
+              </span>
+            </button>
+          )
+      )}
+      {community.rules.length === 0 && <>Your community has no rules yet.</>}
+      <button
+        onClick={() => {
+          setCurrentRuleIndex(-1);
+          setOpen(true);
+        }}
+        className="mx-auto mt-4 flex items-center gap-1 rounded bg-indigo-800 py-2 px-3 text-base transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+      >
+        <BsPlus className="text-xl" />
+        Add rule
+      </button>
+      <Dialog isOpen={isOpen} close={() => setOpen(false)}>
+        <CommunityRuleForm
+          community={community}
+          index={currentRuleIndex}
+          close={() => setOpen(false)}
+        />
+      </Dialog>
+    </div>
+  );
+};
+
+const createCommunityRuleSchema = z.object({
+  title: z
+    .string()
+    .min(2, { message: "Title must have at least 2 characters" })
+    .max(32, { message: "Title must have at most 32 characters" }),
+  content: z
+    .string()
+    .max(256, { message: "Content must have at most 256 characters" }),
+});
+
+export type createCommunityRuleForm = z.infer<typeof createCommunityRuleSchema>;
+
+const CommunityRuleForm: React.FC<{
+  community: CommunityReturnType;
+  index: number;
+  close: () => void;
+}> = ({ community, index, close }) => {
+  const { control, handleSubmit } = useForm<createCommunityRuleForm>({
+    mode: "onChange",
+    resolver: zodResolver(createCommunityRuleSchema),
+    defaultValues: {
+      title: index >= 0 ? community.rules[index * 2 + 0] : "",
+      content: index >= 0 ? community.rules[index * 2 + 1] : "",
+    },
+  });
+
+  const utils = trpc.useContext();
+  const editRulesMutation = trpc.community.editCommunityRules.useMutation({
+    onSuccess: (data) => {
+      utils.community.invalidate();
+      utils.community.getCommunity.setData({ name: data.name }, (prev) => {
+        if (!prev) return community;
+        return { ...prev, ...data };
+      });
+      close();
+    },
+  });
+
+  function onSubmit(data: createCommunityRuleForm) {
+    const newRules = [...community.rules];
+    if (index === -1) {
+      newRules.push(data.title, data.content);
+    } else {
+      newRules[index * 2] = data.title;
+      newRules[index * 2 + 1] = data.content;
+    }
+    editRulesMutation.mutate({ name: community.name, rules: newRules });
+  }
+
+  function removeRule() {
+    const newRules = [...community.rules];
+    newRules.splice(index * 2, 2);
+
+    editRulesMutation.mutate({ name: community.name, rules: newRules });
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="m-auto flex w-full max-w-sm flex-col gap-1 border-2 border-zinc-800 bg-zinc-900 px-4 py-0 md:max-w-md md:px-6"
+    >
+      <h2 className="my-4 text-2xl">
+        {index === -1 ? "Create New Rule" : `Edit Rule ${index + 1}`}
+      </h2>
+      <Controller
+        control={control}
+        name="title"
+        render={({ field, fieldState }) => (
+          <>
+            <div
+              className={cx(
+                "overflow-hidden text-red-400 transition-all",
+                fieldState.error?.message ? "h-8" : "h-0"
+              )}
+            >
+              {fieldState.error?.message}
+            </div>
+            <input
+              autoComplete="off"
+              {...field}
+              className={cx(
+                "w-full rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+                fieldState.error
+                  ? "border-red-600"
+                  : "border-zinc-500 focus:border-zinc-300"
+              )}
+              type="text"
+              placeholder={
+                index === -1
+                  ? "Title of new rule"
+                  : `Title of rule ${index + 1}`
+              }
+            />
+          </>
+        )}
+      />
+      <Controller
+        control={control}
+        name="content"
+        render={({ field, fieldState }) => (
+          <>
+            <div
+              className={cx(
+                "overflow-hidden text-red-400 transition-all",
+                fieldState.error?.message ? "h-8" : "h-0"
+              )}
+            >
+              {fieldState.error?.message}
+            </div>
+            <textarea
+              autoComplete="off"
+              {...field}
+              className={cx(
+                "h-60 w-full resize-none rounded border-2 bg-transparent p-1 text-zinc-200 outline-none md:h-48",
+                fieldState.error
+                  ? "border-red-600"
+                  : "border-zinc-500 focus:border-zinc-300"
+              )}
+              placeholder={
+                index === -1
+                  ? "Content of new rule"
+                  : `Content of rule ${index + 1}`
+              }
+            />
+          </>
+        )}
+      />
+
+      <div className="mt-4 flex w-full justify-center gap-2">
+        <button
+          type="submit"
+          className="w-28 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+          disabled={editRulesMutation.isLoading}
+        >
+          Save
+        </button>
+        {index !== -1 && (
+          <button
+            className="w-28 rounded-md bg-red-800 p-2 text-white transition-colors hover:bg-red-900 disabled:bg-zinc-500"
+            type="button"
+            disabled={editRulesMutation.isLoading}
+            onClick={removeRule}
+          >
+            Remove rule
+          </button>
+        )}
+      </div>
+
+      <Loading size="small" show={editRulesMutation.isLoading} />
+    </form>
   );
 };
 

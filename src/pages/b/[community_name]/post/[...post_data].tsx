@@ -593,6 +593,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
           image: null,
           logo: null,
           moderators: [],
+          rules: [],
         },
         content: "",
         createdAt: new Date(),

@@ -103,6 +103,7 @@ model Community {
   image      String?
   posts      Post[]
   moderators Moderator[]
+  rules      String[]    @default([])
 }
 
 model Comment {
