@@ -25,7 +25,7 @@ import { AiFillCaretDown, AiOutlineInfoCircle } from "react-icons/ai";
 const CommunityPage: NextPage = () => {
   const router = useRouter();
   const community_name = router.query.community_name;
-  const pageTitle = `Bessit | ${community_name}`;
+  const pageTitle = `Bessit | ${community_name ?? "View Community"}`;
 
   return (
     <>
@@ -102,13 +102,27 @@ const CommunityHeader: React.FC<{
 
   return (
     <>
-      <div className="bg-rotate relative h-40 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
+      <div className="bg-rotate relative h-40 w-full overflow-hidden bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
         {community.image && (
           <ImageHidesOnError
             src={community.image}
             loader={({ src }) => src}
             alt={`Community image of ${community.name}`}
-            className="object-cover"
+            className="scale-125 object-cover opacity-0"
+            onLoad={(e) => {
+              e.currentTarget.animate(
+                [
+                  { opacity: "0", transform: "scale(1.25)", offset: 0.05 },
+                  { opacity: "0.9", transform: "scale(1.15)", offset: 0.5 },
+                  { opacity: "1", transform: "scale(1)" },
+                ],
+                {
+                  duration: 1500,
+                  fill: "forwards",
+                  easing: "ease-out",
+                }
+              );
+            }}
             fill
             priority
           />
