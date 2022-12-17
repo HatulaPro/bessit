@@ -45,7 +45,7 @@ export const SortBySection: React.FC<{
   }
 
   return (
-    <div className="justify-left mt-4 flex w-full max-w-3xl flex-1 items-center gap-2 bg-zinc-800 px-0.5 py-3 text-white md:rounded-md md:px-2">
+    <div className="justify-left mt-4 flex w-full max-w-3xl flex-1 flex-wrap-reverse items-center gap-2 bg-zinc-800 px-2 py-3 text-white md:rounded-md md:px-2">
       {Object.entries(SORT_OPTIONS).map(([sortFilter, Icon]) => (
         <button
           className={cx(
