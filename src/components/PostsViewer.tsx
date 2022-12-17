@@ -25,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
 import { trpc } from "../utils/trpc";
 import { UserProfileLink } from "./UserProfileLink";
+import { useRouter } from "next/router";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -207,9 +208,11 @@ export const SinglePost: React.FC<{
   );
 };
 
-const PostModeratorTools: React.FC<{
+export const PostModeratorTools: React.FC<{
   post: CommunityPosts["posts"][number];
-}> = ({ post }) => {
+  comment?: { isDeleted: boolean; id: string };
+}> = ({ post, comment }) => {
+  const router = useRouter();
   const [isOpen, setOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -223,6 +226,20 @@ const PostModeratorTools: React.FC<{
       });
     },
   });
+
+  const deleteCommentMutation = trpc.moderator.setCommentDeleted.useMutation({
+    onSuccess: (data) => {
+      utils.post.getComments.invalidate();
+      router.push(
+        `/b/${post.community.name}/post/${post.id}/${slugify(
+          post.title
+        )}/${data}`
+      );
+    },
+  });
+
+  const isLoading =
+    deletePostMutation.isLoading || deleteCommentMutation.isLoading;
 
   useEffect(() => {
     const listener = (e: MouseEvent) => {
@@ -248,11 +265,7 @@ const PostModeratorTools: React.FC<{
         className="text-xl"
         onClick={() => setOpen(!isOpen)}
       >
-        {deletePostMutation.isLoading ? (
-          <Loading size="small" show />
-        ) : (
-          <BsThreeDotsVertical />
-        )}
+        {isLoading ? <Loading size="small" show /> : <BsThreeDotsVertical />}
       </button>
       <div
         className={cx(
@@ -261,31 +274,47 @@ const PostModeratorTools: React.FC<{
         )}
         ref={menuRef}
       >
-        {post.isDeleted ? (
+        {(comment ? comment.isDeleted : post.isDeleted) ? (
           <button
             onClick={() => {
-              deletePostMutation.mutate({
-                postId: post.id,
-                newDeletedStatus: false,
-              });
+              if (comment) {
+                deleteCommentMutation.mutate({
+                  commentId: comment.id,
+                  newDeletedStatus: false,
+                });
+              } else {
+                deletePostMutation.mutate({
+                  postId: post.id,
+                  newDeletedStatus: false,
+                });
+              }
               setOpen(false);
             }}
             className="flex items-center justify-center gap-1.5 rounded p-1 transition-colors hover:bg-zinc-700"
           >
-            <BsArrowCounterclockwise className="text-green-500" /> Restore Post
+            <BsArrowCounterclockwise className="text-green-500" /> Restore{" "}
+            {comment ? "Comment" : "Post"}
           </button>
         ) : (
           <button
             onClick={() => {
-              deletePostMutation.mutate({
-                postId: post.id,
-                newDeletedStatus: true,
-              });
+              if (comment) {
+                deleteCommentMutation.mutate({
+                  commentId: comment.id,
+                  newDeletedStatus: true,
+                });
+              } else {
+                deletePostMutation.mutate({
+                  postId: post.id,
+                  newDeletedStatus: true,
+                });
+              }
               setOpen(false);
             }}
             className="flex items-center justify-center gap-1.5 rounded p-1 transition-colors hover:bg-zinc-700"
           >
-            <BsTrashFill className="text-red-500" /> Delete Post
+            <BsTrashFill className="text-red-500" /> Delete{" "}
+            {comment ? "Comment" : "Post"}
           </button>
         )}
       </div>

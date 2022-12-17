@@ -5,7 +5,10 @@ import { useRouter } from "next/router";
 import { z } from "zod";
 import { Loading } from "../../../../components/Loading";
 import { NotFoundMessage } from "../../../../components/NotFoundMessage";
-import { SinglePost } from "../../../../components/PostsViewer";
+import {
+  PostModeratorTools,
+  SinglePost,
+} from "../../../../components/PostsViewer";
 import { type RouterOutputs, trpc } from "../../../../utils/trpc";
 import superjson from "superjson";
 import { IoMdClose } from "react-icons/io";
@@ -22,6 +25,7 @@ import {
   BsShare,
   BsArrowUpCircle,
   BsPencil,
+  BsFillExclamationTriangleFill,
 } from "react-icons/bs";
 import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
@@ -158,6 +162,7 @@ export type UIComment = {
     votes: number;
   };
   childComments?: UIComment[];
+  isDeleted: boolean;
   votes: CommentVote[];
 };
 
@@ -185,6 +190,17 @@ const PostComments: React.FC<{
   const session = useSession();
   const [closedComments, setClosedComments] = useState<Set<string>>(new Set());
 
+  const showModeratorTools = useMemo<boolean>(() => {
+    if (!main) return false;
+    if (session.status !== "authenticated" || !session.data?.user) return false;
+    const uid = session.data.user.id;
+    if (uid === post.community.ownerId) return true;
+    for (let i = 0; i < post.community.moderators.length; ++i) {
+      if (uid === post.community.moderators[i]?.userId) return true;
+    }
+    return false;
+  }, [post.community, main, session.data?.user, session.status]);
+
   function closeOrOpenComment(commentId: string) {
     return () => {
       if (closedComments.has(commentId)) {
@@ -205,11 +221,17 @@ const PostComments: React.FC<{
     >
       {comments.map((comment) => {
         return (
-          <div key={comment.id} className="flex">
+          <div key={comment.id} className="relative flex">
             <button
               className="mt-2 w-1 cursor-pointer rounded-full bg-zinc-600 hover:bg-zinc-200"
               onClick={closeOrOpenComment(comment.id)}
             ></button>
+            {showModeratorTools && (
+              <PostModeratorTools
+                post={post}
+                comment={{ id: comment.id, isDeleted: comment.isDeleted }}
+              />
+            )}
             <div
               className={cx(
                 "mt-2 w-full overflow-hidden rounded-sm pl-2 pt-1 transition-colors duration-300",
@@ -227,6 +249,12 @@ const PostComments: React.FC<{
                   : undefined
               }
             >
+              {!closedComments.has(comment.id) && comment.isDeleted && (
+                <div className="flex items-center gap-2 p-1 text-sm text-zinc-200">
+                  <BsFillExclamationTriangleFill className="text-red-500" />
+                  This comment has been erased from the public eye.
+                </div>
+              )}
               <div className="mb-1 flex items-center gap-0.5 text-xs text-gray-400">
                 <UserProfileLink
                   user={comment.user}

@@ -204,7 +204,7 @@ export const postsRouter = router({
           postId: input.post,
           parentCommentId: input.mainCommentId ? undefined : null,
           id: input.mainCommentId ?? undefined,
-          isDeleted: false,
+          isDeleted: input.mainCommentId ? undefined : false,
         },
         select: {
           childComments: {
@@ -212,6 +212,7 @@ export const postsRouter = router({
             orderBy: { createdAt: "desc" },
             select: {
               content: true,
+              isDeleted: true,
               createdAt: true,
               updatedAt: true,
               postId: true,
@@ -228,6 +229,7 @@ export const postsRouter = router({
                 select: {
                   user: true,
                   content: true,
+                  isDeleted: true,
                   createdAt: true,
                   updatedAt: true,
                   postId: true,
@@ -244,6 +246,7 @@ export const postsRouter = router({
                       user: true,
                       content: true,
                       postId: true,
+                      isDeleted: true,
                       createdAt: true,
                       updatedAt: true,
                       id: true,
@@ -259,6 +262,7 @@ export const postsRouter = router({
                           user: true,
                           content: true,
                           postId: true,
+                          isDeleted: true,
                           createdAt: true,
                           updatedAt: true,
                           id: true,
@@ -278,6 +282,7 @@ export const postsRouter = router({
             },
           },
           content: true,
+          isDeleted: true,
           createdAt: true,
           updatedAt: true,
           id: true,
