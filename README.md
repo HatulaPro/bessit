@@ -20,9 +20,9 @@ Users can create communities, post about whatever they want, comment on posts, e
 * [X] Profile pages
 * [ ] Adding moderating options
   - [X] Editing community info
-  - [ ] Removing posts
+  - [X] Removing posts
+  - [X] Community mods
   - [ ] Creating "infra" for community rules
   - [ ] Global mods
-  - [ ] Community mods
 * [ ] Making every user a millionaire
 
