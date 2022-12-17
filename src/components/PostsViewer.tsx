@@ -6,6 +6,7 @@ import {
   BsChatLeft,
   BsDot,
   BsFillExclamationTriangleFill,
+  BsFillShieldFill,
   BsPencil,
   BsShare,
   BsThreeDotsVertical,
@@ -88,6 +89,17 @@ export const SinglePost: React.FC<{
     return false;
   }, [post.community, isMain, placeholder, session.data?.user, session.status]);
 
+  const isPosterModerator = useMemo<boolean>(() => {
+    if (placeholder) return false;
+    if (!isMain) return false;
+    const uid = post.userId;
+    if (uid === post.community.ownerId) return true;
+    for (let i = 0; i < post.community.moderators.length; ++i) {
+      if (uid === post.community.moderators[i]?.userId) return true;
+    }
+    return false;
+  }, [post.community, post.userId, isMain, placeholder]);
+
   return (
     <>
       <div
@@ -124,6 +136,9 @@ export const SinglePost: React.FC<{
                   "inline-block min-w-0 animate-pulse rounded bg-zinc-600"
               )}
             />
+            {isPosterModerator && (
+              <BsFillShieldFill className="ml-1.5 mb-0.5 inline-block text-green-600" />
+            )}
           </div>
           <BsDot className="text-xs text-gray-400" />
           <div className="text-xs text-gray-400">{timeAgo(post.createdAt)}</div>

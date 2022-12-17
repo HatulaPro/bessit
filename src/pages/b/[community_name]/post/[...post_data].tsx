@@ -26,6 +26,7 @@ import {
   BsArrowUpCircle,
   BsPencil,
   BsFillExclamationTriangleFill,
+  BsFillShieldFill,
 } from "react-icons/bs";
 import Image from "next/image";
 import { Markdown } from "../../../../components/Markdown";
@@ -190,16 +191,21 @@ const PostComments: React.FC<{
   const session = useSession();
   const [closedComments, setClosedComments] = useState<Set<string>>(new Set());
 
-  const showModeratorTools = useMemo<boolean>(() => {
-    if (!main) return false;
-    if (session.status !== "authenticated" || !session.data?.user) return false;
-    const uid = session.data.user.id;
-    if (uid === post.community.ownerId) return true;
+  const modsSet = useMemo<Set<string>>(() => {
+    const set = new Set<string>();
+    set.add(post.community.ownerId);
     for (let i = 0; i < post.community.moderators.length; ++i) {
-      if (uid === post.community.moderators[i]?.userId) return true;
+      set.add(post.community.moderators[i]?.userId ?? "");
     }
-    return false;
-  }, [post.community, main, session.data?.user, session.status]);
+    return set;
+  }, [post.community]);
+
+  const showModeratorTools = Boolean(
+    main &&
+      session.status === "authenticated" &&
+      session.data.user &&
+      modsSet.has(session.data.user.id)
+  );
 
   function closeOrOpenComment(commentId: string) {
     return () => {
@@ -278,6 +284,9 @@ const PostComments: React.FC<{
                     u/{comment.user.name}
                   </>
                 </UserProfileLink>
+                {modsSet.has(comment.user.id) && (
+                  <BsFillShieldFill className="ml-1 text-green-600" />
+                )}
                 <BsDot />
                 {timeAgo(comment.createdAt)}
                 {comment.updatedAt.getTime() !==
