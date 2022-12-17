@@ -20,7 +20,7 @@ import { BsGearFill, BsPencil } from "react-icons/bs";
 import { ImageHidesOnError } from "../../../components/ImageHidesOnError";
 import Link from "next/link";
 import { cx } from "../../../utils/general";
-import { AiFillCaretDown } from "react-icons/ai";
+import { AiFillCaretDown, AiOutlineInfoCircle } from "react-icons/ai";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -132,10 +132,11 @@ const CommunityHeader: React.FC<{
               {community.name}
             </h1>
           </div>
+          {!placeholder && <AboutCommunityButtonMobile community={community} />}
           {authStatus === "authenticated" && (
             <button
               onClick={() => setOpen(true)}
-              className="group relative m-2 self-end rounded-full p-2 text-lg text-white md:hidden"
+              className="group relative my-2 mr-2 self-end rounded-full p-2 text-lg text-white md:hidden"
             >
               <BsPencil />
               <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
@@ -156,12 +157,18 @@ const CommunityHeader: React.FC<{
 const AboutCommunity: React.FC<{
   community: Community;
   placeholder: boolean;
-}> = ({ community, placeholder }) => {
+  mobile?: boolean;
+}> = ({ community, placeholder, mobile }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   const session = useSession();
 
   return (
-    <div className="sticky top-20 my-4 hidden flex-[1.25] rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
+    <div
+      className={cx(
+        "flex-[1.25] rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4",
+        mobile ? "my-auto" : "sticky top-20 my-4 hidden md:block"
+      )}
+    >
       <h2 className="mb-2 text-center text-xl text-zinc-300">
         About Community
       </h2>
@@ -208,6 +215,26 @@ const AboutCommunity: React.FC<{
         <PostEditor defaultCommunity={community.name} defaultOpen />
       </Dialog>
     </div>
+  );
+};
+
+const AboutCommunityButtonMobile: React.FC<{ community: Community }> = ({
+  community,
+}) => {
+  const [isOpen, setOpen] = useState<boolean>(false);
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="group relative my-2 self-end rounded-full p-2 text-xl text-white md:hidden"
+      >
+        <AiOutlineInfoCircle />
+        <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
+      </button>
+      <Dialog isOpen={isOpen} close={() => setOpen(false)}>
+        <AboutCommunity placeholder={false} community={community} mobile />
+      </Dialog>
+    </>
   );
 };
 
