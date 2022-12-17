@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog } from "../../../components/Dialog";
 import { Loading } from "../../../components/Loading";
 import { NotFoundMessage } from "../../../components/NotFoundMessage";
@@ -20,6 +20,7 @@ import { BsGearFill, BsPencil } from "react-icons/bs";
 import { ImageHidesOnError } from "../../../components/ImageHidesOnError";
 import Link from "next/link";
 import { cx } from "../../../utils/general";
+import { AiFillCaretDown } from "react-icons/ai";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -160,7 +161,7 @@ const AboutCommunity: React.FC<{
   const session = useSession();
 
   return (
-    <div className="sticky top-20 my-4 hidden flex-1 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
+    <div className="sticky top-20 my-4 hidden flex-[1.25] rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 md:block">
       <h2 className="mb-2 text-center text-xl text-zinc-300">
         About Community
       </h2>
@@ -171,7 +172,9 @@ const AboutCommunity: React.FC<{
       >
         {community.desc}
       </p>
-      <hr className="m-2" />
+      <hr className="my-7 mx-2" />
+      <AboutCommunityRules rules={community.rules} />
+      <hr className="my-7 mx-2" />
       {session.status === "authenticated" ? (
         <>
           <button
@@ -204,6 +207,56 @@ const AboutCommunity: React.FC<{
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
         <PostEditor defaultCommunity={community.name} defaultOpen />
       </Dialog>
+    </div>
+  );
+};
+
+const AboutCommunityRules: React.FC<{ rules: string[] }> = ({ rules }) => {
+  const [activeRule, setActiveRule] = useState<number>(-1);
+  const structuredRules = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < rules.length; i += 2) {
+      result.push({
+        title: rules[i] as string,
+        content: rules[i + 1] as string,
+      });
+    }
+    return result;
+  }, [rules]);
+  return (
+    <div className="flex w-full flex-col gap-0.5 rounded py-1">
+      <h4 className="text-center text-lg text-zinc-300">Rules</h4>
+      {structuredRules.map((rule, index) => (
+        <button
+          key={index}
+          className="flex flex-wrap items-center px-1 py-0.5 hover:bg-zinc-900"
+          onClick={() => setActiveRule(activeRule === index ? -1 : index)}
+        >
+          <span
+            className={cx(
+              "text-lg font-bold transition-colors",
+              activeRule === index ? "text-indigo-300" : "text-white"
+            )}
+          >
+            {rule.title}
+          </span>
+          <AiFillCaretDown
+            className={cx(
+              "ml-auto transition-transform",
+              activeRule === index ? "rotate-90" : "rotate-0"
+            )}
+          />
+          <div
+            className={cx(
+              "w-full basis-full overflow-hidden pr-1.5 pl-2.5 text-left transition-all",
+              activeRule === index ? "max-h-[12rem]" : "max-h-0"
+            )}
+          >
+            {rule.content}
+          </div>
+        </button>
+      ))}
+      {structuredRules.length === 0 && "This community has no rules"}
     </div>
   );
 };

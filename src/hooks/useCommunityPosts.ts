@@ -41,6 +41,7 @@ export function useCommunityPosts(
                 name: "community",
                 ownerId: "",
                 moderators: [],
+                rules: [],
               },
               content: "",
               createdAt: new Date(),
