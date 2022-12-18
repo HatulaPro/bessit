@@ -1,4 +1,3 @@
-import type { Community } from "@prisma/client";
 import type { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -253,7 +252,7 @@ const CommunityHeader: React.FC<{
 };
 
 const AboutCommunity: React.FC<{
-  community: Community;
+  community: Exclude<RouterOutputs["community"]["getCommunity"], null>;
   placeholder: boolean;
   mobile?: boolean;
 }> = ({ community, placeholder, mobile }) => {
@@ -277,7 +276,10 @@ const AboutCommunity: React.FC<{
       >
         {community.desc}
       </p>
-      <hr className="my-7 mx-2" />
+      <p className="mt-5 text-sm text-zinc-300">
+        {community._count.members} members
+      </p>
+      <hr className="my-2 mx-2 mb-7" />
       <AboutCommunityRules rules={community.rules} />
       <hr className="my-7 mx-2" />
       {session.status === "authenticated" ? (
@@ -316,9 +318,9 @@ const AboutCommunity: React.FC<{
   );
 };
 
-const AboutCommunityButtonMobile: React.FC<{ community: Community }> = ({
-  community,
-}) => {
+const AboutCommunityButtonMobile: React.FC<{
+  community: Exclude<RouterOutputs["community"]["getCommunity"], null>;
+}> = ({ community }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   return (
     <>
