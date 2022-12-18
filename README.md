@@ -24,5 +24,6 @@ Users can create communities, post about whatever they want, comment on posts, e
   - [X] Community mods
   - [X] Creating "infra" for community rules
   - [ ] Global mods
+* [X] Favorite communities
 * [ ] Making every user a millionaire
 
