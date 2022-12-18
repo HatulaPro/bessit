@@ -177,4 +177,13 @@ export const communitiesRouter = router({
       include: { community: true },
     });
   }),
+  getTopCommunities: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.community
+      .findMany({
+        take: 5,
+        include: { _count: { select: { members: true } } },
+        orderBy: { members: { _count: "desc" } },
+      })
+      .then((communities) => communities.filter((c) => c._count.members > 0));
+  }),
 });

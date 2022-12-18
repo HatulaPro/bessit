@@ -1,8 +1,11 @@
+import type { Community } from "@prisma/client";
 import { type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
+import { BsStars } from "react-icons/bs";
+import { CgComponents } from "react-icons/cg";
 import { CommunityLogo } from "../components/CommunityLogo";
 import { PostEditor } from "../components/PostEditor";
 import { PostsViewer } from "../components/PostsViewer";
@@ -44,13 +47,13 @@ const Home: NextPage = () => {
           />
           <PostsViewer communityPosts={communityPosts} />
         </div>
-        <UserCommunities />
+        <BrowseSection />
       </main>
     </>
   );
 };
 
-const UserCommunities: React.FC = () => {
+const BrowseSection: React.FC = () => {
   const session = useSession();
 
   const getFavoriteCommunitiesQuery =
@@ -77,49 +80,96 @@ const UserCommunities: React.FC = () => {
       ],
     });
 
+  const getTopCommunitiesQuery = trpc.community.getTopCommunities.useQuery(
+    undefined,
+    {
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      placeholderData: [
+        {
+          ownerId: "...",
+          name: "community",
+          desc: "words",
+          id: "communityId",
+          logo: null,
+          image: null,
+          rules: [],
+          _count: { members: 1 },
+        },
+      ],
+    }
+  );
+
   return (
-    <div className="sticky top-20 my-2 hidden flex-[1] rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white md:block">
-      <h2 className="mb-4 text-sm text-zinc-400">Your communities</h2>
-      {session.status !== "unauthenticated" ? (
+    <div className="sticky top-20 flex-1">
+      <div className="my-2 hidden rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white md:block">
+        <h2 className="mb-4 flex items-center gap-1 text-sm text-zinc-400">
+          <BsStars className="text-lg text-white" /> Popular communities
+        </h2>
         <div className="flex flex-col gap-1">
-          {getFavoriteCommunitiesQuery.data?.map((favCom) => (
-            <Link
-              key={favCom.communityId}
-              className={cx(
-                "group flex items-center gap-1 rounded p-1 text-sm font-bold hover:bg-zinc-600 hover:bg-opacity-25",
-                !getFavoriteCommunitiesQuery.isFetched &&
-                  "min-w-0 animate-pulse bg-zinc-600"
-              )}
-              href={`/b/${favCom.community.name}`}
-            >
-              <CommunityLogo
-                name={favCom.community.name}
-                logo={favCom.community.logo}
-                size="small"
-              />
-              <span className="text-base text-gray-300 group-hover:underline">
-                b/{favCom.community.name}
-              </span>
-            </Link>
+          {getTopCommunitiesQuery.data?.map((com) => (
+            <SingleCommunityLink
+              key={com.id}
+              placeholder={!getTopCommunitiesQuery.isFetched}
+              community={com}
+            />
           ))}
-          {getFavoriteCommunitiesQuery.data?.length === 0 && (
-            <span className="text-sm">
-              You haven&apos;t joined any community yet
-            </span>
-          )}
         </div>
-      ) : (
-        <p className="w-full text-left text-sm">
-          <button
-            onClick={() => signIn()}
-            className="cursor-pointer text-indigo-500 hover:underline"
-          >
-            Log in
-          </button>{" "}
-          to join communities
-        </p>
-      )}
+      </div>
+      <div className="my-2 hidden rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white md:block">
+        <h2 className="mb-4 flex items-center gap-1 text-sm text-zinc-400">
+          <CgComponents className="text-lg text-white" /> Your communities
+        </h2>
+        {session.status !== "unauthenticated" ? (
+          <div className="flex flex-col gap-1">
+            {getFavoriteCommunitiesQuery.data?.map((favCom) => (
+              <SingleCommunityLink
+                key={favCom.communityId}
+                placeholder={!getFavoriteCommunitiesQuery.isFetched}
+                community={favCom.community}
+              />
+            ))}
+            {getFavoriteCommunitiesQuery.data?.length === 0 && (
+              <span className="text-sm">
+                You haven&apos;t joined any community yet
+              </span>
+            )}
+          </div>
+        ) : (
+          <p className="w-full text-left text-sm">
+            <button
+              onClick={() => signIn()}
+              className="cursor-pointer text-indigo-500 hover:underline"
+            >
+              Log in
+            </button>{" "}
+            to join communities
+          </p>
+        )}
+      </div>
     </div>
+  );
+};
+
+const SingleCommunityLink: React.FC<{
+  community: Community;
+  placeholder: boolean;
+}> = ({ community, placeholder }) => {
+  return (
+    <Link
+      className={cx(
+        "group flex items-center gap-1 rounded p-1 text-sm font-bold hover:bg-zinc-600 hover:bg-opacity-25",
+        placeholder && "min-w-0 animate-pulse bg-zinc-600"
+      )}
+      href={`/b/${community.name}`}
+    >
+      <CommunityLogo name={community.name} logo={community.logo} size="small" />
+      <span className="text-base text-gray-300 group-hover:underline">
+        b/{community.name}
+      </span>
+    </Link>
   );
 };
 
