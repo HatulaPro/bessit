@@ -44,6 +44,7 @@ const Home: NextPage = () => {
             setSortBy={setSortBy}
             timeFilter={timeFilter}
             setTimeFilter={setTimeFilter}
+            allowFav
           />
           <PostsViewer communityPosts={communityPosts} />
         </div>
@@ -103,8 +104,8 @@ const BrowseSection: React.FC = () => {
   );
 
   return (
-    <div className="sticky top-20 flex-1">
-      <div className="my-2 hidden rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white md:block">
+    <div className="sticky top-20 hidden flex-1 md:block">
+      <div className="my-2 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white">
         <h2 className="mb-4 flex items-center gap-1 text-sm text-zinc-400">
           <BsStars className="text-lg text-white" /> Popular communities
         </h2>
@@ -118,7 +119,7 @@ const BrowseSection: React.FC = () => {
           ))}
         </div>
       </div>
-      <div className="my-2 hidden rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white md:block">
+      <div className="my-2 rounded-md border-[1px] border-zinc-400 bg-zinc-800 p-4 text-white">
         <h2 className="mb-4 flex items-center gap-1 text-sm text-zinc-400">
           <CgComponents className="text-lg text-white" /> Your communities
         </h2>

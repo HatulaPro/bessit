@@ -423,7 +423,7 @@ export const postsRouter = router({
     .input(
       z.object({
         postsFromLast: z.enum(["day", "week", "month", "year", "all time"]),
-        sort: z.enum(["new", "hot", "moot"]),
+        sort: z.enum(["fav", "new", "hot", "moot"]),
         count: z.number().min(4).max(50),
         cursor: z.string().nullish(),
         community: z.string().min(4).max(24).nullable(),
@@ -477,6 +477,31 @@ export const postsRouter = router({
         };
       }
 
+      if (input.sort === "fav") {
+        if (!ctx.session?.user?.id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Not logged in.",
+          });
+        }
+        if (input.community) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input.",
+          });
+        }
+        whereQuery.where = {
+          createdAt: {
+            gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
+          },
+          communityId: {
+            in: await ctx.prisma.communityMember
+              .findMany({ where: { userId: ctx.session.user.id } })
+              .then((res) => res.map((f) => f.communityId)),
+          },
+        };
+      }
+
       const orderByMap: Record<
         typeof input["sort"],
         Parameters<typeof ctx.prisma.post.findMany>[0]
@@ -484,6 +509,7 @@ export const postsRouter = router({
         new: { orderBy: { createdAt: "desc" } },
         hot: { orderBy: { votes: { _count: "desc" } } },
         moot: { orderBy: { comments: { _count: "desc" } } },
+        fav: { orderBy: { votes: { _count: "desc" } } },
       } as const;
 
       const posts = await ctx.prisma.post.findMany({

@@ -2,7 +2,12 @@ import { useState } from "react";
 import { cx } from "../utils/general";
 import { AiFillCaretDown } from "react-icons/ai";
 import type { RouterInputs } from "../utils/trpc";
-import { BsClock, BsExclamationTriangle, BsStars } from "react-icons/bs";
+import {
+  BsClock,
+  BsExclamationTriangle,
+  BsStars,
+  BsSuitHeartFill,
+} from "react-icons/bs";
 import type { IconType } from "react-icons/lib";
 
 export type SortingOptions = RouterInputs["post"]["getPosts"]["sort"];
@@ -18,6 +23,7 @@ const TIME_FILTERS: Record<PostsFromLastOptions, string> = {
 };
 
 const SORT_OPTIONS: Record<SortingOptions, IconType> = {
+  fav: BsSuitHeartFill,
   new: BsClock,
   moot: BsExclamationTriangle,
   hot: BsStars,
@@ -29,7 +35,15 @@ export const SortBySection: React.FC<{
   setTimeFilter: (val: PostsFromLastOptions) => void;
   timeFilter: PostsFromLastOptions;
   isLoading: boolean;
-}> = ({ timeFilter, setTimeFilter, setSortBy, sortBy, isLoading }) => {
+  allowFav: boolean;
+}> = ({
+  timeFilter,
+  setTimeFilter,
+  setSortBy,
+  sortBy,
+  isLoading,
+  allowFav,
+}) => {
   const [isFocused, setFocused] = useState<boolean>(false);
 
   function setCorrectSortingOption(val: SortingOptions) {
@@ -39,6 +53,8 @@ export const SortBySection: React.FC<{
       setTimeFilter("all time");
     } else if (val === "hot") {
       setTimeFilter("day");
+    } else if (val === "fav") {
+      setTimeFilter("day");
     }
 
     setSortBy(val);
@@ -46,24 +62,29 @@ export const SortBySection: React.FC<{
 
   return (
     <div className="justify-left mt-4 flex w-full max-w-3xl flex-1 flex-wrap-reverse items-center gap-2 bg-zinc-800 px-2 py-3 text-white md:rounded-md md:px-2">
-      {Object.entries(SORT_OPTIONS).map(([sortFilter, Icon]) => (
-        <button
-          className={cx(
-            "my-0.5 flex items-center gap-1 rounded-full py-0.5 px-2 text-base font-bold transition-all disabled:opacity-50 disabled:contrast-50 md:px-3 md:text-lg",
-            sortFilter === sortBy
-              ? "bg-zinc-700 text-white"
-              : "bg-transparent text-zinc-500 hover:bg-zinc-700"
-          )}
-          key={sortFilter}
-          onClick={() => {
-            setCorrectSortingOption(sortFilter as keyof typeof SORT_OPTIONS);
-          }}
-          disabled={isLoading}
-        >
-          <Icon />
-          {sortFilter}
-        </button>
-      ))}
+      {Object.entries(SORT_OPTIONS).map(
+        ([sortFilter, Icon]) =>
+          (allowFav || (!allowFav && sortFilter !== "fav")) && (
+            <button
+              className={cx(
+                "my-0.5 flex items-center gap-1 rounded-full py-0.5 px-2 text-base font-bold transition-all disabled:opacity-50 disabled:contrast-50 md:px-3 md:text-lg",
+                sortFilter === sortBy
+                  ? "bg-zinc-700 text-white"
+                  : "bg-transparent text-zinc-500 hover:bg-zinc-700"
+              )}
+              key={sortFilter}
+              onClick={() => {
+                setCorrectSortingOption(
+                  sortFilter as keyof typeof SORT_OPTIONS
+                );
+              }}
+              disabled={isLoading}
+            >
+              <Icon />
+              {sortFilter}
+            </button>
+          )
+      )}
       {sortBy === "hot" && (
         <div
           className="relative ml-auto mr-2 w-24 text-sm md:w-28 md:text-base"

@@ -83,6 +83,7 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
             setSortBy={setSortBy}
             timeFilter={timeFilter}
             setTimeFilter={setTimeFilter}
+            allowFav={false}
           />
           {!showPlaceholder && <PostsViewer communityPosts={communityPosts} />}
         </div>
