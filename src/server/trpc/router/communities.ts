@@ -142,4 +142,33 @@ export const communitiesRouter = router({
           return false;
         });
     }),
+  leaveCommunity: protectedProcedure
+    .input(z.object({ name: z.string().min(2).max(24) }))
+    .mutation(async ({ ctx, input }) => {
+      const community = await ctx.prisma.community.findUnique({
+        where: { name: input.name },
+      });
+      if (!community) {
+        throw new TRPCError({
+          message: "Community not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      return ctx.prisma.communityMember
+        .delete({
+          where: {
+            communityId_userId: {
+              userId: ctx.session.user.id,
+              communityId: community.id,
+            },
+          },
+        })
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+    }),
 });

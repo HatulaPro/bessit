@@ -127,6 +127,22 @@ const CommunityHeader: React.FC<{
     },
   });
 
+  const leaveCommunityMutation = trpc.community.leaveCommunity.useMutation({
+    onSuccess: () => {
+      utils.community.invalidate();
+      utils.community.getCommunity.setData({ name: community.name }, () => {
+        return {
+          ...community,
+          _count: {
+            ...community._count,
+            members: community._count.members - 1,
+          },
+          members: [],
+        };
+      });
+    },
+  });
+
   return (
     <>
       <div className="bg-rotate relative h-40 w-full overflow-hidden bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-64">
@@ -179,14 +195,21 @@ const CommunityHeader: React.FC<{
                 <button
                   {...props}
                   className="ml-auto mt-1 mr-2 block rounded-full bg-green-600 py-0.5 px-3 text-sm enabled:hover:bg-green-700 disabled:contrast-50 md:my-2 md:py-1 md:px-4 md:text-base"
-                  disabled={joinCommunityMutation.isLoading}
+                  disabled={
+                    leaveCommunityMutation.isLoading ||
+                    joinCommunityMutation.isLoading
+                  }
                 >
                   {isMember ? "Joined" : "Join"}
                 </button>
               )}
-              onClick={() =>
-                joinCommunityMutation.mutate({ name: community.name })
-              }
+              onClick={() => {
+                if (isMember) {
+                  leaveCommunityMutation.mutate({ name: community.name });
+                } else {
+                  joinCommunityMutation.mutate({ name: community.name });
+                }
+              }}
               icon={<CgComponents className="text-green-600" />}
               title={
                 <>
