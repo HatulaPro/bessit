@@ -266,14 +266,14 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
   const addModMutation = trpc.moderator.addModerator.useMutation({
     onSuccess: (data) => {
       utils.community.getCommunity.setData({ name: community.name }, () => {
-        return data;
+        return { ...community, ...data };
       });
     },
   });
   const removeModMutation = trpc.moderator.removeModerator.useMutation({
     onSuccess: (data) => {
       utils.community.getCommunity.setData({ name: community.name }, () => {
-        return data;
+        return { ...community, ...data };
       });
     },
   });

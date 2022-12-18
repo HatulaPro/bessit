@@ -120,7 +120,12 @@ export function useCommunityPosts(
     community: communityName
       ? (getCommunityQuery.data ??
           (flattenedPosts[0]
-            ? { ...flattenedPosts[0]?.community, moderators: [] }
+            ? {
+                ...flattenedPosts[0]?.community,
+                moderators: [],
+                members: [],
+                _count: { members: 0 },
+              }
             : null)) ||
         null
       : null,

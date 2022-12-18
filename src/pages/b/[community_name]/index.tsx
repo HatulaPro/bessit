@@ -21,6 +21,9 @@ import { ImageHidesOnError } from "../../../components/ImageHidesOnError";
 import Link from "next/link";
 import { cx } from "../../../utils/general";
 import { AiFillCaretDown, AiOutlineInfoCircle } from "react-icons/ai";
+import { type RouterOutputs, trpc } from "../../../utils/trpc";
+import { LoggedOnlyButton } from "../../../components/LoggedOnlyButton";
+import { CgComponents } from "react-icons/cg";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -94,11 +97,35 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
 };
 
 const CommunityHeader: React.FC<{
-  community: Community;
+  community: Exclude<RouterOutputs["community"]["getCommunity"], null>;
   placeholder: boolean;
 }> = ({ community, placeholder }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
-  const { status: authStatus } = useSession();
+  const session = useSession();
+  const isMember =
+    session.status === "authenticated" && community.members.length === 1;
+
+  const utils = trpc.useContext();
+  const joinCommunityMutation = trpc.community.joinCommunity.useMutation({
+    onSuccess: () => {
+      utils.community.invalidate();
+      utils.community.getCommunity.setData({ name: community.name }, () => {
+        return {
+          ...community,
+          _count: {
+            ...community._count,
+            members: community._count.members + 1,
+          },
+          members: [
+            {
+              communityId: community.id,
+              userId: session.data?.user?.id ?? "THIS_IS_A_USER",
+            },
+          ],
+        };
+      });
+    },
+  });
 
   return (
     <>
@@ -146,20 +173,54 @@ const CommunityHeader: React.FC<{
               {community.name}
             </h1>
           </div>
-          {!placeholder && <AboutCommunityButtonMobile community={community} />}
-          {authStatus === "authenticated" && (
-            <button
-              onClick={() => setOpen(true)}
-              className="group relative my-2 mr-2 self-end rounded-full p-2 text-lg text-white md:hidden"
-            >
-              <BsPencil />
-              <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
-            </button>
-          )}
+          <div>
+            <LoggedOnlyButton
+              Child={(props) => (
+                <button
+                  {...props}
+                  className="ml-auto mt-1 mr-2 block rounded-full bg-green-600 py-0.5 px-3 text-sm enabled:hover:bg-green-700 disabled:contrast-50 md:my-2 md:py-1 md:px-4 md:text-base"
+                  disabled={joinCommunityMutation.isLoading}
+                >
+                  {isMember ? "Joined" : "Join"}
+                </button>
+              )}
+              onClick={() =>
+                joinCommunityMutation.mutate({ name: community.name })
+              }
+              icon={<CgComponents className="text-green-600" />}
+              title={
+                <>
+                  Join the wonderful community of{" "}
+                  <Link
+                    className="text-indigo-400 hover:underline"
+                    href={`/b/${community.name}`}
+                  >
+                    b/{community.name}
+                  </Link>
+                  !
+                </>
+              }
+              content="Log in to Bessit to participate in our communities"
+            />
+            <div className="flex gap-1">
+              {!placeholder && (
+                <AboutCommunityButtonMobile community={community} />
+              )}
+              {session.status === "authenticated" && (
+                <button
+                  onClick={() => setOpen(true)}
+                  className="group relative my-2 mr-2 self-end rounded-full p-2 text-lg text-white md:hidden"
+                >
+                  <BsPencil />
+                  <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {authStatus === "authenticated" && (
+      {session.status === "authenticated" && (
         <Dialog close={() => setOpen(false)} isOpen={isOpen}>
           <PostEditor defaultCommunity={community.name} defaultOpen />
         </Dialog>

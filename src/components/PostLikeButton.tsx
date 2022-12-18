@@ -118,7 +118,8 @@ export const PostLikeButton: React.FC<{
       icon={<BsSuitHeartFill className="text-red-500" />}
       title={
         <>
-          Like <UserProfileLink user={post.user} /> &apos;s great post
+          Like <UserProfileLink user={post.user} />
+          &apos;s great post
         </>
       }
       content="Join Bessit to let the world know of your appreciation of awesome content"

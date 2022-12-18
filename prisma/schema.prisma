@@ -42,20 +42,21 @@ model Session {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String?        @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  posts         Post[]
-  comment       Comment[]
-  communities   Community[]
-  postVotes     PostVote[]
-  commentVotes  CommentVote[]
-  notifications Notification[]
-  moderation    Moderator[]
+  id                  String            @id @default(cuid())
+  name                String?
+  email               String?           @unique
+  emailVerified       DateTime?
+  image               String?
+  accounts            Account[]
+  sessions            Session[]
+  posts               Post[]
+  comment             Comment[]
+  communities         Community[]
+  favoriteCommunities CommunityMember[]
+  postVotes           PostVote[]
+  commentVotes        CommentVote[]
+  notifications       Notification[]
+  moderation          Moderator[]
 }
 
 model VerificationToken {
@@ -94,16 +95,27 @@ model PostVote {
 }
 
 model Community {
-  id         String      @id @default(cuid())
-  name       String      @unique
+  id         String            @id @default(cuid())
+  name       String            @unique
   desc       String
   ownerId    String
-  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner      User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   logo       String?
   image      String?
   posts      Post[]
   moderators Moderator[]
-  rules      String[]    @default([])
+  rules      String[]          @default([])
+  members    CommunityMember[]
+}
+
+model CommunityMember {
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
+  @@index([communityId, userId])
 }
 
 model Comment {

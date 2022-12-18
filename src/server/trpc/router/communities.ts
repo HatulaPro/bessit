@@ -9,7 +9,13 @@ export const communitiesRouter = router({
     .query(({ ctx, input }) => {
       return ctx.prisma.community.findUnique({
         where: { name: input.name },
-        include: { moderators: { include: { user: true } } },
+        include: {
+          moderators: { include: { user: true } },
+          members: ctx.session?.user?.id
+            ? { where: { userId: ctx.session.user.id } }
+            : { where: { userId: "NOT_REAL_USER_ID" } },
+          _count: { select: { members: true } },
+        },
       });
     }),
   findCommunity: publicProcedure
@@ -112,5 +118,28 @@ export const communitiesRouter = router({
           });
         });
     }),
-  // updateCommunitySettings: protectedProcedure.input(z.object({}))
+  joinCommunity: protectedProcedure
+    .input(z.object({ name: z.string().min(2).max(24) }))
+    .mutation(async ({ ctx, input }) => {
+      const community = await ctx.prisma.community.findUnique({
+        where: { name: input.name },
+      });
+      if (!community) {
+        throw new TRPCError({
+          message: "Community not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      return ctx.prisma.communityMember
+        .create({
+          data: { userId: ctx.session.user.id, communityId: community.id },
+        })
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+    }),
 });
