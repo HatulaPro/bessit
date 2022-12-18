@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -79,7 +80,10 @@ const CommunityPreview: React.FC<{
   logo: string | null;
 }> = ({ name, image, logo, desc }) => {
   return (
-    <div className="group relative w-full max-w-xs cursor-pointer rounded-md border-2 border-zinc-500 p-2">
+    <Link
+      href={`/b/${name}`}
+      className="group relative w-full max-w-xs cursor-pointer rounded-md border-2 border-zinc-500 p-2"
+    >
       <div className="absolute inset-0 h-full w-full bg-zinc-200 bg-opacity-0 transition-colors group-hover:bg-opacity-10"></div>
       <div className="bg-rotate relative h-12 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-20">
         {image && (
@@ -97,7 +101,7 @@ const CommunityPreview: React.FC<{
         <span>/b/{name}</span>
       </div>
       <p className="text-xs text-gray-300">{desc}</p>
-    </div>
+    </Link>
   );
 };
 const editCommunitySchema = z.object({
