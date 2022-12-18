@@ -196,7 +196,8 @@ const CommunityHeader: React.FC<{
                   className="ml-auto mt-1 mr-2 block rounded-full bg-green-600 py-0.5 px-3 text-sm enabled:hover:bg-green-700 disabled:contrast-50 md:my-2 md:py-1 md:px-4 md:text-base"
                   disabled={
                     leaveCommunityMutation.isLoading ||
-                    joinCommunityMutation.isLoading
+                    joinCommunityMutation.isLoading ||
+                    placeholder
                   }
                 >
                   {isMember ? "Joined" : "Join"}
