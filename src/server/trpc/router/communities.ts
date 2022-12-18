@@ -171,4 +171,10 @@ export const communitiesRouter = router({
           return false;
         });
     }),
+  getFavoriteCommunities: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.communityMember.findMany({
+      where: { userId: ctx.session.user.id },
+      include: { community: true },
+    });
+  }),
 });
