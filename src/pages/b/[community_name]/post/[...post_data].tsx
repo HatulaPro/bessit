@@ -204,7 +204,7 @@ const PostComments: React.FC<{
     main &&
       session.status === "authenticated" &&
       session.data.user &&
-      modsSet.has(session.data.user.id)
+      (modsSet.has(session.data.user.id) || session.data.user.isGlobalMod)
   );
 
   function closeOrOpenComment(commentId: string) {
@@ -284,8 +284,15 @@ const PostComments: React.FC<{
                     u/{comment.user.name}
                   </>
                 </UserProfileLink>
-                {modsSet.has(comment.user.id) && (
-                  <BsFillShieldFill className="ml-1 text-green-600" />
+                {(comment.user.isGlobalMod || modsSet.has(comment.user.id)) && (
+                  <BsFillShieldFill
+                    className={cx(
+                      "ml-1",
+                      comment.user.isGlobalMod
+                        ? "text-green-600"
+                        : "text-indigo-600"
+                    )}
+                  />
                 )}
                 <BsDot />
                 {timeAgo(comment.createdAt)}

@@ -92,13 +92,14 @@ export const SinglePost: React.FC<{
   const isPosterModerator = useMemo<boolean>(() => {
     if (placeholder) return false;
     if (!isMain) return false;
+    if (post.user.isGlobalMod) return true;
     const uid = post.userId;
     if (uid === post.community.ownerId) return true;
     for (let i = 0; i < post.community.moderators.length; ++i) {
       if (uid === post.community.moderators[i]?.userId) return true;
     }
     return false;
-  }, [post.community, post.userId, isMain, placeholder]);
+  }, [post.community, post.userId, post.user, isMain, placeholder]);
 
   return (
     <>
@@ -137,7 +138,12 @@ export const SinglePost: React.FC<{
               )}
             />
             {isPosterModerator && (
-              <BsFillShieldFill className="ml-1.5 mb-0.5 inline-block text-green-600" />
+              <BsFillShieldFill
+                className={cx(
+                  "ml-1.5 mb-0.5 inline-block",
+                  post.user.isGlobalMod ? "text-green-600" : "text-indigo-600"
+                )}
+              />
             )}
           </div>
           <BsDot className="text-xs text-gray-400" />
