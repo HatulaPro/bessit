@@ -26,9 +26,16 @@ export const moderationRouter = router({
         });
       }
       // Can't make owner a mod
-      if (!user || community.ownerId === user.id) {
+      if (!user) {
         throw new TRPCError({
           message: "User not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      if (community.ownerId === user.id) {
+        throw new TRPCError({
+          message: "Can't add self as moderator.",
           code: "BAD_REQUEST",
         });
       }
@@ -100,6 +107,66 @@ export const moderationRouter = router({
           // Pretend nothing happened on error
           return community;
         });
+    }),
+  transferCommunity: protectedProcedure
+    .input(
+      z.object({
+        communityId: z.string().length(25),
+        newOwnerId: z.string().length(25),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [community, newOwner] = await Promise.all([
+        ctx.prisma.community.findUnique({
+          where: { id: input.communityId },
+          include: { moderators: { include: { user: true } } },
+        }),
+        ctx.prisma.user.findUnique({ where: { id: input.newOwnerId } }),
+      ]);
+
+      if (!community || community.ownerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          message: "Community not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      if (!newOwner) {
+        throw new TRPCError({
+          message: "User not found.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      if (community.ownerId === newOwner.id) {
+        throw new TRPCError({
+          message: "Can't transfer community to self.",
+          code: "BAD_REQUEST",
+        });
+      }
+
+      const result = await ctx.prisma
+        .$transaction([
+          // Set new owner
+          ctx.prisma.community.update({
+            where: { id: input.communityId },
+            data: { ownerId: input.newOwnerId },
+          }),
+          // Remove mod if was mod
+          ctx.prisma.moderator.deleteMany({
+            where: { communityId: input.communityId, userId: input.newOwnerId },
+          }),
+          // Set owner as 'normal' mod
+          ctx.prisma.moderator.create({
+            data: {
+              communityId: input.communityId,
+              userId: ctx.session.user.id,
+            },
+          }),
+        ])
+        .catch(() => false);
+
+      return Boolean(result);
     }),
   setPostDeleted: protectedProcedure
     .input(

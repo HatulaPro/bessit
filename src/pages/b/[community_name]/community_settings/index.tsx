@@ -258,9 +258,6 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
   community,
 }) => {
   const [newModId, setNewModId] = useState<string>("");
-  const [clicked, setClicked] = useState<boolean>(false);
-  const newModError =
-    clicked && newModId.length !== 0 && newModId.length !== 25;
 
   const utils = trpc.useContext();
   const addModMutation = trpc.moderator.addModerator.useMutation({
@@ -277,6 +274,8 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
       });
     },
   });
+  const newModError =
+    addModMutation.error?.message || removeModMutation.error?.message;
 
   return (
     <div className="my-8 w-full">
@@ -314,7 +313,7 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
           newModError ? "h-7" : "h-0"
         )}
       >
-        {newModError && "Invalid User ID"}
+        {newModError}
       </span>
       <Loading
         size="small"
@@ -335,17 +334,15 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
               communityId: community.id,
               moderatorId: newModId,
             });
-            setClicked(false);
             setNewModId("");
             return;
           }
-          setClicked(true);
         }}
       >
         <button
           type="submit"
-          className="rounded p-1 text-2xl text-white transition-colors hover:bg-black disabled:text-zinc-300"
-          disabled={addModMutation.isLoading}
+          className="overflow-hidden rounded p-1 text-2xl text-white transition-all enabled:hover:bg-black disabled:w-0 disabled:px-0"
+          disabled={addModMutation.isLoading || newModId.length !== 25}
         >
           <BsPlus />
         </button>
@@ -359,7 +356,75 @@ const EditCommunityModerators: React.FC<{ community: CommunityReturnType }> = ({
           }
         />
       </form>
+      <TransferCommunityForm community={community} />
     </div>
+  );
+};
+
+const TransferCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
+  community,
+}) => {
+  const [newOwnerId, setNewOwnerId] = useState<string>("");
+
+  const utils = trpc.useContext();
+  const router = useRouter();
+  const transferCommunityMutation =
+    trpc.moderator.transferCommunity.useMutation({
+      onSuccess: () => {
+        utils.community.getCommunity.invalidate({ name: community.name });
+        router.push(`/b/${community.name}`);
+      },
+    });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (newOwnerId.length === 0) return;
+        if (newOwnerId.length === 25) {
+          transferCommunityMutation.mutate({
+            communityId: community.id,
+            newOwnerId: newOwnerId,
+          });
+          return;
+        }
+      }}
+      className="mt-6"
+    >
+      <h3 className="text-3xl text-white">Transfer community</h3>
+      <Loading size="small" show={transferCommunityMutation.isLoading} />
+      <span
+        className={cx(
+          "block overflow-hidden text-sm text-red-500 transition-all",
+          transferCommunityMutation.error ? "h-5" : "h-0"
+        )}
+      >
+        {transferCommunityMutation.error?.message}
+      </span>
+      <input
+        type="text"
+        placeholder="User ID of new owner"
+        className={cx(
+          "my-2 w-full gap-1 rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+          transferCommunityMutation.error
+            ? "border-red-500"
+            : "border-zinc-500 focus-within:border-zinc-300"
+        )}
+        value={newOwnerId}
+        onChange={(e) =>
+          setNewOwnerId(e.currentTarget.value.replaceAll(/[^a-z0-9]*/g, ""))
+        }
+      />
+      <button
+        type="submit"
+        className="mx-auto block rounded bg-red-700 p-1 text-base text-white transition-colors enabled:hover:bg-red-800 disabled:contrast-50"
+        disabled={
+          transferCommunityMutation.isLoading || newOwnerId.length !== 25
+        }
+      >
+        Transfer Community
+      </button>
+    </form>
   );
 };
 
