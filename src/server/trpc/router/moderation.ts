@@ -118,6 +118,7 @@ export const moderationRouter = router({
         });
       }
       const isMod =
+        ctx.session.user.isGlobalMod ||
         post.community.ownerId === ctx.session.user.id ||
         Boolean(
           post.community.moderators.find(
@@ -165,6 +166,7 @@ export const moderationRouter = router({
         });
       }
       const isMod =
+        ctx.session.user.isGlobalMod ||
         comment.post.community.ownerId === ctx.session.user.id ||
         Boolean(
           comment.post.community.moderators.find(
