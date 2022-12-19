@@ -112,7 +112,7 @@ export const SinglePost: React.FC<{
       >
         <Link
           href={`/b/${post.community.name}`}
-          className="group flex items-center gap-1 text-sm font-bold"
+          className="group flex w-min items-center gap-1 text-sm font-bold"
         >
           <CommunityLogo
             name={post.community.name}
