@@ -5,6 +5,7 @@ import {
   BsArrowCounterclockwise,
   BsChatLeft,
   BsDot,
+  BsEyeSlashFill,
   BsFillExclamationTriangleFill,
   BsFillShieldFill,
   BsPencil,
@@ -238,6 +239,8 @@ export const PostModeratorTools: React.FC<{
   const [isOpen, setOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const session = useSession();
+  const isGlobalMod = Boolean(session.data?.user?.isGlobalMod);
 
   const utils = trpc.useContext();
   const deletePostMutation = trpc.moderator.setPostDeleted.useMutation({
@@ -260,8 +263,30 @@ export const PostModeratorTools: React.FC<{
     },
   });
 
+  const nukePostMutation = trpc.moderator.nukePost.useMutation({
+    onSuccess: () => {
+      utils.post.getPosts.invalidate();
+      utils.post.getPost.setData({ post_id: post.id }, () => {
+        return undefined;
+      });
+      router.push(`/b/${post.community.name}`);
+    },
+  });
+
+  const nukeCommentMutation = trpc.moderator.nukeComment.useMutation({
+    onSuccess: () => {
+      utils.post.getComments.invalidate();
+      router.push(
+        `/b/${post.community.name}/post/${post.id}/${slugify(post.title)}`
+      );
+    },
+  });
+
   const isLoading =
-    deletePostMutation.isLoading || deleteCommentMutation.isLoading;
+    deletePostMutation.isLoading ||
+    deleteCommentMutation.isLoading ||
+    nukePostMutation.isLoading ||
+    nukeCommentMutation.isLoading;
 
   useEffect(() => {
     const listener = (e: MouseEvent) => {
@@ -335,10 +360,30 @@ export const PostModeratorTools: React.FC<{
             }}
             className="flex items-center justify-center gap-1.5 rounded p-1 transition-colors hover:bg-zinc-700"
           >
-            <BsTrashFill className="text-red-500" /> Delete{" "}
+            <BsEyeSlashFill className="text-white" /> Hide{" "}
             {comment ? "Comment" : "Post"}
           </button>
         )}
+        {isGlobalMod && (
+          <button
+            onClick={() => {
+              if (comment) {
+                nukeCommentMutation.mutate({
+                  commentId: comment.id,
+                });
+              } else {
+                nukePostMutation.mutate({
+                  postId: post.id,
+                });
+              }
+              setOpen(false);
+            }}
+            className="flex items-center justify-center gap-1.5 rounded p-1 transition-colors hover:bg-zinc-700"
+          >
+            <BsTrashFill className="text-red-500" /> Nuke{" "}
+            {comment ? "Comment" : "Post"}
+          </button>
+        )}{" "}
       </div>
     </div>
   );

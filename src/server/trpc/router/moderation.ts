@@ -1,3 +1,4 @@
+import { modOnlyProcedure } from "./../trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
@@ -102,7 +103,10 @@ export const moderationRouter = router({
     }),
   setPostDeleted: protectedProcedure
     .input(
-      z.object({ postId: z.string().length(25), newDeletedStatus: z.boolean() })
+      z.object({
+        postId: z.string().length(25),
+        newDeletedStatus: z.boolean(),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const post = await ctx.prisma.post.findUnique({
@@ -138,6 +142,16 @@ export const moderationRouter = router({
       });
       post.isDeleted = input.newDeletedStatus;
       return post;
+    }),
+  nukePost: modOnlyProcedure
+    .input(
+      z.object({
+        postId: z.string().length(25),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.post.delete({ where: { id: input.postId } });
+      return true;
     }),
   setCommentDeleted: protectedProcedure
     .input(
@@ -189,5 +203,15 @@ export const moderationRouter = router({
       });
       comment.isDeleted = input.newDeletedStatus;
       return comment.id;
+    }),
+  nukeComment: modOnlyProcedure
+    .input(
+      z.object({
+        commentId: z.string().length(25),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.comment.delete({ where: { id: input.commentId } });
+      return true;
     }),
 });
