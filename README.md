@@ -24,6 +24,10 @@ Users can create communities, post about whatever they want, comment on posts, e
   - [X] Community mods
   - [X] Creating "infra" for community rules
   - [ ] Global mods
+    - [ ] Add new global mods
+    - [X] Remove all posts/comments
+    - [ ] Remove communities
+    - [ ] Remove users
 * [X] Favorite communities
 * [ ] Making every user a millionaire
 
