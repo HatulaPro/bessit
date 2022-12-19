@@ -15,7 +15,7 @@ import { type RouterOutputs, trpc } from "../../utils/trpc";
 
 const ProfilePage: NextPage = () => {
   const {
-    user,
+    userData,
     isLoadingUser: isLoading,
     is404,
     posts,
@@ -24,7 +24,7 @@ const ProfilePage: NextPage = () => {
     setCurrentlyViewing,
     isLoadingPosts,
   } = useUserProfileData();
-  const pageTitle = `Bessit | ${user?.name || "User Profile"}`;
+  const pageTitle = `Bessit | ${userData?.user.name || "User Profile"}`;
 
   return (
     <>
@@ -41,10 +41,10 @@ const ProfilePage: NextPage = () => {
           <Loading size="large" show />
         ) : is404 ? (
           <NotFoundMessage message="This user does not seem to exist" />
-        ) : user ? (
+        ) : userData ? (
           <UserProfileContent
             isLoadingPosts={isLoadingPosts}
-            user={user}
+            userData={userData}
             posts={posts}
             comments={comments}
             currentlyViewing={currentlyViewing}
@@ -160,7 +160,7 @@ const useUserProfileData = () => {
 
   return {
     is404: !getUserQuery.isLoading && !getUserQuery.data,
-    user: getUserQuery.data || null,
+    userData: getUserQuery.data || null,
     isLoadingUser: getUserQuery.isLoading,
     isLoadingPosts:
       getUserPostsQuery.isLoading ||
@@ -177,8 +177,8 @@ const useUserProfileData = () => {
 type FullUser = Exclude<RouterOutputs["user"]["getUser"], null>;
 
 const UserDataSection: React.FC<{
-  user: FullUser;
-}> = ({ user }) => {
+  userData: FullUser;
+}> = ({ userData }) => {
   function randomlyGeneratedGoodAdjective() {
     const WORDS = [
       "Wholesome",
@@ -195,11 +195,11 @@ const UserDataSection: React.FC<{
     <div className="container relative mx-auto my-4 max-w-sm rounded border-2 border-zinc-500 bg-zinc-800 p-3 md:max-w-md">
       <div className="absolute inset-0 h-32 w-full bg-indigo-700"></div>
       <div className="relative flex-col justify-center text-center">
-        {user.image ? (
+        {userData.user.image ? (
           <Image
             className="mx-auto rounded-md"
             loader={({ src }) => src}
-            src={user.image}
+            src={userData.user.image}
             alt="Profile Image"
             width={112}
             height={112}
@@ -211,28 +211,30 @@ const UserDataSection: React.FC<{
           <span
             className={cx(
               "inline-block h-4 w-4 rounded-full",
-              user._count.sessions
+              userData.user._count.sessions
                 ? "bg-green-600"
                 : "border-2 border-zinc-500 bg-zinc-600"
             )}
           ></span>{" "}
-          u/{user.name}
+          u/{userData.user.name}
         </h1>
-        <span className="text-sm font-normal text-zinc-400">ID: {user.id}</span>
+        <span className="text-sm font-normal text-zinc-400">
+          ID: {userData.user.id}
+        </span>
 
         <div className="mt-4 flex w-full justify-evenly">
           <div className="flex flex-col text-center">
             <span>Post Likes</span>
             <span>
               <BsSuitHeartFill className="mr-1.5 inline-block text-red-500" />
-              {user._count.postVotes}
+              {userData.postVotes}
             </span>
           </div>
           <div className="flex flex-col text-center">
             <span> Comment Likes</span>
             <span>
               <BsSuitHeartFill className="mr-1.5 inline-block text-red-500" />
-              {user._count.commentVotes}
+              {userData.commentVotes}
             </span>
           </div>
         </div>
@@ -240,18 +242,18 @@ const UserDataSection: React.FC<{
       <div className="mt-4 flex flex-col">
         <span>
           <span className="text-lg font-bold underline decoration-indigo-500">
-            #{user._count.posts}
+            #{userData.user._count.posts}
           </span>{" "}
           {randomlyGeneratedGoodAdjective()} Posts
         </span>
         <span>
           <span className="text-lg font-bold underline decoration-indigo-500">
-            #{user._count.comment}
+            #{userData.user._count.comment}
           </span>{" "}
           {randomlyGeneratedGoodAdjective()} Comments
         </span>
       </div>
-      {user.isGlobalMod && (
+      {userData.user.isGlobalMod && (
         <div className="mt-4 flex justify-center gap-1 text-sm">
           <BsFillShieldFill className="ml-1 text-lg text-green-600" />
           <span>Official Bessit Mod</span>
@@ -370,14 +372,14 @@ const UserProfilePosts: React.FC<{
 };
 
 const UserProfileContent: React.FC<{
-  user: FullUser;
+  userData: FullUser;
   posts: RouterOutputs["user"]["getUserPosts"]["posts"];
   isLoadingPosts: boolean;
   comments: RouterOutputs["user"]["getUserComments"]["comments"];
   currentlyViewing: "posts" | "comments";
   setCurrentlyViewing: (x: "posts" | "comments") => void;
 }> = ({
-  user,
+  userData,
   posts,
   isLoadingPosts,
   comments,
@@ -387,7 +389,7 @@ const UserProfileContent: React.FC<{
   return (
     <div className="relative w-full">
       <GoBackButton />
-      <UserDataSection user={user} />
+      <UserDataSection userData={userData} />
       <UserProfilePosts
         isLoadingPosts={isLoadingPosts}
         posts={posts}

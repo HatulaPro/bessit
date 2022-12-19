@@ -5,8 +5,15 @@ export const userRouter = router({
   getUser: publicProcedure
     .input(z.object({ userId: z.string().length(25) }))
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.user
-        .findUnique({
+      const [postVotes, commentVotes, user] = await ctx.prisma.$transaction([
+        ctx.prisma.postVote.count({
+          where: { post: { userId: input.userId } },
+        }),
+        ctx.prisma.postVote.count({
+          where: { post: { userId: input.userId } },
+        }),
+
+        ctx.prisma.user.findUnique({
           where: { id: input.userId },
           select: {
             id: true,
@@ -15,28 +22,24 @@ export const userRouter = router({
             isGlobalMod: true,
             _count: {
               select: {
-                postVotes: true,
-                commentVotes: true,
                 sessions: true,
                 comment: true,
                 posts: true,
               },
             },
           },
-        })
-        .then((result) => {
-          if (result) {
-            // Random changes to score cuz funny
-            result._count.commentVotes += Math.round(Math.random() * 8 - 4);
-            result._count.commentVotes = Math.max(
-              result._count.commentVotes,
-              0
-            );
-            result._count.postVotes += Math.round(Math.random() * 8 - 4);
-            result._count.postVotes = Math.max(result._count.postVotes, 0);
-          }
-          return result;
-        });
+        }),
+      ]);
+
+      if (!user) return null;
+      return {
+        user: user,
+        postVotes: Math.max(0, postVotes + Math.round(Math.random() * 8 - 4)),
+        commentVotes: Math.max(
+          0,
+          commentVotes + Math.round(Math.random() * 8 - 4)
+        ),
+      };
     }),
   getUserPosts: publicProcedure
     .input(
