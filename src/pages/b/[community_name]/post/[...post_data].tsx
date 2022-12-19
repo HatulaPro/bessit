@@ -34,6 +34,7 @@ import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
 import type { InfiniteData } from "@tanstack/react-query";
 import { UserProfileLink } from "../../../../components/UserProfileLink";
+import { AiFillMeh } from "react-icons/ai";
 
 const PostPage: NextPage = () => {
   const postTopRef = useRef<HTMLDivElement>(null);
@@ -278,7 +279,7 @@ const PostComments: React.FC<{
                           height="128"
                         />
                       ) : (
-                        comment.user.name?.charAt(0).toUpperCase() ?? ""
+                        <AiFillMeh className="h-9 w-9 rounded-full text-white" />
                       )}
                     </div>
                     u/{comment.user.name}
