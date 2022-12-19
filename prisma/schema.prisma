@@ -47,6 +47,7 @@ model User {
   email               String?           @unique
   emailVerified       DateTime?
   image               String?
+  isGlobalMod         Boolean           @default(false)
   accounts            Account[]
   sessions            Session[]
   posts               Post[]

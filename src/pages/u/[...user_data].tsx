@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
-import { BsDot, BsSuitHeartFill } from "react-icons/bs";
+import { BsDot, BsFillShieldFill, BsSuitHeartFill } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { Loading } from "../../components/Loading";
@@ -212,13 +212,14 @@ const UserDataSection: React.FC<{
             className={cx(
               "inline-block h-4 w-4 rounded-full",
               user._count.sessions
-                ? "bg-green-500"
+                ? "bg-green-600"
                 : "border-2 border-zinc-500 bg-zinc-600"
             )}
           ></span>{" "}
           u/{user.name}
         </h1>
         <span className="text-sm font-normal text-zinc-400">ID: {user.id}</span>
+
         <div className="mt-4 flex w-full justify-evenly">
           <div className="flex flex-col text-center">
             <span>Post Likes</span>
@@ -250,6 +251,12 @@ const UserDataSection: React.FC<{
           {randomlyGeneratedGoodAdjective()} Comments
         </span>
       </div>
+      {user.isGlobalMod && (
+        <div className="mt-4 flex justify-center gap-1 text-sm">
+          <BsFillShieldFill className="ml-1 text-lg text-green-600" />
+          <span>Official Bessit Mod</span>
+        </div>
+      )}{" "}
     </div>
   );
 };

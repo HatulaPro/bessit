@@ -12,6 +12,7 @@ export const userRouter = router({
             id: true,
             name: true,
             image: true,
+            isGlobalMod: true,
             _count: {
               select: {
                 postVotes: true,

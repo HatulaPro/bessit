@@ -55,6 +55,7 @@ export function useCommunityPosts(
                 id: "",
                 image: "",
                 name: "",
+                isGlobalMod: false,
               },
               userId: "",
               votes: [],
