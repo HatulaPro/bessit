@@ -45,7 +45,7 @@ const PostPage: NextPage = () => {
     currentMainCommentId: currentParentCommentId,
     setCurrentMainCommentId: setCurrentParentCommentId,
   } = useCachedPost(postTopRef.current);
-  const pageTitle = `Bessit | ${post?.title ?? "View Post"}`;
+  const pageTitle = `Bessit | ${post?.title || "View Post"}`;
   const router = useRouter();
   return (
     <>
