@@ -177,7 +177,7 @@ export const communitiesRouter = router({
       include: { community: true },
     });
   }),
-  getTopCommunities: protectedProcedure.query(({ ctx }) => {
+  getTopCommunities: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.community
       .findMany({
         take: 5,
