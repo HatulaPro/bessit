@@ -82,6 +82,7 @@ export const SinglePost: React.FC<{
     if (!isMain) return false;
     if (session.status !== "authenticated" || !session.data?.user) return false;
     const uid = session.data.user.id;
+    if (session.data.user.isGlobalMod) return true;
     if (uid === post.community.ownerId) return true;
     for (let i = 0; i < post.community.moderators.length; ++i) {
       if (uid === post.community.moderators[i]?.userId) return true;
