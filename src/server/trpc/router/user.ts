@@ -28,6 +28,7 @@ export const userRouter = router({
                 posts: true,
               },
             },
+            ban: true,
           },
         }),
       ]);

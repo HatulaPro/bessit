@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,9 +7,11 @@ import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
 import {
+  BsClock,
   BsDot,
   BsFillExclamationTriangleFill,
   BsFillShieldFill,
+  BsFlag,
   BsSuitHeartFill,
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
@@ -267,12 +270,6 @@ const UserDataSection: React.FC<{
           <span>Official Bessit Mod</span>
         </div>
       )}
-      {isBanned && (
-        <div className="mt-4 flex justify-center gap-1 text-sm">
-          <BsFillExclamationTriangleFill className="ml-1 text-lg text-red-500" />
-          <span>User is banned</span>
-        </div>
-      )}
     </div>
   );
 };
@@ -385,6 +382,66 @@ const UserProfilePosts: React.FC<{
   );
 };
 
+const UserProfileModeration: React.FC<{
+  userData: FullUser;
+}> = ({ userData }) => {
+  const isBanned = userData.user.bannedUntil > new Date();
+  const session = useSession();
+  const isMod = Boolean(session.data?.user?.isGlobalMod);
+
+  if (!isMod && !isBanned) return null;
+  return (
+    <div
+      className={cx(
+        "my-1 mx-auto flex w-full max-w-sm flex-col rounded border-2 border-zinc-500 p-1 md:max-w-md",
+        "bg-zinc-800"
+      )}
+    >
+      <div>
+        <h2 className="my-4 text-center text-xl">
+          {isBanned ? (
+            <>
+              <BsFillExclamationTriangleFill className="m-1 inline text-lg text-red-500" />
+              User has been banned
+            </>
+          ) : (
+            "User is not banned."
+          )}
+        </h2>
+        {isBanned && (
+          <>
+            <div className="inline-flex w-1/2 flex-col justify-center text-center">
+              <span className="text-lg font-bold">
+                <BsClock className="m-1 inline align-top" />
+                Until
+              </span>
+              <span>
+                {userData.user.bannedUntil?.toLocaleDateString()}{" "}
+                {userData.user.bannedUntil?.toLocaleTimeString()}
+              </span>
+            </div>
+            <div className="inline-flex w-1/2 flex-col justify-center text-center">
+              <span className="text-lg font-bold">
+                <BsFlag className="m-1 inline align-top" />
+                For
+              </span>
+              <span>{userData.user.ban?.reason || "An unknown reason"}</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      {isMod && (
+        <div className="mt-4">
+          <button className="ml-auto block rounded bg-red-900 px-2 py-1 hover:bg-red-800">
+            Banning Options
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const UserProfileContent: React.FC<{
   userData: FullUser;
   posts: RouterOutputs["user"]["getUserPosts"]["posts"];
@@ -404,6 +461,7 @@ const UserProfileContent: React.FC<{
     <div className="relative w-full">
       <GoBackButton />
       <UserDataSection userData={userData} />
+      <UserProfileModeration userData={userData} />
       <UserProfilePosts
         isLoadingPosts={isLoadingPosts}
         posts={posts}

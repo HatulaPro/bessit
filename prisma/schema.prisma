@@ -59,8 +59,7 @@ model User {
   commentVotes        CommentVote[]
   notifications       Notification[]
   moderation          Moderator[]
-  bansHistory         Ban[]             @relation(name: "ban-history")
-  banning             Ban[]             @relation(name: "ban-by-mod-history")
+  ban                 Ban?
 }
 
 model VerificationToken {
@@ -191,13 +190,10 @@ model Moderator {
 }
 
 model Ban {
-  id          String   @id @default(cuid())
-  reason      String
-  bannedId    String
-  bannedUser  User     @relation(fields: [bannedId], references: [id], onDelete: Cascade, name: "ban-history")
-  modId       String
-  mod         User     @relation(fields: [modId], references: [id], onDelete: Cascade, name: "ban-by-mod-history")
-  bannedUntil DateTime
+  reason     String
+  bannedId   String
+  bannedUser User   @relation(fields: [bannedId], references: [id], onDelete: Cascade)
 
-  @@index(fields: [bannedId, bannedUntil])
+  @@unique([bannedId])
+  @@index(fields: [bannedId])
 }
