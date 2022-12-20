@@ -1,7 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createCommunitySchema } from "../../../pages/create_community";
-import { router, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  router,
+  protectedProcedure,
+  publicProcedure,
+  unbannedUserProcedure,
+} from "../trpc";
 
 export const communitiesRouter = router({
   getCommunity: publicProcedure
@@ -28,7 +33,7 @@ export const communitiesRouter = router({
         })
         .then((values) => values);
     }),
-  editCommunity: protectedProcedure
+  editCommunity: unbannedUserProcedure
     .input(
       z.object({
         name: z.string().min(2).max(24),
@@ -63,7 +68,7 @@ export const communitiesRouter = router({
       });
       return result;
     }),
-  editCommunityRules: protectedProcedure
+  editCommunityRules: unbannedUserProcedure
     .input(
       z.object({
         rules: z.array(z.string()).refine((arr) => {
@@ -94,7 +99,7 @@ export const communitiesRouter = router({
       });
       return result;
     }),
-  createCommunity: protectedProcedure
+  createCommunity: unbannedUserProcedure
     .input(createCommunitySchema)
     .mutation(({ ctx, input }) => {
       const ownerId = ctx.session.user.id;

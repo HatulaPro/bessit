@@ -1,12 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPostSchema } from "../../../components/PostEditor";
-import { router, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  router,
+  protectedProcedure,
+  publicProcedure,
+  unbannedUserProcedure,
+} from "../trpc";
 
 const NOTIFY_ON_NUMBERS = new Set([1, 2, 10, 100, 1000]);
 
 export const postsRouter = router({
-  createPost: protectedProcedure
+  createPost: unbannedUserProcedure
     .input(createPostSchema)
     .mutation(async ({ ctx, input }) => {
       const userId: string = ctx.session.user.id;
@@ -30,7 +35,7 @@ export const postsRouter = router({
         },
       });
     }),
-  editPost: protectedProcedure
+  editPost: unbannedUserProcedure
     .input(
       z.object({
         title: z.string().min(2).max(256),
@@ -60,7 +65,7 @@ export const postsRouter = router({
         },
       });
     }),
-  createComment: protectedProcedure
+  createComment: unbannedUserProcedure
     .input(
       z.object({
         postId: z.string().length(25),
@@ -146,7 +151,7 @@ export const postsRouter = router({
 
       return newComment;
     }),
-  editComment: protectedProcedure
+  editComment: unbannedUserProcedure
     .input(
       z.object({
         content: z.string().min(4).max(4096),
