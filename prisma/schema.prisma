@@ -48,6 +48,7 @@ model User {
   emailVerified       DateTime?
   image               String?
   isGlobalMod         Boolean           @default(false)
+  bannedUntil         DateTime          @default("1970-01-01T00:00:00.000Z")
   accounts            Account[]
   sessions            Session[]
   posts               Post[]
@@ -58,6 +59,8 @@ model User {
   commentVotes        CommentVote[]
   notifications       Notification[]
   moderation          Moderator[]
+  bansHistory         Ban[]             @relation(name: "ban-history")
+  banning             Ban[]             @relation(name: "ban-by-mod-history")
 }
 
 model VerificationToken {
@@ -185,4 +188,16 @@ model Moderator {
 
   @@unique([userId, communityId])
   @@index(fields: [userId, communityId])
+}
+
+model Ban {
+  id          String   @id @default(cuid())
+  reason      String
+  bannedId    String
+  bannedUser  User     @relation(fields: [bannedId], references: [id], onDelete: Cascade, name: "ban-history")
+  modId       String
+  mod         User     @relation(fields: [modId], references: [id], onDelete: Cascade, name: "ban-by-mod-history")
+  bannedUntil DateTime
+
+  @@index(fields: [bannedId, bannedUntil])
 }

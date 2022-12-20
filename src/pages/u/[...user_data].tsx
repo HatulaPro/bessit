@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
-import { BsDot, BsFillShieldFill, BsSuitHeartFill } from "react-icons/bs";
+import {
+  BsDot,
+  BsFillExclamationTriangleFill,
+  BsFillShieldFill,
+  BsSuitHeartFill,
+} from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
 import { Loading } from "../../components/Loading";
@@ -190,6 +195,7 @@ const UserDataSection: React.FC<{
     ];
     return WORDS[Math.floor(Math.random() * WORDS.length)];
   }
+  const isBanned = userData.user.bannedUntil > new Date();
 
   return (
     <div className="container relative mx-auto my-4 max-w-sm rounded border-2 border-zinc-500 bg-zinc-800 p-3 md:max-w-md">
@@ -211,7 +217,9 @@ const UserDataSection: React.FC<{
           <span
             className={cx(
               "inline-block h-4 w-4 rounded-full",
-              userData.user._count.sessions
+              isBanned
+                ? "border-2 border-red-500 bg-red-600"
+                : userData.user._count.sessions
                 ? "bg-green-600"
                 : "border-2 border-zinc-500 bg-zinc-600"
             )}
@@ -258,7 +266,13 @@ const UserDataSection: React.FC<{
           <BsFillShieldFill className="ml-1 text-lg text-green-600" />
           <span>Official Bessit Mod</span>
         </div>
-      )}{" "}
+      )}
+      {isBanned && (
+        <div className="mt-4 flex justify-center gap-1 text-sm">
+          <BsFillExclamationTriangleFill className="ml-1 text-lg text-red-500" />
+          <span>User is banned</span>
+        </div>
+      )}
     </div>
   );
 };

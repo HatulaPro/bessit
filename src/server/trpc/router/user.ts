@@ -20,6 +20,7 @@ export const userRouter = router({
             name: true,
             image: true,
             isGlobalMod: true,
+            bannedUntil: true,
             _count: {
               select: {
                 sessions: true,

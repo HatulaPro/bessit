@@ -11,6 +11,7 @@ import {
   BsChatLeft,
   BsCheck2All,
   BsDot,
+  BsFillExclamationTriangleFill,
   BsSearch,
   BsSuitHeartFill,
   BsXLg,
@@ -72,7 +73,7 @@ export const TopBar: React.FC = () => {
             >
               <UserProfileLink
                 user={session.data.user}
-                className="flex items-center gap-2"
+                className="relative flex items-center gap-2"
               >
                 <>
                   {session.data.user.image ? (
@@ -90,6 +91,9 @@ export const TopBar: React.FC = () => {
                   <span className="hidden text-lg md:block">
                     {session.data.user.name}
                   </span>
+                  {session.data.user.bannedUntil > new Date() && (
+                    <BsFillExclamationTriangleFill className="absolute bottom-0 left-6 h-3 w-3 text-red-500" />
+                  )}
                 </>
               </UserProfileLink>
               <TopBarUserMenu />
