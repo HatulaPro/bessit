@@ -56,6 +56,7 @@ export function useCommunityPosts(
                 image: "",
                 name: "",
                 isGlobalMod: false,
+                bannedUntil: new Date(0),
               },
               userId: "",
               votes: [],

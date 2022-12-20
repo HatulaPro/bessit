@@ -625,6 +625,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
           image: null,
           name: "",
           isGlobalMod: false,
+          bannedUntil: new Date(0),
         },
         userId: "",
         votes: [],
