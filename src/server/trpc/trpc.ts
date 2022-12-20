@@ -42,7 +42,7 @@ const isAuthedAndNotBanned = t.middleware(({ ctx, next }) => {
   if (
     !ctx.session ||
     !ctx.session.user ||
-    ctx.session.user.bannedUntil > new Date()
+    new Date(ctx.session.user.bannedUntil) > new Date()
   ) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }

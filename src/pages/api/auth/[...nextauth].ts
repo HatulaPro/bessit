@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = user.id;
         session.user.isGlobalMod = user.isGlobalMod;
-        session.user.bannedUntil = user.bannedUntil;
+        session.user.bannedUntil = user.bannedUntil.toISOString();
       }
       return session;
     },

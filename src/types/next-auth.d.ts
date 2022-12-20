@@ -8,7 +8,7 @@ declare module "next-auth" {
     user?: {
       id: string;
       isGlobalMod: boolean;
-      bannedUntil: Date;
+      bannedUntil: string;
     } & DefaultSession["user"];
   }
   interface User {

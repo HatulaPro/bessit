@@ -91,7 +91,7 @@ export const TopBar: React.FC = () => {
                   <span className="hidden text-lg md:block">
                     {session.data.user.name}
                   </span>
-                  {session.data.user.bannedUntil > new Date() && (
+                  {new Date(session.data.user.bannedUntil) > new Date() && (
                     <BsFillExclamationTriangleFill className="absolute bottom-0 left-6 h-3 w-3 text-red-500" />
                   )}
                 </>

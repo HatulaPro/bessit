@@ -199,7 +199,7 @@ const UserDataSection: React.FC<{
     ];
     return WORDS[Math.floor(Math.random() * WORDS.length)];
   }
-  const isBanned = userData.user.bannedUntil > new Date();
+  const isBanned = new Date(userData.user.bannedUntil) > new Date();
 
   return (
     <div className="container relative mx-auto my-4 max-w-sm rounded border-2 border-zinc-500 bg-zinc-800 p-3 md:max-w-md">
@@ -403,7 +403,8 @@ const UserModerationDialog: React.FC<{
   const [reason, setReason] = useState<string>(userData.user.ban?.reason ?? "");
   const isInvalidLength = reason.length > 128;
 
-  const isBanned = userData.user.bannedUntil > new Date();
+  const isBanned = new Date(userData.user.bannedUntil) > new Date();
+
   const utils = trpc.useContext();
   const banUserMutation = trpc.moderator.banUser.useMutation({
     onSuccess: () => {
@@ -488,7 +489,7 @@ const UserModerationDialog: React.FC<{
 const UserProfileModeration: React.FC<{
   userData: FullUser;
 }> = ({ userData }) => {
-  const isBanned = userData.user.bannedUntil > new Date();
+  const isBanned = new Date(userData.user.bannedUntil) > new Date();
   const session = useSession();
   const isMod = Boolean(session.data?.user?.isGlobalMod);
   const [isOpen, setOpen] = useState<boolean>(false);
