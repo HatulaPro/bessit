@@ -35,6 +35,7 @@ import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
 import type { InfiniteData } from "@tanstack/react-query";
 import { UserProfileLink } from "../../../../components/UserProfileLink";
 import { AiFillMeh } from "react-icons/ai";
+import { NotBannedOnlyButton } from "../../../../components/NotBannedOnlyButton";
 
 const PostPage: NextPage = () => {
   const postTopRef = useRef<HTMLDivElement>(null);
@@ -371,7 +372,7 @@ const PostComments: React.FC<{
                       />
                     )}
                     {session.data?.user?.id === comment.user.id && (
-                      <button
+                      <NotBannedOnlyButton
                         onClick={() => {
                           setEditCommentOptions(
                             editCommentOptions.commentId === comment.id
@@ -379,11 +380,16 @@ const PostComments: React.FC<{
                               : { editOrCreate: "edit", commentId: comment.id }
                           );
                         }}
-                        className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white"
-                      >
-                        <BsPencil className="text-xl" />
-                        <span className="hidden md:block">Edit</span>
-                      </button>
+                        Child={(props) => (
+                          <button
+                            {...props}
+                            className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white"
+                          >
+                            <BsPencil className="text-xl" />
+                            <span className="hidden md:block">Edit</span>
+                          </button>
+                        )}
+                      />
                     )}
                   </div>
                   {session.status === "authenticated" && (
@@ -471,6 +477,7 @@ const CreateCommentForm: React.FC<{
   commentContent,
   close,
 }) => {
+  const formRef = useRef<HTMLFormElement>(null);
   const { control, handleSubmit, reset } = useForm<createCommentForm>({
     mode: "onSubmit",
     resolver: zodResolver(createCommentSchema),
@@ -519,7 +526,7 @@ const CreateCommentForm: React.FC<{
         parentCommentId === null ? "my-2 p-3" : "grow-on-mount"
       )}
     >
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
         <Controller
           control={control}
           name="content"
@@ -560,15 +567,24 @@ const CreateCommentForm: React.FC<{
             }
             size="small"
           />
-          <button
-            disabled={
-              createCommentMutation.isLoading || editCommentMutation.isLoading
-            }
-            type="submit"
-            className="my-2 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
-          >
-            {editOrCreate === "create" ? "Submit" : "Save"}
-          </button>
+          <NotBannedOnlyButton
+            onClick={() => {
+              formRef.current?.requestSubmit();
+            }}
+            Child={(props) => (
+              <button
+                {...props}
+                disabled={
+                  createCommentMutation.isLoading ||
+                  editCommentMutation.isLoading
+                }
+                type="button"
+                className="my-2 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+              >
+                {editOrCreate === "create" ? "Submit" : "Save"}
+              </button>
+            )}
+          />
         </div>
       </form>
     </div>

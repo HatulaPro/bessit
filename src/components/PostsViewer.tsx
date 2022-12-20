@@ -28,6 +28,7 @@ import { Tabs } from "./Tabs";
 import { trpc } from "../utils/trpc";
 import { UserProfileLink } from "./UserProfileLink";
 import { useRouter } from "next/router";
+import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
@@ -395,12 +396,14 @@ const EditPostButton: React.FC<{ post: CommunityPosts["posts"][number] }> = ({
   const [isOpen, setOpen] = useState<boolean>(false);
   return (
     <>
-      <button
+      <NotBannedOnlyButton
         onClick={() => setOpen(true)}
-        className="p-2 text-zinc-400 hover:text-white"
-      >
-        <BsPencil className="text-xl" />
-      </button>
+        Child={(props) => (
+          <button {...props} className="p-2 text-zinc-400 hover:text-white">
+            <BsPencil className="text-xl" />
+          </button>
+        )}
+      />
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
         <EditPostForm post={post} close={() => setOpen(false)} />
       </Dialog>

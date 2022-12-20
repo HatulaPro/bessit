@@ -23,6 +23,7 @@ import { AiFillCaretDown, AiOutlineInfoCircle } from "react-icons/ai";
 import { type RouterOutputs, trpc } from "../../../utils/trpc";
 import { LoggedOnlyButton } from "../../../components/LoggedOnlyButton";
 import { CgComponents } from "react-icons/cg";
+import { NotBannedOnlyButton } from "../../../components/NotBannedOnlyButton";
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
@@ -230,15 +231,18 @@ const CommunityHeader: React.FC<{
               {!placeholder && (
                 <AboutCommunityButtonMobile community={community} />
               )}
-              {session.status === "authenticated" && (
-                <button
-                  onClick={() => setOpen(true)}
-                  className="group relative my-2 mr-2 self-end rounded-full p-2 text-lg text-white md:hidden"
-                >
-                  <BsPencil />
-                  <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
-                </button>
-              )}
+              <NotBannedOnlyButton
+                onClick={() => setOpen(true)}
+                Child={(props) => (
+                  <button
+                    {...props}
+                    className="group relative my-2 mr-2 self-end rounded-full p-2 text-lg text-white md:hidden"
+                  >
+                    <BsPencil />
+                    <div className="absolute inset-0 h-full w-full scale-0 rounded-full bg-zinc-500 bg-opacity-25 transition-transform group-active:scale-100"></div>
+                  </button>
+                )}
+              />
             </div>
           </div>
         </div>

@@ -9,6 +9,8 @@ import { useRouter } from "next/router";
 import { Loading } from "../components/Loading";
 import { useDebounce } from "../hooks/useDebounce";
 import { useLoggedOnly } from "../hooks/useLoggedOnly";
+import { NotBannedOnlyButton } from "../components/NotBannedOnlyButton";
+import { useRef } from "react";
 
 const CreateCommunity: NextPage = () => {
   useLoggedOnly("/");
@@ -41,6 +43,7 @@ export type createCommunityForm = z.infer<typeof createCommunitySchema>;
 
 const CreateCommunityForm: React.FC = () => {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const { control, handleSubmit, formState, setError, watch } =
     useForm<createCommunityForm>({
       mode: "onTouched",
@@ -48,7 +51,6 @@ const CreateCommunityForm: React.FC = () => {
       defaultValues: { name: "", desc: "" },
     });
   const name = useDebounce(watch("name"), 3000);
-
   const createCommunityMutation = trpc.community.createCommunity.useMutation();
   const getCommunityQuery = trpc.community.getCommunity.useQuery(
     { name },
@@ -82,6 +84,7 @@ const CreateCommunityForm: React.FC = () => {
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center gap-2 rounded border-2 border-zinc-800 p-8"
+      ref={formRef}
     >
       <div className="flex w-full">
         <h2 className="my-2 w-full text-3xl text-white">Create a community</h2>
@@ -118,6 +121,7 @@ const CreateCommunityForm: React.FC = () => {
                 )}
                 type="text"
                 placeholder="Community name"
+                autoComplete="off"
               />
             )}
           />
@@ -134,15 +138,21 @@ const CreateCommunityForm: React.FC = () => {
           ></textarea>
         )}
       />
-      <button
-        type="submit"
-        className={cx(
-          "mt-4 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+      <NotBannedOnlyButton
+        onClick={() => formRef.current?.requestSubmit()}
+        Child={(props) => (
+          <button
+            {...props}
+            type="button"
+            className={cx(
+              "mt-4 w-24 rounded-md bg-indigo-800 p-2 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+            )}
+            disabled={!formState.isValid || createCommunityMutation.isLoading}
+          >
+            Create
+          </button>
         )}
-        disabled={!formState.isValid || createCommunityMutation.isLoading}
-      >
-        Create
-      </button>
+      />
       <Loading size="small" show={createCommunityMutation.isLoading} />
     </form>
   );

@@ -12,6 +12,7 @@ import { Markdown } from "./Markdown";
 import { AiFillCaretDown } from "react-icons/ai";
 import { signIn, useSession } from "next-auth/react";
 import { ImageHidesOnError } from "./ImageHidesOnError";
+import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
 
 export const createPostSchema = z.object({
   title: z
@@ -34,6 +35,7 @@ export const PostEditor: React.FC<{
   const [isOpen, setOpen] = useState<boolean>(defaultOpen);
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 
   const { status: authStatus } = useSession();
@@ -89,14 +91,17 @@ export const PostEditor: React.FC<{
   const trpcContext = trpc.useContext();
 
   const createPostMutation = trpc.post.createPost.useMutation({
+    retry: false,
     onSuccess: (data) => {
       trpcContext.post.getPosts.invalidate();
       router.push(
         `/b/${searchCommunityQueryInput}/post/${data.id}/${slugify(data.title)}`
       );
     },
-    onError: (err) =>
-      setError("communityName", { message: err.shape?.message }),
+    onError: (err) => {
+      setError("communityName", { message: err.shape?.message });
+    },
+    onMutate: console.log,
   });
 
   const onSubmit = (data: createPostForm) => {
@@ -107,6 +112,7 @@ export const PostEditor: React.FC<{
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="my-auto flex w-full max-w-3xl flex-col items-center gap-1 rounded border-2 border-transparent bg-zinc-900 p-2 pb-0 text-white md:border-zinc-800 md:p-8 md:pb-4"
+      ref={formRef}
     >
       <div className="flex w-full items-center">
         {defaultOpen ? (
@@ -120,6 +126,7 @@ export const PostEditor: React.FC<{
             )}
             onClick={() => setOpen((prev) => !prev)}
             disabled={authStatus !== "authenticated"}
+            type="button"
           >
             <span className="p-2 transition-colors group-hover:bg-zinc-800">
               <AiFillCaretDown
@@ -131,21 +138,27 @@ export const PostEditor: React.FC<{
             </h2>
           </button>
         )}
-        <button
-          type="submit"
-          className="text-md w-16 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400 md:w-24 md:text-lg"
-          disabled={!formState.isValid || createPostMutation.isLoading}
-        >
-          Create
-        </button>
+        <NotBannedOnlyButton
+          onClick={() => formRef.current?.requestSubmit()}
+          Child={(props) => (
+            <button
+              {...props}
+              type="button"
+              className="text-md w-16 rounded bg-indigo-700 p-2 text-white disabled:bg-indigo-500 disabled:text-gray-400 md:w-24 md:text-lg"
+              disabled={!formState.isValid || createPostMutation.isLoading}
+            >
+              Create
+            </button>
+          )}
+        />
       </div>
       <Loading size="small" show={createPostMutation.isLoading} />
       <div
         className={cx(
           "flex w-full origin-top flex-col gap-2 transition-all",
           defaultOpen || isOpen
-            ? "visible max-h-[250vh] scale-y-100"
-            : "invisible max-h-0 scale-y-0"
+            ? "max-h-[250vh] scale-y-100"
+            : "max-h-0 scale-y-0"
         )}
       >
         <hr className="my-2 w-full" />
