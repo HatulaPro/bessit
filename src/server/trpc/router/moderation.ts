@@ -1,3 +1,4 @@
+import { banTimeOptions } from "./../../../pages/u/[...user_data]";
 import { modOnlyProcedure } from "./../trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -280,5 +281,67 @@ export const moderationRouter = router({
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.comment.delete({ where: { id: input.commentId } });
       return true;
+    }),
+  banUser: modOnlyProcedure
+    .input(
+      z.object({
+        userId: z.string().length(25),
+        reason: z.string().max(128),
+        banTime: z.enum([...banTimeOptions, "Not Banned"] as const),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      let nextUntilTime = new Date().getTime();
+      if (input.banTime === "1 Minute") {
+        nextUntilTime += 1000 * 60;
+      } else if (input.banTime === "1 Hour") {
+        nextUntilTime += 1000 * 60 * 60;
+      } else if (input.banTime === "12 Hours") {
+        nextUntilTime += 1000 * 60 * 60 * 12;
+      } else if (input.banTime === "1 Day") {
+        nextUntilTime += 1000 * 60 * 60 * 24;
+      } else if (input.banTime === "1 Week") {
+        nextUntilTime += 1000 * 60 * 60 * 24 * 7;
+      } else if (input.banTime === "1 Month") {
+        nextUntilTime += 1000 * 60 * 60 * 24 * 30;
+      } else if (input.banTime === "Forever") {
+        const forever = new Date(0);
+        forever.setFullYear(9999, 11, 31);
+        nextUntilTime = forever.getTime();
+      } else {
+        nextUntilTime = 0;
+      }
+      const bannedUntil = new Date(nextUntilTime);
+      const user = await ctx.prisma.user.findUnique({
+        where: { id: input.userId },
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User not found.",
+        });
+      }
+      if (user.isGlobalMod) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can not ban mods.",
+        });
+      }
+
+      const res = await ctx.prisma
+        .$transaction([
+          ctx.prisma.user.update({
+            where: { id: user.id },
+            data: { bannedUntil: bannedUntil },
+          }),
+          ctx.prisma.ban.upsert({
+            where: { bannedId: user.id },
+            create: { reason: input.reason, bannedId: user.id },
+            update: { bannedId: user.id, reason: input.reason },
+          }),
+        ])
+        .then(() => true)
+        .catch(() => false);
+      return res;
     }),
 });

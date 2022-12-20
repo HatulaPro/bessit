@@ -4,7 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
 import {
   BsClock,
@@ -16,6 +16,7 @@ import {
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { z } from "zod";
+import { Dialog } from "../../components/Dialog";
 import { Loading } from "../../components/Loading";
 import { NotFoundMessage } from "../../components/NotFoundMessage";
 import { cx, slugify, timeAgo } from "../../utils/general";
@@ -382,12 +383,115 @@ const UserProfilePosts: React.FC<{
   );
 };
 
+export const banTimeOptions = [
+  "1 Minute",
+  "1 Hour",
+  "12 Hours",
+  "1 Day",
+  "1 Week",
+  "1 Month",
+  "Forever",
+] as const;
+type BanTimeOption = typeof banTimeOptions[number];
+
+const UserModerationDialog: React.FC<{
+  userData: FullUser;
+  isOpen: boolean;
+  close: () => void;
+}> = ({ userData, close, isOpen }) => {
+  const [banTime, setBanTime] = useState<BanTimeOption>("1 Minute");
+  const [reason, setReason] = useState<string>(userData.user.ban?.reason ?? "");
+  const isInvalidLength = reason.length > 128;
+
+  const isBanned = userData.user.bannedUntil > new Date();
+  const utils = trpc.useContext();
+  const banUserMutation = trpc.moderator.banUser.useMutation({
+    onSuccess: () => {
+      utils.user.getUser.invalidate({ userId: userData.user.id });
+      close();
+    },
+  });
+
+  return (
+    <Dialog isOpen={isOpen} close={close}>
+      <div className="m-auto w-full max-w-sm rounded bg-zinc-800 p-4 pt-0 text-left md:max-w-lg">
+        <h2 className="my-4 text-xl">Edit Ban</h2>
+        <div className="flex gap-2 overflow-x-scroll p-1">
+          {banTimeOptions.map((timeOption) => (
+            <button
+              key={timeOption}
+              className={cx(
+                "my-0.5 block w-28 shrink-0 gap-1 rounded-full py-0.5 px-2 text-sm font-bold transition-all disabled:opacity-50 disabled:contrast-50 md:px-3 md:text-base",
+                timeOption === banTime
+                  ? "bg-zinc-700 text-white"
+                  : "bg-transparent text-zinc-500 hover:bg-zinc-700"
+              )}
+              disabled={banUserMutation.isLoading}
+              onClick={() => setBanTime(timeOption)}
+            >
+              {timeOption}
+            </button>
+          ))}
+        </div>
+        <span
+          className={cx(
+            "mt-3 block overflow-hidden text-sm text-red-500 transition-all",
+            isInvalidLength ? "h-5" : "h-0"
+          )}
+        >
+          Reason is too long. Keep it short.
+        </span>
+        <textarea
+          className="my-4 h-40 w-full resize-none overflow-y-scroll rounded border-2 border-zinc-500 bg-transparent p-1 text-zinc-200 outline-none focus:border-zinc-300 md:h-28"
+          placeholder="The reason for the ban"
+          onChange={(e) => setReason(e.currentTarget.value)}
+        >
+          {reason}
+        </textarea>
+
+        <Loading show={banUserMutation.isLoading} size="small" />
+        <div className="mt-2 flex justify-center gap-3">
+          <button
+            className="my-2 w-24 rounded-md bg-indigo-800 p-1.5 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+            disabled={isInvalidLength || banUserMutation.isLoading}
+            onClick={() =>
+              banUserMutation.mutate({
+                banTime,
+                reason,
+                userId: userData.user.id,
+              })
+            }
+          >
+            Save
+          </button>
+          {isBanned && (
+            <button
+              className="my-2 w-24 rounded-md bg-indigo-800 p-1.5 text-white transition-colors hover:bg-indigo-900 disabled:bg-zinc-500"
+              disabled={isInvalidLength || banUserMutation.isLoading}
+              onClick={() =>
+                banUserMutation.mutate({
+                  banTime: "Not Banned",
+                  reason: "",
+                  userId: userData.user.id,
+                })
+              }
+            >
+              Unban
+            </button>
+          )}
+        </div>
+      </div>
+    </Dialog>
+  );
+};
+
 const UserProfileModeration: React.FC<{
   userData: FullUser;
 }> = ({ userData }) => {
   const isBanned = userData.user.bannedUntil > new Date();
   const session = useSession();
   const isMod = Boolean(session.data?.user?.isGlobalMod);
+  const [isOpen, setOpen] = useState<boolean>(false);
 
   if (!isMod && !isBanned) return null;
   return (
@@ -431,12 +535,22 @@ const UserProfileModeration: React.FC<{
         )}
       </div>
 
-      {isMod && (
-        <div className="mt-4">
-          <button className="ml-auto block rounded bg-red-900 px-2 py-1 hover:bg-red-800">
-            Banning Options
-          </button>
-        </div>
+      {isMod && !userData.user.isGlobalMod && (
+        <>
+          <div className="mt-4">
+            <button
+              onClick={() => setOpen(true)}
+              className="ml-auto block rounded bg-red-900 px-2 py-1 hover:bg-red-800"
+            >
+              Banning Options
+            </button>
+          </div>
+          <UserModerationDialog
+            isOpen={isOpen}
+            close={() => setOpen(false)}
+            userData={userData}
+          />
+        </>
       )}
     </div>
   );
