@@ -501,11 +501,14 @@ const TopBarSearch: React.FC<{
                 tabIndex={index + 10}
                 ref={index === 0 ? firstUserRef : undefined}
                 onClick={(e) => {
-                  router.push("/");
+                  router.push(`/u/${user.id}/${user.name}`);
                   setQueryInput(`/u/${user.name}`);
                   e.currentTarget.blur();
                 }}
-                onKeyDown={onKeyDown("/", `/u/${user.name}`)}
+                onKeyDown={onKeyDown(
+                  `/u/${user.id}/${user.name}`,
+                  `/u/${user.name}`
+                )}
               >
                 {user.image ? (
                   <Image
