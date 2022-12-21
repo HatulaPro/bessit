@@ -83,9 +83,9 @@ const useUserProfileData = () => {
   const getUserQuery = trpc.user.getUser.useQuery(
     { userId: queryData?.user_data[0] ?? "NOT_SENDABLE" },
     {
-      enabled: Boolean(queryData),
+      enabled: Boolean(queryData) && document.hasFocus(),
       refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
       staleTime: 1000 * 60 * 5,
       cacheTime: 1000 * 60 * 5,
       refetchInterval: 1000 * 60 * 5,
