@@ -86,8 +86,9 @@ const useUserProfileData = () => {
       enabled: Boolean(queryData),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
-      cacheTime: Infinity,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 5,
+      cacheTime: 1000 * 60 * 5,
+      refetchInterval: 1000 * 60 * 5,
       retry: false,
       onError: () => {
         router.push("/");

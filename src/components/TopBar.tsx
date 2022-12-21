@@ -133,8 +133,8 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
     trpc.notification.getNumberOfUnseenNotifications.useQuery(undefined, {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
-      cacheTime: Infinity,
-      staleTime: Infinity,
+      cacheTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 5,
       refetchInterval: 1000 * 60 * 5,
     });
 
@@ -145,8 +145,9 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         refetchOnReconnect: false,
         refetchOnWindowFocus: false,
-        cacheTime: Infinity,
-        staleTime: Infinity,
+        cacheTime: 1000 * 60 * 5,
+        staleTime: 1000 * 60 * 5,
+        refetchInterval: 1000 * 60 * 5,
         retry: 0,
         notifyOnChangeProps: "all",
         keepPreviousData: true,
