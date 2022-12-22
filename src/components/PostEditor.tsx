@@ -195,6 +195,7 @@ export const PostEditor: React.FC<{
                         alt={`Community logo of /b/${currentCommunity.name}`}
                         fill
                         className="rounded-full object-cover"
+                        priority
                       />
                     </div>
                   )}

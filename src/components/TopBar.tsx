@@ -84,6 +84,7 @@ export const TopBar: React.FC = () => {
                       alt="Profile Image"
                       width={36}
                       height={36}
+                      priority
                     />
                   ) : (
                     <AiFillMeh className="h-9 w-9 rounded-full" />
@@ -521,6 +522,7 @@ const TopBarSearch: React.FC<{
                     alt="Profile Image"
                     width={28}
                     height={28}
+                    priority
                   />
                 ) : (
                   <AiFillMeh className="h-7 w-7 rounded-full" />

@@ -278,6 +278,7 @@ const PostComments: React.FC<{
                           alt={`Profile image of ${comment.user.name}`}
                           width="128"
                           height="128"
+                          priority
                         />
                       ) : (
                         <AiFillMeh className="h-9 w-9 rounded-full text-white" />

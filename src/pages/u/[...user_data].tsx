@@ -214,6 +214,7 @@ const UserDataSection: React.FC<{
             alt="Profile Image"
             width={112}
             height={112}
+            priority
           />
         ) : (
           <AiFillMeh className="mx-auto h-28 w-28 rounded-md bg-zinc-600 bg-opacity-60" />

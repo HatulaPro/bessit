@@ -93,6 +93,7 @@ const CommunityPreview: React.FC<{
             alt={`Community image of ${name}`}
             className="object-cover"
             fill
+            priority
           />
         )}
       </div>
