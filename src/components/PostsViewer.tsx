@@ -54,8 +54,9 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
 
 const LinkToPost: React.FC<{
   post: CommunityPosts["posts"][number];
+  className?: string;
   children: JSX.Element;
-}> = ({ post, children }) => {
+}> = ({ post, children, className }) => {
   return (
     <Link
       href={{
@@ -66,6 +67,7 @@ const LinkToPost: React.FC<{
       }}
       as={`/b/${post.community.name}/post/${post.id}/${slugify(post.title)}`}
       shallow
+      className={className}
     >
       {children}
     </Link>
@@ -216,11 +218,14 @@ export const SinglePost: React.FC<{
               post={post}
               loggedIn={session.status === "authenticated"}
             />
-            <LinkToPost post={post}>
-              <button className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500">
+            <LinkToPost
+              className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500"
+              post={post}
+            >
+              <>
                 <BsChatLeft className="text-2xl" />
                 {post._count.comments}
-              </button>
+              </>
             </LinkToPost>
             {session.data?.user?.id === post.userId && isMain && (
               <EditPostButton post={post} />
