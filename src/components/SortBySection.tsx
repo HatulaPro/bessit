@@ -69,8 +69,8 @@ export const SortBySection: React.FC<{
               className={cx(
                 "my-0.5 flex items-center gap-1 rounded-full py-0.5 px-2 text-base font-bold transition-all disabled:opacity-50 disabled:contrast-50 md:px-3 md:text-lg",
                 sortFilter === sortBy
-                  ? "bg-zinc-700 text-white"
-                  : "bg-transparent text-zinc-500 hover:bg-zinc-700"
+                  ? "bg-zinc-700"
+                  : "bg-transparent text-zinc-400 hover:bg-zinc-700"
               )}
               key={sortFilter}
               onClick={() => {

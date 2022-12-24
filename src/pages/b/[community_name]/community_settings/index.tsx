@@ -406,7 +406,7 @@ const TransferCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
         type="text"
         placeholder="User ID of new owner"
         className={cx(
-          "my-2 w-full gap-1 rounded border-2 bg-transparent p-1 text-zinc-200 outline-none",
+          "my-2 w-full gap-1 rounded border-2 bg-transparent p-2 text-zinc-200 outline-none",
           transferCommunityMutation.error
             ? "border-red-500"
             : "border-zinc-500 focus-within:border-zinc-300"
