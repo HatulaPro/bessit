@@ -618,12 +618,12 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       cacheTime: Infinity,
       // TODO: Build infra so this doesn't look like shit
       placeholderData: {
-        communityId: "",
+        communityId: "communityId",
         community: {
           ownerId: "",
-          name: "",
+          name: "communityName",
           desc: "",
-          id: "",
+          id: "communityId",
           image: null,
           logo: null,
           moderators: [],
@@ -631,7 +631,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
         },
         content: "",
         createdAt: new Date(),
-        id: "",
+        id: "postId",
         isDeleted: false,
         title: "",
         updatedAt: new Date(),
