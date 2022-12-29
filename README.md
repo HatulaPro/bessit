@@ -28,8 +28,5 @@ Users can create communities, post about whatever they want, comment on posts, e
     - [X] Remove all posts/comments
     - [X] Ban users
 * [X] Favorite communities
-* [ ] TikTok-like design
-  - [ ] Snap scrolling
-  - [ ] One post/comment/feature visible per "page"
 * [ ] Making every user a millionaire
 
