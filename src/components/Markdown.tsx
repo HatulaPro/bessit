@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 
+const regex = /(^|\s)(\/b\/[a-z0-9_]{2,24})($|\s)/gm;
 export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
   source,
   simplify,
@@ -20,7 +21,7 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
       remarkPlugins={[remarkGfm]}
       rehypePlugins={simplify ? undefined : [rehypeRaw, rehypeSanitize]}
     >
-      {source}
+      {source.replaceAll(regex, '$1<a href="$2">$2</a>$3')}
     </ReactMarkdown>
   );
 };
