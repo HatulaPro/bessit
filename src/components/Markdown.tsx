@@ -3,12 +3,17 @@ import { cx } from "../utils/general";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import { useMemo } from "react";
 
-const regex = /(^|\s)(\/b\/[a-z0-9_]{2,24})($|\s)/gm;
+const communityNameRegex = /(^|\s)(\/b\/[a-z0-9_]{2,24})($|\s)/gm;
 export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
   source,
   simplify,
 }) => {
+  const memoizedSource = useMemo(
+    () => source.replaceAll(communityNameRegex, '$1<a href="$2">$2</a>$3'),
+    [source]
+  );
   return (
     <ReactMarkdown
       className={cx(
@@ -21,7 +26,7 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
       remarkPlugins={[remarkGfm]}
       rehypePlugins={simplify ? undefined : [rehypeRaw, rehypeSanitize]}
     >
-      {source.replaceAll(regex, '$1<a href="$2">$2</a>$3')}
+      {memoizedSource}
     </ReactMarkdown>
   );
 };
