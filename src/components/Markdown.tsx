@@ -14,7 +14,7 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
         "markdown",
         simplify
           ? "max-h-44 overflow-hidden bg-gradient-to-b from-white to-transparent bg-[length:100%_11rem] bg-clip-text text-transparent"
-          : "prose prose-invert max-h-[70vh] max-w-full overflow-y-auto"
+          : "prose prose-invert max-h-[70vh] min-h-[2rem] max-w-full overflow-y-auto"
       )}
       skipHtml={simplify}
       remarkPlugins={[remarkGfm]}
