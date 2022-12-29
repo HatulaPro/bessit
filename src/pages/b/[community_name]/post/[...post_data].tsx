@@ -203,8 +203,7 @@ const PostComments: React.FC<{
   }, [post.community]);
 
   const showModeratorTools = Boolean(
-    main &&
-      session.status === "authenticated" &&
+    session.status === "authenticated" &&
       session.data.user &&
       (modsSet.has(session.data.user.id) || session.data.user.isGlobalMod)
   );
