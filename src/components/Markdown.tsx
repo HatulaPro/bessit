@@ -5,6 +5,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { useMemo } from "react";
 import { trpc } from "../utils/trpc";
+import Link from "next/link";
 
 const communityNameRegex = /(^|\s)(\/b\/[a-z0-9_]{2,24})($|\s)/gm;
 const userIdRegex =
@@ -19,22 +20,12 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
       [...source.matchAll(userIdRegex)].map((match) => match[4] ?? match[3]!),
     [source]
   );
-  console.log(usersMatched);
-  const userQueries = trpc.useQueries((t) => {
-    return usersMatched.map((u) =>
-      t.search.search(
-        { q: `/u/${u}` },
-        {
-          refetchOnReconnect: false,
-          refetchOnWindowFocus: false,
-          cacheTime: Infinity,
-          staleTime: Infinity,
-        }
-      )
-    );
-  });
 
-  console.log(userQueries);
+  // TODO: Check why cache is invalid
+  const userQueries = trpc.useQueries((t) =>
+    usersMatched.map((u) => t.search.search({ q: `/u/${u}` }))
+  );
+
   const usersMap = useMemo(() => {
     const res = new Map();
     for (const userQuery of userQueries) {
@@ -75,6 +66,11 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
       skipHtml={simplify}
       remarkPlugins={[remarkGfm]}
       rehypePlugins={simplify ? undefined : [rehypeRaw, rehypeSanitize]}
+      components={{
+        a: (idk) => {
+          return <Link href={idk.href ?? "#"}>{idk.children}</Link>;
+        },
+      }}
     >
       {memoizedSource}
     </ReactMarkdown>
