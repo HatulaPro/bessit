@@ -9,7 +9,7 @@ import {
   BsArrowRepeat,
   BsAt,
   BsBell,
-  BsChatLeft,
+  BsChatLeftFill,
   BsCheck2All,
   BsDot,
   BsFillExclamationTriangleFill,
@@ -276,7 +276,7 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                     </span>
                   </h3>
                   <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-zinc-400">
-                    <BsChatLeft className="m-1 inline-block text-blue-500" />
+                    <BsChatLeftFill className="m-1 inline-block text-blue-500" />
                     {notification.newComment?.content}
                   </p>
                 </>
@@ -292,7 +292,7 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                     </span>
                   </h3>
                   <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-zinc-400">
-                    <BsChatLeft className="m-1 inline-block text-blue-500" />
+                    <BsChatLeftFill className="m-1 inline-block text-blue-500" />
                     {notification.newComment?.content}
                   </p>
                 </>
