@@ -33,3 +33,7 @@ export const slugify = (sentence: string): string => {
   slugCache.set(sentence, newValue);
   return newValue;
 };
+
+export const FIND_COMMUNITIES_REGEX = /(^|\s)(\/b\/[a-z0-9_]{2,24})($|\s)/gm;
+export const FIND_USERS_REGEX =
+  /(^|\s)(\/u\/([a-zA-Z0-9\.@*\$\/\\\#]{2,32}|\(([^ ][a-zA-Z0-9\.@*\$\/\\\# ]{1,32})\)))($|\s)/gm;
