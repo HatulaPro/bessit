@@ -155,6 +155,8 @@ enum NotificationType {
   LIKES_ON_COMMENT
   COMMENT_ON_POST
   COMMENT_ON_COMMENT
+  TAG_ON_POST
+  TAG_ON_COMMENT
 }
 
 model Notification {
