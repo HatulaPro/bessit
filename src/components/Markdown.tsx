@@ -21,10 +21,9 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
     [source]
   );
 
-  // TODO: Better searching
   const userQueries = trpc.useQueries((t) =>
-    usersMatched.map((u) => {
-      const query = t.search.search({ q: `/u/${u}` });
+    usersMatched.map((name) => {
+      const query = t.search.getTaggedUser({ name });
       // TODO: There is a TRPC bug that forces it to be written this way
       query.cacheTime = Infinity;
       query.staleTime = Infinity;
@@ -37,10 +36,9 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
   const usersMap = useMemo(() => {
     const res = new Map();
     for (const userQuery of userQueries) {
-      if (userQuery.data?.users?.length) {
-        const user = userQuery.data.users[0];
-        if (user?.name) {
-          res.set(user.name, user);
+      if (userQuery.data) {
+        if (userQuery.data.name) {
+          res.set(userQuery.data.name, userQuery.data);
         }
       }
     }

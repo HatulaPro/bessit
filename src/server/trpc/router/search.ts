@@ -55,4 +55,18 @@ export const searchRouter = router({
           : null,
       };
     }),
+  getTaggedUser: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.prisma.user.findFirst({
+        take: 1,
+        where: {
+          name: {
+            equals: input.name,
+          },
+        },
+        select: { id: true, name: true, image: true },
+      });
+      return result;
+    }),
 });
