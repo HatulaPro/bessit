@@ -348,7 +348,7 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                   <h3
                     className={cx("text-sm", !notification.seen && "font-bold")}
                   >
-                    <i>{notification.newComment?.user.name}</i> mentioned you in
+                    <i>{notification.newComment?.user.name}</i> mentioned you
                     on: <i>{notification.relatedPost.title}</i>
                     <span className="pl-2 text-xs font-thin text-zinc-400">
                       {timeAgo(notification.updatedAt)}

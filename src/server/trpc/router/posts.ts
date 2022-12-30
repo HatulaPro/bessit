@@ -40,17 +40,27 @@ async function notifyTaggedUsers(
       usersMap.set(user.name, user);
     }
   }
+  const notificationType = commentId ? "TAG_ON_COMMENT" : "TAG_ON_POST";
+  if (removeExisting) {
+    await prisma.notification.deleteMany({
+      where: {
+        relatedPostId: postId,
+        newCommentId: commentId,
+        type: notificationType,
+        seen: false,
+      },
+    });
+  }
   await prisma.notification.createMany({
+    skipDuplicates: true,
     data: [...usersMap.keys()].map((key) => ({
       relatedPostId: postId,
-      type: "TAG_ON_POST",
+      type: notificationType,
+      newCommentId: commentId,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       userId: usersMap.get(key)!.id,
     })),
   });
-  if (commentId || removeExisting) {
-    throw new Error("Not implemented");
-  }
 }
 
 export const postsRouter = router({
@@ -106,7 +116,7 @@ export const postsRouter = router({
       if (!post || post.userId !== userId) {
         throw new TRPCError({ message: "Post not found", code: "BAD_REQUEST" });
       }
-      return await ctx.prisma.post.update({
+      const result = await ctx.prisma.post.update({
         where: { id: post.id },
         data: { title: input.title, content: input.content },
         include: {
@@ -119,6 +129,17 @@ export const postsRouter = router({
           },
         },
       });
+
+      notifyTaggedUsers(
+        ctx.prisma,
+        input.content,
+        userId,
+        post.id,
+        undefined,
+        true
+      );
+
+      return result;
     }),
   createComment: unbannedUserProcedure
     .input(
@@ -204,6 +225,15 @@ export const postsRouter = router({
         });
       }
 
+      notifyTaggedUsers(
+        ctx.prisma,
+        input.content,
+        ctx.session.user.id,
+        post.id,
+        newComment.id,
+        false
+      );
+
       return newComment;
     }),
   editComment: unbannedUserProcedure
@@ -224,10 +254,19 @@ export const postsRouter = router({
           code: "BAD_REQUEST",
         });
       }
-      return await ctx.prisma.comment.update({
+      const updatedComment = await ctx.prisma.comment.update({
         where: { id: comment.id },
         data: { content: input.content },
       });
+      notifyTaggedUsers(
+        ctx.prisma,
+        input.content,
+        ctx.session.user.id,
+        updatedComment.postId,
+        updatedComment.id,
+        true
+      );
+      return updatedComment;
     }),
   getPost: publicProcedure
     .input(z.object({ post_id: z.string() }))
