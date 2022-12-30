@@ -21,9 +21,17 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
     [source]
   );
 
-  // TODO: Check why cache is invalid
+  // TODO: Better searching
   const userQueries = trpc.useQueries((t) =>
-    usersMatched.map((u) => t.search.search({ q: `/u/${u}` }))
+    usersMatched.map((u) => {
+      const query = t.search.search({ q: `/u/${u}` });
+      // TODO: There is a TRPC bug that forces it to be written this way
+      query.cacheTime = Infinity;
+      query.staleTime = Infinity;
+      query.refetchOnWindowFocus = false;
+      query.refetchOnReconnect = false;
+      return query;
+    })
   );
 
   const usersMap = useMemo(() => {
