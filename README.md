@@ -28,5 +28,6 @@ Users can create communities, post about whatever they want, comment on posts, e
     - [X] Remove all posts/comments
     - [X] Ban users
 * [X] Favorite communities
+* [X] Tagging users on posts/comments
 * [ ] Making every user a millionaire
 
