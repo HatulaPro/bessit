@@ -7,6 +7,7 @@ import { CgComponents } from "react-icons/cg";
 import { cx, slugify, timeAgo } from "../utils/general";
 import {
   BsArrowRepeat,
+  BsAt,
   BsBell,
   BsChatLeft,
   BsCheck2All,
@@ -324,6 +325,38 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                     <BsSuitHeartFill className="m-1 inline-block text-red-500" />
                     See your comment:{" "}
                     <i>{notification.relatedComment?.content}</i>
+                  </p>
+                </>
+              ) : notification.type === "TAG_ON_POST" ? (
+                <>
+                  <h3
+                    className={cx("text-sm", !notification.seen && "font-bold")}
+                  >
+                    Someone mentioned you in a post:{" "}
+                    <i>{notification.relatedPost.title}</i>
+                    <span className="pl-2 text-xs font-thin text-zinc-400">
+                      {timeAgo(notification.updatedAt)}
+                    </span>
+                  </h3>
+                  <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-zinc-400">
+                    <BsAt className="m-1 inline-block text-sm text-emerald-400" />
+                    {notification.relatedPost.content}
+                  </p>
+                </>
+              ) : notification.type === "TAG_ON_COMMENT" ? (
+                <>
+                  <h3
+                    className={cx("text-sm", !notification.seen && "font-bold")}
+                  >
+                    <i>{notification.newComment?.user.name}</i> mentioned you in
+                    on: <i>{notification.relatedPost.title}</i>
+                    <span className="pl-2 text-xs font-thin text-zinc-400">
+                      {timeAgo(notification.updatedAt)}
+                    </span>
+                  </h3>
+                  <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-zinc-400">
+                    <BsAt className="m-1 inline-block text-sm text-emerald-400" />
+                    {notification.newComment?.content}
                   </p>
                 </>
               ) : (

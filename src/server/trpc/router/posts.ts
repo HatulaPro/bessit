@@ -1,6 +1,8 @@
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPostSchema } from "../../../components/PostEditor";
+import { FIND_USERS_REGEX } from "../../../utils/general";
 import {
   router,
   protectedProcedure,
@@ -9,6 +11,47 @@ import {
 } from "../trpc";
 
 const NOTIFY_ON_NUMBERS = new Set([1, 2, 10, 100, 1000]);
+
+async function notifyTaggedUsers(
+  prisma: PrismaClient<
+    Prisma.PrismaClientOptions,
+    never,
+    Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+  >,
+  content: string,
+  userId: string,
+  postId: string,
+  commentId: string | undefined,
+  removeExisting: boolean
+) {
+  const usersMatched = new Set(
+    [...content.matchAll(FIND_USERS_REGEX)].map(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (match) => match[4] ?? match[3]!
+    )
+  );
+  const results = await prisma.user.findMany({
+    where: { name: { in: [...usersMatched] } },
+    select: { id: true, name: true },
+  });
+  const usersMap = new Map();
+  for (const user of results) {
+    if (user.id !== userId) {
+      usersMap.set(user.name, user);
+    }
+  }
+  await prisma.notification.createMany({
+    data: [...usersMap.keys()].map((key) => ({
+      relatedPostId: postId,
+      type: "TAG_ON_POST",
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      userId: usersMap.get(key)!.id,
+    })),
+  });
+  if (commentId || removeExisting) {
+    throw new Error("Not implemented");
+  }
+}
 
 export const postsRouter = router({
   createPost: unbannedUserProcedure
@@ -25,7 +68,8 @@ export const postsRouter = router({
           code: "BAD_REQUEST",
         });
       }
-      return await ctx.prisma.post.create({
+
+      const post = await ctx.prisma.post.create({
         data: {
           title: input.title,
           content: input.content,
@@ -34,6 +78,17 @@ export const postsRouter = router({
           communityId: community.id,
         },
       });
+
+      notifyTaggedUsers(
+        ctx.prisma,
+        input.content,
+        userId,
+        post.id,
+        undefined,
+        false
+      );
+
+      return post;
     }),
   editPost: unbannedUserProcedure
     .input(
