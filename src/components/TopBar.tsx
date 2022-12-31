@@ -173,7 +173,21 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
     trpc.notification.setNotificationAsSeen.useMutation({
       cacheTime: Infinity,
       retry: 0,
-      onSuccess: (data, { notificationId }) => {
+      onMutate: ({ notificationId }) => {
+        if (notificationId === null) {
+          utils.notification.getNotifications.setInfiniteData(
+            { count: 4, cursor: undefined },
+            (oldData) => {
+              if (!oldData) return;
+              for (const page of oldData.pages) {
+                for (const notification of page.notifications) {
+                  notification.seen = true;
+                }
+              }
+              return { ...oldData };
+            }
+          );
+        }
         utils.notification.getNumberOfUnseenNotifications.setData(
           undefined,
           (x) => {
@@ -184,6 +198,8 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
             return 0;
           }
         );
+      },
+      onSuccess: () => {
         utils.notification.getNotifications.invalidate();
       },
     });
@@ -207,7 +223,6 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
       <Dialog isOpen={isOpen} close={() => setOpen(false)}>
         <div className="m-auto max-h-72 w-full max-w-xs overflow-y-scroll rounded bg-zinc-800 p-2 pt-0 text-left md:max-w-sm">
           <h2 className="sticky top-0 z-10 mb-4 flex justify-between border-b-2 border-zinc-700 bg-zinc-800 px-2 pt-4 pb-2 text-sm text-zinc-300">
-            {/* TODO: Show the number of unread notifications here */}
             Notifications{" "}
             {getNotificationsCountQuery.data
               ? `(${getNotificationsCountQuery.data})`
