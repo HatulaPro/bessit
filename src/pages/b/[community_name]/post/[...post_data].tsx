@@ -332,7 +332,7 @@ const PostComments: React.FC<{
                     </button>
                     <CommentLikeButton
                       comment={comment}
-                      loggedIn={session.status === "authenticated"}
+                      userId={session.data?.user?.id}
                     />
                     {!post.isDeleted && (
                       <LoggedOnlyButton

@@ -4,7 +4,6 @@ import { trpc } from "../utils/trpc";
 import type { RouterOutputs, RouterInputs } from "../utils/trpc";
 import { useQueryClient } from "@tanstack/react-query";
 import type { InfiniteData } from "@tanstack/react-query";
-import { Loading } from "./Loading";
 import type { InfinityQueryKeyInput } from "./PostLikeButton";
 import { cx } from "../utils/general";
 import { LoggedOnlyButton } from "./LoggedOnlyButton";
@@ -12,20 +11,20 @@ import { UserProfileLink } from "./UserProfileLink";
 
 export const CommentLikeButton: React.FC<{
   comment: UIComment;
-  loggedIn: boolean;
-}> = ({ comment, loggedIn }) => {
+  userId?: string;
+}> = ({ comment, userId }) => {
   const queryClient = useQueryClient();
-  const voted = loggedIn && comment.votes.length > 0;
+  const voted = userId && comment.votes.length > 0;
 
   const likeMutation = trpc.post.likeComment.useMutation({
     cacheTime: 0,
-    onSuccess: (data) => {
+    onMutate: (x) => {
+      const data = { commentId: x.commentId, userId: "TODO" };
       // TODO: Change a shitload of stuff
       // Getting all the keys
       const commentsQueries = queryClient.getQueriesData<
         InfiniteData<RouterOutputs["post"]["getComments"]>
       >([["post", "getComments"]]);
-      console.log(commentsQueries);
 
       for (const [queryKey, queryData] of commentsQueries) {
         const queryKeyTyped = queryKey[1] as unknown as InfinityQueryKeyInput<
@@ -64,7 +63,6 @@ export const CommentLikeButton: React.FC<{
               comments: nextComments,
             };
           });
-          console.log(queryData);
           queryClient.setQueryData<
             InfiniteData<RouterOutputs["post"]["getComments"]>
           >([["post", "getComments"], queryKeyTyped], { ...queryData });
@@ -78,16 +76,13 @@ export const CommentLikeButton: React.FC<{
       Child={(props) => (
         <button
           {...props}
-          disabled={likeMutation.isLoading}
           className={cx(
             "text-md group relative flex items-center gap-2 p-2",
             voted ? "text-red-400" : "text-zinc-400",
-            loggedIn && "hover:text-red-400 disabled:text-zinc-500"
+            userId && "hover:text-red-400"
           )}
         >
-          {likeMutation.isLoading ? (
-            <Loading show size="small" />
-          ) : voted ? (
+          {voted ? (
             <BsSuitHeartFill className="text-lg" />
           ) : (
             <BsSuitHeart className="text-lg" />
