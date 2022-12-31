@@ -214,10 +214,7 @@ export const SinglePost: React.FC<{
             >
               <BsShare className="text-xl" />
             </button>
-            <PostLikeButton
-              post={post}
-              loggedIn={session.status === "authenticated"}
-            />
+            <PostLikeButton post={post} userId={session.data?.user?.id} />
             <LinkToPost
               className="text-md flex items-center gap-1.5 p-2 text-zinc-400 hover:text-blue-500"
               post={post}

@@ -4,7 +4,6 @@ import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 import type { CommunityPosts } from "../hooks/useCommunityPosts";
 import { trpc } from "../utils/trpc";
 import type { RouterOutputs, RouterInputs } from "../utils/trpc";
-import { Loading } from "./Loading";
 import { cx } from "../utils/general";
 import { LoggedOnlyButton } from "./LoggedOnlyButton";
 import { UserProfileLink } from "./UserProfileLink";
@@ -16,74 +15,79 @@ export type InfinityQueryKeyInput<T> = {
 
 export const PostLikeButton: React.FC<{
   post: CommunityPosts["posts"][number];
-  loggedIn: boolean;
-}> = ({ post, loggedIn }) => {
+  userId?: string;
+}> = ({ post, userId }) => {
   const utils = trpc.useContext();
-  const voted = loggedIn && post.votes.length > 0;
+  const voted = userId && post.votes.length > 0;
   const queryClient = useQueryClient();
-  const likeMutation = trpc.post.likePost.useMutation({
-    onSuccess: (data) => {
-      const singlePostData = utils.post.getPost.getData({ post_id: post.id });
-      if (singlePostData) {
-        utils.post.getPost.setData(
-          { post_id: post.id },
-          {
-            ...singlePostData,
-            votes: voted ? [] : [data],
-            _count: {
-              ...singlePostData._count,
-              votes: singlePostData._count.votes + (voted ? -1 : 1),
-            },
-          }
-        );
-      }
 
-      // Getting all the keys
-      const communityQueries = queryClient.getQueriesData<
-        InfiniteData<RouterOutputs["post"]["getPosts"]>
-      >([["post", "getPosts"]]);
+  function setPostAs(postId: string, userId: string) {
+    const data = { postId, userId };
+    const singlePostData = utils.post.getPost.getData({ post_id: post.id });
+    if (singlePostData) {
+      utils.post.getPost.setData(
+        { post_id: post.id },
+        {
+          ...singlePostData,
+          votes: voted ? [] : [data],
+          _count: {
+            ...singlePostData._count,
+            votes: singlePostData._count.votes + (voted ? -1 : 1),
+          },
+        }
+      );
+    }
 
-      // For every key
-      for (const [queryKey, queryData] of communityQueries) {
-        const queryKeyTyped = queryKey[1] as unknown as InfinityQueryKeyInput<
-          RouterInputs["post"]["getPosts"]
-        >;
+    // Getting all the keys
+    const communityQueries = queryClient.getQueriesData<
+      InfiniteData<RouterOutputs["post"]["getPosts"]>
+    >([["post", "getPosts"]]);
 
-        // queryData exists, and the community can "hold" the post
-        if (
-          queryData &&
-          (queryKeyTyped.input.community === null ||
-            queryKeyTyped.input.community === post.community.name)
-        ) {
-          queryData.pages = queryData.pages.map((page) => {
-            let needsChange = false;
-            const nextPosts = page.posts.map((pagePost) => {
-              if (pagePost.id === post.id) {
-                needsChange = true;
-                return {
-                  ...pagePost,
-                  votes: voted ? [] : [data],
-                  _count: {
-                    ...pagePost._count,
-                    votes: pagePost._count.votes + (voted ? -1 : 1),
-                  },
-                };
-              }
-              return pagePost;
-            });
-            if (needsChange) {
+    // For every key
+    for (const [queryKey, queryData] of communityQueries) {
+      const queryKeyTyped = queryKey[1] as unknown as InfinityQueryKeyInput<
+        RouterInputs["post"]["getPosts"]
+      >;
+
+      // queryData exists, and the community can "hold" the post
+      if (
+        queryData &&
+        (queryKeyTyped.input.community === null ||
+          queryKeyTyped.input.community === post.community.name)
+      ) {
+        queryData.pages = queryData.pages.map((page) => {
+          let needsChange = false;
+          const nextPosts = page.posts.map((pagePost) => {
+            if (pagePost.id === post.id) {
+              needsChange = true;
               return {
-                ...page,
-                posts: nextPosts,
+                ...pagePost,
+                votes: voted ? [] : [data],
+                _count: {
+                  ...pagePost._count,
+                  votes: pagePost._count.votes + (voted ? -1 : 1),
+                },
               };
             }
-            return page;
+            return pagePost;
           });
-          queryClient.setQueryData<
-            InfiniteData<RouterOutputs["post"]["getPosts"]>
-          >([["post", "getPosts"], queryKeyTyped], { ...queryData });
-        }
+          if (needsChange) {
+            return {
+              ...page,
+              posts: nextPosts,
+            };
+          }
+          return page;
+        });
+        queryClient.setQueryData<
+          InfiniteData<RouterOutputs["post"]["getPosts"]>
+        >([["post", "getPosts"], queryKeyTyped], { ...queryData });
       }
+    }
+  }
+  const likeMutation = trpc.post.likePost.useMutation({
+    onMutate: (x) => {
+      setPostAs(x.postId, userId ?? "UNREACHABLE");
     },
   });
   return (
@@ -94,13 +98,10 @@ export const PostLikeButton: React.FC<{
           className={cx(
             "group relative flex items-center gap-2 p-2 text-lg",
             voted ? "text-red-400" : "text-zinc-400",
-            loggedIn && "hover:text-red-400 disabled:text-zinc-500"
+            userId && "hover:text-red-400"
           )}
-          disabled={likeMutation.isLoading}
         >
-          {likeMutation.isLoading ? (
-            <Loading show size="small" />
-          ) : voted ? (
+          {voted ? (
             <BsSuitHeartFill className="text-2xl" />
           ) : (
             <BsSuitHeart className="text-2xl" />
