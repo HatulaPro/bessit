@@ -8,11 +8,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
 import { useRouter } from "next/router";
 import { Loading } from "./Loading";
-import { Markdown } from "./Markdown";
 import { AiFillCaretDown } from "react-icons/ai";
 import { signIn, useSession } from "next-auth/react";
 import { ImageHidesOnError } from "./ImageHidesOnError";
 import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
+import dynamic from "next/dynamic";
+
+const Markdown = dynamic(() => import("./Markdown").then((x) => x.Markdown));
 
 export const createPostSchema = z.object({
   title: z
@@ -344,7 +346,12 @@ export const PostEditor: React.FC<{
                     ></textarea>
                   </>
                 ),
-                preview: <Markdown source={field.value} />,
+                preview:
+                  field.value.length > 0 ? (
+                    <Markdown source={field.value} />
+                  ) : (
+                    <p></p>
+                  ),
               }}
             />
           )}

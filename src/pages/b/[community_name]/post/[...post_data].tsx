@@ -29,13 +29,17 @@ import {
   BsFillShieldFill,
 } from "react-icons/bs";
 import Image from "next/image";
-import { Markdown } from "../../../../components/Markdown";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
 import type { InfiniteData } from "@tanstack/react-query";
 import { UserProfileLink } from "../../../../components/UserProfileLink";
 import { AiFillMeh } from "react-icons/ai";
 import { NotBannedOnlyButton } from "../../../../components/NotBannedOnlyButton";
+import dynamic from "next/dynamic";
+
+const Markdown = dynamic(() =>
+  import("../../../../components/Markdown").then((x) => x.Markdown)
+);
 
 const PostPage: NextPage = () => {
   const postTopRef = useRef<HTMLDivElement>(null);

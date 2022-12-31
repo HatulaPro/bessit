@@ -1,6 +1,5 @@
 import superjson from "superjson";
 import Link from "next/link";
-import { Markdown } from "./Markdown";
 import {
   BsArrowCounterclockwise,
   BsChatLeft,
@@ -29,6 +28,9 @@ import { trpc } from "../utils/trpc";
 import { UserProfileLink } from "./UserProfileLink";
 import { useRouter } from "next/router";
 import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
+import dynamic from "next/dynamic";
+
+const Markdown = dynamic(() => import("./Markdown").then((x) => x.Markdown));
 
 export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
   communityPosts,
