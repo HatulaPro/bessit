@@ -34,7 +34,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="mx-auto flex max-w-5xl items-start gap-6 bg-zinc-900 px-4 pt-12 md:pt-20">
+      <main className="mx-auto flex max-w-5xl items-start gap-6 bg-zinc-900 pt-12 sm:px-4 md:pt-20">
         <div className="my-2 mx-auto flex flex-[3] flex-col items-center justify-center px-0.5">
           <PostEditor defaultOpen={false} />
           <hr className="block w-full max-w-3xl opacity-50 md:hidden" />
