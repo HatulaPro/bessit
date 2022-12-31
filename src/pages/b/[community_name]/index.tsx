@@ -6,13 +6,12 @@ import { useMemo, useState } from "react";
 import { Dialog } from "../../../components/Dialog";
 import { Loading } from "../../../components/Loading";
 import { NotFoundMessage } from "../../../components/NotFoundMessage";
-import { PostEditor } from "../../../components/PostEditor";
 import { PostsViewer } from "../../../components/PostsViewer";
 import {
   type PostsFromLastOptions,
+  type SortingOptions,
   SortBySection,
 } from "../../../components/SortBySection";
-import type { SortingOptions } from "../../../components/SortBySection";
 import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
 import { CommunityLogo } from "../../../components/CommunityLogo";
 import { BsGearFill, BsPencil } from "react-icons/bs";
@@ -24,6 +23,12 @@ import { type RouterOutputs, trpc } from "../../../utils/trpc";
 import { LoggedOnlyButton } from "../../../components/LoggedOnlyButton";
 import { CgComponents } from "react-icons/cg";
 import { NotBannedOnlyButton } from "../../../components/NotBannedOnlyButton";
+
+import dynamic from "next/dynamic";
+
+const PostEditor = dynamic(() =>
+  import("../../../components/PostEditor").then((x) => x.PostEditor)
+);
 
 const CommunityPage: NextPage = () => {
   const router = useRouter();
