@@ -28,7 +28,7 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
   const userQueries = trpc.useQueries((t) =>
     usersMatched.map((name) => {
       const query = t.search.getTaggedUser({ name });
-      // TODO: There is a TRPC bug that forces it to be written this way
+      query.enabled = !simplify;
       query.cacheTime = Infinity;
       query.staleTime = Infinity;
       query.refetchOnWindowFocus = false;
