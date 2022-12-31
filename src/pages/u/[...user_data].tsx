@@ -15,7 +15,6 @@ import {
   BsSuitHeartFill,
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
-import { z } from "zod";
 import { Dialog } from "../../components/Dialog";
 import { Loading } from "../../components/Loading";
 import { NotFoundMessage } from "../../components/NotFoundMessage";
@@ -69,16 +68,14 @@ const ProfilePage: NextPage = () => {
 
 export default ProfilePage;
 
-const userDataQuerySchema = z.object({
-  user_data: z.array(z.string()).length(2),
-});
 const useUserProfileData = () => {
   const [currentlyViewing, setCurrentlyViewing] = useState<
     "posts" | "comments"
   >("posts");
   const router = useRouter();
-  const zodParsing = userDataQuerySchema.safeParse(router.query);
-  const queryData = zodParsing.success ? zodParsing.data : undefined;
+  const queryData = router.query.user_data
+    ? (router.query as { user_data: string[] })
+    : undefined;
 
   const getUserQuery = trpc.user.getUser.useQuery(
     { userId: queryData?.user_data[0] ?? "NOT_SENDABLE" },
@@ -90,8 +87,14 @@ const useUserProfileData = () => {
       cacheTime: 1000 * 60 * 5,
       refetchInterval: 1000 * 60 * 5,
       retry: false,
-      onError: () => {
-        router.push("/");
+      onSuccess: (data) => {
+        if (data) {
+          router.replace(
+            `/u/${data.user.id}/${slugify(data.user.name ?? "username")}`,
+            undefined,
+            { shallow: true }
+          );
+        }
       },
     }
   );
