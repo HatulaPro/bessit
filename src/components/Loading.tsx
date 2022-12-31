@@ -12,7 +12,7 @@ export const Loading: React.FC<{
     <div
       className={cx(
         sizeOf[size].w,
-        "m-auto rounded-full border-[3px] border-white border-t-slate-500 transition-all",
+        "m-auto rounded-full border-[3px] border-slate-700 border-t-white transition-all",
         show ? `${sizeOf[size].h} animate-spin` : "h-0 border-0 opacity-0"
       )}
     ></div>
