@@ -28,6 +28,7 @@ import { UserProfileLink } from "./UserProfileLink";
 export const TopBar: React.FC = () => {
   const session = useSession();
   const [searchBarOpen, setSearchBarOpen] = useState<boolean>(false);
+  const router = useRouter();
 
   return (
     <div
@@ -42,7 +43,7 @@ export const TopBar: React.FC = () => {
           searchBarOpen ? "shrink" : "shrink-0"
         )}
       >
-        {document.location.pathname === "/" ? (
+        {router.pathname === "/" ? (
           <button
             className="group relative flex items-center gap-2 text-xl decoration-indigo-500 hover:underline active:text-gray-300 md:pr-4"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
