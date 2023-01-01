@@ -471,16 +471,15 @@ const useCachedPost = (topElement: HTMLElement | null) => {
   const router = useRouter();
   const zodParsing = postDataQuerySchema.safeParse(router.query);
   const queryData = zodParsing.success ? zodParsing.data : undefined;
+  const initialPlaceholderFromCache = queryData?.cached_post
+    ? (superjson.parse(queryData.cached_post) as Partial<
+        RouterOutputs["post"]["getPost"]
+      >)
+    : {};
 
   const postQuery = trpc.post.getPost.useQuery(
     { post_id: queryData?.post_data[0] ?? "NOT_SENDABLE" },
     {
-      initialData:
-        queryData && queryData.cached_post
-          ? (superjson.parse(
-              queryData.cached_post
-            ) as RouterOutputs["post"]["getPost"])
-          : undefined,
       enabled: Boolean(queryData),
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -517,7 +516,8 @@ const useCachedPost = (topElement: HTMLElement | null) => {
         userId: "",
         votes: [],
         _count: { comments: 0, votes: 0 },
-      } as RouterOutputs["post"]["getPost"],
+        ...initialPlaceholderFromCache,
+      },
     }
   );
 

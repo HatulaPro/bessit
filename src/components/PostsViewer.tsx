@@ -165,7 +165,9 @@ export const SinglePost: React.FC<{
             <h3
               className={cx(
                 "my-6 text-center text-2xl underline decoration-indigo-600 md:text-3xl",
-                placeholder && "w-full animate-pulse rounded bg-zinc-600"
+                placeholder &&
+                  !post.title &&
+                  "w-full animate-pulse rounded bg-zinc-600"
               )}
             >
               {post.title || "..."}
@@ -177,7 +179,9 @@ export const SinglePost: React.FC<{
             <h3
               className={cx(
                 "my-2 cursor-pointer text-2xl hover:underline",
-                placeholder && "w-full animate-pulse rounded bg-zinc-600"
+                placeholder &&
+                  !post.title &&
+                  "w-full animate-pulse rounded bg-zinc-600"
               )}
             >
               {post.title || "..."}
@@ -185,8 +189,10 @@ export const SinglePost: React.FC<{
           </LinkToPost>
         )}
         <div className="text-sm text-gray-400">
-          {placeholder ? (
-            <p className="h-16 w-full animate-pulse bg-zinc-600"></p>
+          {placeholder && !post.content ? (
+            <p className="h-16 w-full animate-pulse bg-zinc-600">
+              {post.content}
+            </p>
           ) : (
             <Markdown source={post.content} simplify={!isMain} />
           )}
