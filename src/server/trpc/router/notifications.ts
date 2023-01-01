@@ -60,19 +60,6 @@ export const notificationsRouter = router({
           relatedComment: true,
         },
       });
-      // TODO: make this its own query
-      //   const newNotificationsCountPromise = ctx.prisma.notification.count({
-      //     where: { userId: ctx.session.user.id, seen: false },
-      //   });
-      //   const [notifications, newNotificationsCount] = await Promise.all([
-      //     notificationsPromise,
-      //     newNotificationsCountPromise,
-      //   ]).catch(() => {
-      //     throw new TRPCError({
-      //       message: "Error fetching notifications.",
-      //       code: "BAD_REQUEST",
-      //     });
-      //   });
 
       if (notifications.length < input.count) {
         return {
