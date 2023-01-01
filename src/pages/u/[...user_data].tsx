@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
@@ -16,6 +15,7 @@ import {
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { Dialog } from "../../components/Dialog";
+import { LinkToPost } from "../../components/LinkToPost";
 import { Loading } from "../../components/Loading";
 import { NotFoundMessage } from "../../components/NotFoundMessage";
 import { cx, slugify, timeAgo } from "../../utils/general";
@@ -343,44 +343,54 @@ const UserProfilePosts: React.FC<{
         </div>
         {currentlyViewing === "posts" &&
           posts.map((p) => (
-            <Link
+            <LinkToPost
               key={p.id}
               className="block border-2 border-b-0 border-zinc-600 p-3 last:border-b-2 hover:bg-zinc-800"
-              href={`/b/${p.community.name}/post/${p.id}/${slugify(p.title)}`}
+              post={{
+                ...p,
+                community: { ...p.community, moderators: [] },
+              }}
             >
-              <h2 className="flex items-center text-lg">
-                {p.title}
-                <BsDot className="text-sm text-zinc-400" />
-                <span className="text-sm text-zinc-400">
-                  {timeAgo(p.createdAt)}
-                </span>
-              </h2>
-              <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
-                {p.content}
-              </p>
-            </Link>
+              <>
+                {" "}
+                <h2 className="flex items-center text-lg">
+                  {p.title}
+                  <BsDot className="text-sm text-zinc-400" />
+                  <span className="text-sm text-zinc-400">
+                    {timeAgo(p.createdAt)}
+                  </span>
+                </h2>
+                <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
+                  {p.content}
+                </p>
+              </>
+            </LinkToPost>
           ))}
 
         {currentlyViewing === "comments" &&
           comments.map((c) => (
-            <Link
+            <LinkToPost
               key={c.id}
               className="block border-2 border-b-0 border-zinc-600 p-3 last:border-b-2 hover:bg-zinc-800"
-              href={`/b/${c.post.community.name}/post/${c.post.id}/${slugify(
-                c.post.title
-              )}/${c.id}`}
+              post={{
+                ...c.post,
+                community: { ...c.post.community, moderators: [] },
+              }}
+              commentId={c.id}
             >
-              <h2 className="flex items-center text-lg">
-                {c.post.title}
-                <BsDot className="text-sm text-zinc-400" />
-                <span className="text-sm text-zinc-400">
-                  {timeAgo(c.createdAt)}
-                </span>
-              </h2>
-              <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
-                {c.content}
-              </p>
-            </Link>
+              <>
+                <h2 className="flex items-center text-lg">
+                  {c.post.title}
+                  <BsDot className="text-sm text-zinc-400" />
+                  <span className="text-sm text-zinc-400">
+                    {timeAgo(c.createdAt)}
+                  </span>
+                </h2>
+                <p className="mt-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-zinc-400">
+                  {c.content}
+                </p>
+              </>
+            </LinkToPost>
           ))}
       </div>
       <Loading show={isLoadingPosts} size="large" />

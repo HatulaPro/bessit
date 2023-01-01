@@ -10,17 +10,19 @@ export const LinkToPost: React.FC<{
     title: string;
   };
   className?: string;
+  commentId?: string;
   children: JSX.Element;
-}> = ({ post, children, className }) => {
+}> = ({ post, children, className, commentId }) => {
+  const link = `/b/${post.community.name}/post/${post.id}/${slugify(
+    post.title
+  )}${commentId ? "/" + commentId : ""}`;
   return (
     <Link
       href={{
-        pathname: `/b/${post.community.name}/post/${post.id}/${slugify(
-          post.title
-        )}`,
+        pathname: link,
         query: { cached_post: superjson.stringify(post) },
       }}
-      as={`/b/${post.community.name}/post/${post.id}/${slugify(post.title)}`}
+      as={link}
       shallow
       className={className}
     >

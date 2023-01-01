@@ -55,9 +55,9 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
       .replaceAll(FIND_USERS_REGEX, (a, b, _c, d, e, f) => {
         const username = e ?? d;
         if (usersMap.has(username)) {
-          return `${b}<a data-is-user-link="true" href="/u/${
-            usersMap.get(e ?? d)?.id
-          }/${slugify(username)}">/u/${username}</a>${f}`;
+          return `${b}<a href="/u/${usersMap.get(e ?? d)?.id}/${slugify(
+            username
+          )}">/u/${username}</a>${f}`;
         } else {
           return a;
         }

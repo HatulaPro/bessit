@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import { trpc } from "../utils/trpc";
 import { CommunityLogo } from "./CommunityLogo";
 import { Dialog } from "./Dialog";
 import { ImageHidesOnError } from "./ImageHidesOnError";
+import { LinkToCommunity } from "./LinkToCommunity";
 import { Loading } from "./Loading";
 import { UserProfileLink } from "./UserProfileLink";
 
@@ -560,28 +560,30 @@ const CommunityPreview: React.FC<{
   logo: string | null;
 }> = ({ name, image, logo, desc }) => {
   return (
-    <Link
-      href={`/b/${name}`}
+    <LinkToCommunity
+      community={{ name, image, logo, desc }}
       className="group relative w-full max-w-xs cursor-pointer rounded-md border-2 border-zinc-500 p-2"
     >
-      <div className="absolute inset-0 h-full w-full bg-zinc-200 bg-opacity-0 transition-colors group-hover:bg-opacity-10"></div>
-      <div className="bg-rotate relative h-12 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-20">
-        {image && (
-          <ImageHidesOnError
-            loader={({ src }) => src}
-            src={image}
-            alt={`Community image of ${name}`}
-            className="object-cover"
-            fill
-            priority
-          />
-        )}
-      </div>
-      <div className="ml-4 flex -translate-y-1/3 items-center gap-1 text-lg font-bold md:ml-12 md:max-w-3xl">
-        <CommunityLogo name={name} logo={logo} size="medium" />
-        <span>/b/{name}</span>
-      </div>
-      <p className="text-xs text-gray-300">{desc}</p>
-    </Link>
+      <>
+        <div className="absolute inset-0 h-full w-full bg-zinc-200 bg-opacity-0 transition-colors group-hover:bg-opacity-10"></div>
+        <div className="bg-rotate relative h-12 w-full bg-gradient-radial from-stone-700 bg-[length:12px_12px] md:h-20">
+          {image && (
+            <ImageHidesOnError
+              loader={({ src }) => src}
+              src={image}
+              alt={`Community image of ${name}`}
+              className="object-cover"
+              fill
+              priority
+            />
+          )}
+        </div>
+        <div className="ml-4 flex -translate-y-1/3 items-center gap-1 text-lg font-bold md:ml-12 md:max-w-3xl">
+          <CommunityLogo name={name} logo={logo} size="medium" />
+          <span>/b/{name}</span>
+        </div>
+        <p className="text-xs text-gray-300">{desc}</p>
+      </>
+    </LinkToCommunity>
   );
 };
