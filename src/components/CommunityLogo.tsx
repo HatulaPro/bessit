@@ -4,9 +4,8 @@ import { ImageHidesOnError } from "./ImageHidesOnError";
 export const CommunityLogo: React.FC<{
   logo: string | null;
   name: string;
-  placeholder?: boolean;
   size: "small" | "large" | "medium";
-}> = ({ logo, name, size, placeholder }) => {
+}> = ({ logo, name, size }) => {
   return (
     <div
       className={cx(
@@ -16,7 +15,7 @@ export const CommunityLogo: React.FC<{
           : size === "small"
           ? "h-5 w-5 text-xs md:h-7 md:w-7 md:text-sm"
           : "h-7 w-7 text-base md:h-8 md:w-8 md:text-lg",
-        placeholder && "animate-pulse"
+        name.length === 0 && "animate-pulse"
       )}
     >
       {logo ? (
@@ -28,10 +27,8 @@ export const CommunityLogo: React.FC<{
           fill
           priority
         />
-      ) : placeholder ? (
-        "?"
       ) : (
-        name[0]?.toUpperCase()
+        name[0]?.toUpperCase() || "?"
       )}
     </div>
   );

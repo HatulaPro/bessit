@@ -43,7 +43,7 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
           post={post}
           isMain={false}
           placeholder={
-            communityPosts.isLoading && communityPosts.posts.length === 1
+            communityPosts.isLoading && communityPosts.posts.length === 0
           }
         />
       ))}

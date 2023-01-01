@@ -25,6 +25,7 @@ import { CgComponents } from "react-icons/cg";
 import { NotBannedOnlyButton } from "../../../components/NotBannedOnlyButton";
 
 import dynamic from "next/dynamic";
+import { LinkToCommunity } from "../../../components/LinkToCommunity";
 
 const PostEditor = dynamic(() =>
   import("../../../components/PostEditor").then((x) => x.PostEditor)
@@ -72,13 +73,10 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
     return <NotFoundMessage message="This community does not seem to exist" />;
   }
 
-  const showPlaceholder =
-    communityPosts.isLoading && communityPosts.posts.length === 0;
-
   return (
     <div className="w-full pt-12 md:pt-16">
       <CommunityHeader
-        placeholder={showPlaceholder}
+        placeholder={communityPosts.isLoading}
         community={communityPosts.community}
       />
       <div className="container mx-auto flex max-w-5xl items-start justify-center gap-8 px-0 md:px-2">
@@ -91,11 +89,11 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
             setTimeFilter={setTimeFilter}
             allowFav={false}
           />
-          {!showPlaceholder && <PostsViewer communityPosts={communityPosts} />}
+          <PostsViewer communityPosts={communityPosts} />
         </div>
         <AboutCommunity
           community={communityPosts.community}
-          placeholder={showPlaceholder}
+          placeholder={communityPosts.isLoading}
         />
       </div>
     </div>
@@ -181,7 +179,6 @@ const CommunityHeader: React.FC<{
         <div className="flex w-full max-w-xl justify-center">
           <div className="flex w-full -translate-y-1/4 items-center gap-4 md:max-w-3xl">
             <CommunityLogo
-              placeholder={placeholder}
               name={community.name}
               logo={community.logo}
               size="large"
@@ -189,10 +186,12 @@ const CommunityHeader: React.FC<{
             <h1
               className={cx(
                 "text-3xl font-bold",
-                placeholder && "h-9 min-w-0 animate-pulse rounded bg-zinc-600"
+                placeholder &&
+                  !community.name &&
+                  "h-9 min-w-0 animate-pulse rounded bg-zinc-600"
               )}
             >
-              {community.name}
+              {community.name ?? "community"}
             </h1>
           </div>
           <div>
@@ -221,12 +220,12 @@ const CommunityHeader: React.FC<{
               title={
                 <>
                   Join the wonderful community of{" "}
-                  <Link
+                  <LinkToCommunity
                     className="text-indigo-400 hover:underline"
-                    href={`/b/${community.name}`}
+                    community={community}
                   >
-                    b/{community.name}
-                  </Link>
+                    <>b/{community.name}</>
+                  </LinkToCommunity>
                   !
                 </>
               }
@@ -282,7 +281,9 @@ const AboutCommunity: React.FC<{
       </h2>
       <p
         className={cx(
-          placeholder && "h-16 w-full animate-pulse rounded bg-zinc-600"
+          placeholder &&
+            !community.desc &&
+            "h-16 w-full animate-pulse rounded bg-zinc-600"
         )}
       >
         {community.desc}
