@@ -46,8 +46,7 @@ const CommunitySettingsPage: NextPage = () => {
 
         <button
           onClick={() => {
-            if (!getCommunityQuery.data) return router.back();
-            router.replace(`/b/${getCommunityQuery.data.name}`);
+            router.back();
           }}
           className="absolute right-12 top-20 hidden items-center gap-1 rounded-xl px-2 py-1 text-white hover:bg-white hover:bg-opacity-10 md:flex"
         >
