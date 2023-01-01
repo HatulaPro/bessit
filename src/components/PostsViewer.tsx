@@ -1,5 +1,3 @@
-import superjson from "superjson";
-import Link from "next/link";
 import {
   BsArrowCounterclockwise,
   BsChatLeft,
@@ -26,6 +24,7 @@ import { useRouter } from "next/router";
 import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
 import dynamic from "next/dynamic";
 import { LinkToCommunity } from "./LinkToCommunity";
+import { LinkToPost } from "./LinkToPost";
 
 const Markdown = dynamic(() => import("./Markdown").then((x) => x.Markdown));
 const EditPostForm = dynamic(() =>
@@ -51,28 +50,6 @@ export const PostsViewer: React.FC<{ communityPosts: CommunityPosts }> = ({
       <Loading size="large" show={communityPosts.isLoading} />
       <br />
     </div>
-  );
-};
-
-const LinkToPost: React.FC<{
-  post: CommunityPosts["posts"][number];
-  className?: string;
-  children: JSX.Element;
-}> = ({ post, children, className }) => {
-  return (
-    <Link
-      href={{
-        pathname: `/b/${post.community.name}/post/${post.id}/${slugify(
-          post.title
-        )}`,
-        query: { cached_post: superjson.stringify(post) },
-      }}
-      as={`/b/${post.community.name}/post/${post.id}/${slugify(post.title)}`}
-      shallow
-      className={className}
-    >
-      {children}
-    </Link>
   );
 };
 
