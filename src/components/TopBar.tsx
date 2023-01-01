@@ -42,19 +42,35 @@ export const TopBar: React.FC = () => {
           searchBarOpen ? "shrink" : "shrink-0"
         )}
       >
-        <Link
-          href="/"
-          className="group relative flex items-center gap-2 text-xl decoration-indigo-500 hover:underline active:text-gray-300 md:pr-4"
-        >
-          <Image
-            src="/bessit_logo.png"
-            alt="Bessit's Logo"
-            width={128}
-            height={128}
-            className="h-8 w-8 md:h-12 md:w-12"
-          />
-          <span className="hidden md:block">Bessit</span>
-        </Link>
+        {document.location.pathname === "/" ? (
+          <button
+            className="group relative flex items-center gap-2 text-xl decoration-indigo-500 hover:underline active:text-gray-300 md:pr-4"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            <Image
+              src="/bessit_logo.png"
+              alt="Bessit's Logo"
+              width={128}
+              height={128}
+              className="h-8 w-8 md:h-12 md:w-12"
+            />
+            <span className="hidden md:block">Bessit</span>
+          </button>
+        ) : (
+          <Link
+            href="/"
+            className="group relative flex items-center gap-2 text-xl decoration-indigo-500 hover:underline active:text-gray-300 md:pr-4"
+          >
+            <Image
+              src="/bessit_logo.png"
+              alt="Bessit's Logo"
+              width={128}
+              height={128}
+              className="h-8 w-8 md:h-12 md:w-12"
+            />
+            <span className="hidden md:block">Bessit</span>
+          </Link>
+        )}
       </div>
       <TopBarSearch open={searchBarOpen} setOpen={setSearchBarOpen} />
       <div
