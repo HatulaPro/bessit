@@ -25,6 +25,7 @@ import { UserProfileLink } from "./UserProfileLink";
 import { useRouter } from "next/router";
 import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
 import dynamic from "next/dynamic";
+import { LinkToCommunity } from "./LinkToCommunity";
 
 const Markdown = dynamic(() => import("./Markdown").then((x) => x.Markdown));
 const EditPostForm = dynamic(() =>
@@ -115,24 +116,26 @@ export const SinglePost: React.FC<{
           isMain ? "container max-w-3xl md:max-w-5xl" : "come-from-bottom"
         )}
       >
-        <Link
-          href={`/b/${post.community.name}`}
+        <LinkToCommunity
+          community={post.community}
           className="group flex w-min items-center gap-1 text-sm font-bold"
         >
-          <CommunityLogo
-            name={post.community.name}
-            logo={post.community.logo}
-            size="small"
-          />
-          <span
-            className={cx(
-              "text-gray-300 group-hover:underline",
-              placeholder && "min-w-0 animate-pulse rounded bg-zinc-600"
-            )}
-          >
-            b/{post.community.name}
-          </span>
-        </Link>
+          <>
+            <CommunityLogo
+              name={post.community.name}
+              logo={post.community.logo}
+              size="small"
+            />
+            <span
+              className={cx(
+                "text-gray-300 group-hover:underline",
+                placeholder && "min-w-0 animate-pulse rounded bg-zinc-600"
+              )}
+            >
+              b/{post.community.name}
+            </span>
+          </>
+        </LinkToCommunity>
         <div className="flex items-center pl-0 sm:pl-6">
           <div className="text-xs text-gray-400">
             Posted by{" "}

@@ -2,11 +2,11 @@ import type { Community } from "@prisma/client";
 import { type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import { useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { CgComponents } from "react-icons/cg";
 import { CommunityLogo } from "../components/CommunityLogo";
+import { LinkToCommunity } from "../components/LinkToCommunity";
 import { PostEditor } from "../components/PostEditor";
 import { PostsViewer } from "../components/PostsViewer";
 import {
@@ -160,18 +160,24 @@ const SingleCommunityLink: React.FC<{
   placeholder: boolean;
 }> = ({ community, placeholder }) => {
   return (
-    <Link
+    <LinkToCommunity
+      community={community}
       className={cx(
         "group flex items-center gap-1 rounded p-1 text-sm font-bold hover:bg-zinc-600 hover:bg-opacity-25",
         placeholder && "min-w-0 animate-pulse bg-zinc-600"
       )}
-      href={`/b/${community.name}`}
     >
-      <CommunityLogo name={community.name} logo={community.logo} size="small" />
-      <span className="text-base text-gray-300 group-hover:underline">
-        b/{community.name}
-      </span>
-    </Link>
+      <>
+        <CommunityLogo
+          name={community.name}
+          logo={community.logo}
+          size="small"
+        />
+        <span className="text-base text-gray-300 group-hover:underline">
+          b/{community.name}
+        </span>
+      </>
+    </LinkToCommunity>
   );
 };
 
