@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 import "../styles/globals.css";
 import dynamic from "next/dynamic";
+import { useScrollRestoration } from "../hooks/useScrollRestoration";
 
 const TopBar = dynamic(
   () => import("../components/TopBar").then((x) => x.TopBar),
@@ -18,6 +19,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  useScrollRestoration();
   return (
     <SessionProvider session={session}>
       <TopBar />
