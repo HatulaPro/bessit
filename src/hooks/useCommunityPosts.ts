@@ -27,44 +27,7 @@ export function useCommunityPosts(
     keepPreviousData: true,
     placeholderData: {
       pageParams: [undefined],
-      pages: [
-        {
-          nextCursor: undefined,
-          posts: [
-            {
-              communityId: "",
-              community: {
-                desc: "",
-                id: "",
-                image: null,
-                logo: null,
-                name: "community",
-                ownerId: "",
-                moderators: [],
-                rules: [],
-              },
-              content: "",
-              createdAt: new Date(),
-              id: "postId",
-              isDeleted: false,
-              title: "",
-              updatedAt: new Date(),
-              user: {
-                email: null,
-                emailVerified: null,
-                id: "",
-                image: "",
-                name: "",
-                isGlobalMod: false,
-                bannedUntil: new Date(0),
-              },
-              userId: "",
-              votes: [],
-              _count: { votes: 0, comments: 0 },
-            },
-          ],
-        },
-      ],
+      pages: [],
     } as InfiniteData<RouterOutputs["post"]["getPosts"]>,
   });
 
@@ -119,17 +82,21 @@ export function useCommunityPosts(
       getPostsQuery.isFetching ||
       (communityQueryEnabled &&
         (getCommunityQuery.isLoading || getCommunityQuery.isFetching)),
-    community: communityName
-      ? (getCommunityQuery.data ??
-          (flattenedPosts[0]
-            ? {
-                ...flattenedPosts[0]?.community,
-                moderators: [],
-                members: [],
-                _count: { members: 0 },
-              }
-            : null)) ||
-        null
-      : null,
+    community:
+      getCommunityQuery.data || {
+        desc: "",
+        id: "",
+        image: null,
+        logo: null,
+        name: "community",
+        ownerId: "",
+        moderators: [],
+        rules: [],
+        _count: {
+          members: 0,
+        },
+        members: [],
+      } ||
+      null,
   };
 }

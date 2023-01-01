@@ -73,7 +73,7 @@ const CommunityPageContent: React.FC<{ name: string }> = ({ name }) => {
   }
 
   const showPlaceholder =
-    communityPosts.isLoading && communityPosts.posts.length === 1;
+    communityPosts.isLoading && communityPosts.posts.length === 0;
 
   return (
     <div className="w-full pt-12 md:pt-16">

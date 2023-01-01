@@ -19,8 +19,9 @@ import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const [sortBy, setSortBy] = useState<SortingOptions>("hot");
-  const [timeFilter, setTimeFilter] = useState<PostsFromLastOptions>("day");
+  const [sortBy, setSortBy] = useState<SortingOptions>("new");
+  const [timeFilter, setTimeFilter] =
+    useState<PostsFromLastOptions>("all time");
 
   const communityPosts = useCommunityPosts(null, sortBy, timeFilter);
 

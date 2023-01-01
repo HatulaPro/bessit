@@ -91,3 +91,20 @@ body {
   animation: GrowOnMountAnimation 1s forwards;
   animation-fill-mode: forwards;
 }
+
+@keyframes ComeFromBottomAnimation {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.come-from-bottom {
+  animation: ComeFromBottomAnimation 0.5s forwards;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease;
+}
