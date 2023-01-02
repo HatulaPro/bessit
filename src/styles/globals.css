@@ -105,6 +105,6 @@ body {
 
 .come-from-bottom {
   animation: ComeFromBottomAnimation 0.5s forwards;
-  animation-fill-mode: forwards;
+  animation-fill-mode: none;
   animation-timing-function: ease;
 }
