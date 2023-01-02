@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
 import { useRouter } from "next/router";
 import { Loading } from "./Loading";
-import { AiFillCaretDown } from "react-icons/ai";
 import { signIn, useSession } from "next-auth/react";
 import { ImageHidesOnError } from "./ImageHidesOnError";
 import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
@@ -31,10 +30,8 @@ export type createPostForm = z.infer<typeof createPostSchema>;
 
 export const PostEditor: React.FC<{
   defaultCommunity?: string;
-  defaultOpen: boolean;
-}> = ({ defaultCommunity, defaultOpen }) => {
+}> = ({ defaultCommunity }) => {
   const [isFocused, setFocused] = useState<boolean>(false);
-  const [isOpen, setOpen] = useState<boolean>(defaultOpen);
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -117,29 +114,10 @@ export const PostEditor: React.FC<{
       ref={formRef}
     >
       <div className="flex w-full items-center">
-        {defaultOpen ? (
-          <h2 className="my-2 w-full text-lg text-white md:text-2xl">
-            Create a post
-          </h2>
-        ) : (
-          <button
-            className={cx(
-              "enabled:group flex w-full items-center gap-4 pl-0 text-left text-xl disabled:cursor-not-allowed"
-            )}
-            onClick={() => setOpen((prev) => !prev)}
-            disabled={authStatus !== "authenticated"}
-            type="button"
-          >
-            <span className="p-2 transition-colors group-hover:bg-zinc-800">
-              <AiFillCaretDown
-                className={cx("transition-transform", isOpen && "rotate-180")}
-              />
-            </span>
-            <h2 className="my-2 w-full text-lg text-white md:text-2xl">
-              Create a post
-            </h2>
-          </button>
-        )}
+        <h2 className="my-2 w-full text-lg text-white md:text-2xl">
+          Create a post
+        </h2>
+
         <NotBannedOnlyButton
           onClick={() => formRef.current?.requestSubmit()}
           Child={(props) => (
@@ -155,14 +133,7 @@ export const PostEditor: React.FC<{
         />
       </div>
       <Loading size="small" show={createPostMutation.isLoading} />
-      <div
-        className={cx(
-          "flex w-full origin-top flex-col gap-2 transition-all",
-          defaultOpen || isOpen
-            ? "max-h-[250vh] scale-y-100"
-            : "max-h-0 scale-y-0"
-        )}
-      >
+      <div className="flex max-h-[250vh] w-full origin-top flex-col gap-2">
         <hr className="my-2 w-full" />
         <div
           className="relative mb-8 flex w-full flex-col"

@@ -2,10 +2,13 @@ import type { Community } from "@prisma/client";
 import { type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
+import Image from "next/image";
 import { useState } from "react";
+import { AiFillMeh } from "react-icons/ai";
 import { BsStars } from "react-icons/bs";
 import { CgComponents } from "react-icons/cg";
 import { CommunityLogo } from "../components/CommunityLogo";
+import { Dialog } from "../components/Dialog";
 import { LinkToCommunity } from "../components/LinkToCommunity";
 import { PostEditor } from "../components/PostEditor";
 import { PostsViewer } from "../components/PostsViewer";
@@ -14,6 +17,7 @@ import {
   SortBySection,
   type SortingOptions,
 } from "../components/SortBySection";
+import { UserProfileLink } from "../components/UserProfileLink";
 import { useCommunityPosts } from "../hooks/useCommunityPosts";
 import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
@@ -37,8 +41,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="mx-auto flex max-w-5xl items-start gap-6 bg-zinc-900 pt-12 sm:px-4 md:pt-20">
         <div className="my-2 mx-auto flex flex-[3] flex-col items-center justify-center px-0.5">
-          <PostEditor defaultOpen={false} />
-          <hr className="block w-full max-w-3xl opacity-50 md:hidden" />
+          <CreatePostSuggestion />
           <SortBySection
             isLoading={communityPosts.isLoading}
             sortBy={sortBy}
@@ -51,6 +54,53 @@ const Home: NextPage = () => {
         </div>
         <BrowseSection />
       </main>
+    </>
+  );
+};
+
+const CreatePostSuggestion: React.FC = () => {
+  const [isOpen, setOpen] = useState<boolean>(false);
+  const session = useSession();
+
+  return (
+    <>
+      <div className="my-4 flex w-full items-center gap-4 rounded-md bg-zinc-800 p-1 md:p-4">
+        {session.data?.user ? (
+          <UserProfileLink user={session.data.user}>
+            {session.data?.user?.image ? (
+              <Image
+                className="h-8 w-8 rounded-full md:h-12 md:w-12"
+                loader={({ src }) => src}
+                src={session.data.user.image}
+                alt="Profile Image"
+                width={48}
+                height={48}
+                priority
+              />
+            ) : (
+              <AiFillMeh className="h-8 w-8 rounded-full md:h-12 md:w-12" />
+            )}
+          </UserProfileLink>
+        ) : (
+          <Image
+            className="h-8 w-8 rounded-full md:h-12 md:w-12"
+            src="/bessit_logo.png"
+            alt="Profile Image"
+            width={48}
+            height={48}
+            priority
+          />
+        )}
+        <button
+          onClick={() => setOpen(true)}
+          className="flex-1 rounded-md border-2 border-zinc-600 bg-zinc-700 px-4 py-1  text-left text-zinc-100 hover:bg-zinc-600 active:border-zinc-500 sm:py-2"
+        >
+          create post
+        </button>
+      </div>
+      <Dialog close={() => setOpen(false)} isOpen={isOpen}>
+        <PostEditor />
+      </Dialog>
     </>
   );
 };
