@@ -1,16 +1,17 @@
 import type { Community } from "@prisma/client";
 import { type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import { AiFillMeh } from "react-icons/ai";
-import { BsStars } from "react-icons/bs";
+import { BsPencilFill, BsStars } from "react-icons/bs";
 import { CgComponents } from "react-icons/cg";
 import { CommunityLogo } from "../components/CommunityLogo";
 import { Dialog } from "../components/Dialog";
 import { LinkToCommunity } from "../components/LinkToCommunity";
-import { PostEditor } from "../components/PostEditor";
+import { LoggedOnlyButton } from "../components/LoggedOnlyButton";
 import { PostsViewer } from "../components/PostsViewer";
 import {
   type PostsFromLastOptions,
@@ -21,6 +22,9 @@ import { UserProfileLink } from "../components/UserProfileLink";
 import { useCommunityPosts } from "../hooks/useCommunityPosts";
 import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
+const PostEditor = dynamic(() =>
+  import("../components/PostEditor").then((x) => x.PostEditor)
+);
 
 const Home: NextPage = () => {
   const [sortBy, setSortBy] = useState<SortingOptions>("new");
@@ -78,7 +82,7 @@ const CreatePostSuggestion: React.FC = () => {
                 priority
               />
             ) : (
-              <AiFillMeh className="h-8 w-8 rounded-full md:h-12 md:w-12" />
+              <AiFillMeh className="h-8 w-8 rounded-full text-white md:h-12 md:w-12" />
             )}
           </UserProfileLink>
         ) : (
@@ -91,12 +95,20 @@ const CreatePostSuggestion: React.FC = () => {
             priority
           />
         )}
-        <button
+        <LoggedOnlyButton
+          Child={(props) => (
+            <button
+              {...props}
+              className="flex-1 rounded-md border-2 border-zinc-600 bg-zinc-700 px-4 py-1  text-left text-zinc-200 hover:bg-zinc-600 hover:text-zinc-100 active:border-zinc-500 sm:py-2"
+            >
+              Create post
+            </button>
+          )}
           onClick={() => setOpen(true)}
-          className="flex-1 rounded-md border-2 border-zinc-600 bg-zinc-700 px-4 py-1  text-left text-zinc-100 hover:bg-zinc-600 active:border-zinc-500 sm:py-2"
-        >
-          create post
-        </button>
+          icon={<BsPencilFill className="text-white" />}
+          title={<>Share your awesome post</>}
+          content="Join Bessit to share your thoughts with our incredible community"
+        />
       </div>
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
         <PostEditor />

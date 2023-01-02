@@ -9,8 +9,11 @@ export const Dialog: React.FC<{
 }> = ({ children, isOpen, close }) => {
   useEffect(() => {
     document.body.style.overflowY = isOpen ? "hidden" : "";
+    document.body.style.paddingRight = isOpen ? "12px" : "";
+
     return () => {
       document.body.style.overflowY = "";
+      document.body.style.paddingRight = "";
     };
   }, [isOpen]);
   const debouncedOpen = useDebounce(isOpen, 150);
