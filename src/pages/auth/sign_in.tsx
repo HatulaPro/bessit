@@ -55,12 +55,13 @@ const SignInPage = ({
   const router = useRouter();
   const session = useSession();
   if (session.status === "authenticated") {
-    router.push("/");
+    router.back();
   }
   if (!providers) {
     return <></>;
   }
   const error = router.query?.error as string | undefined;
+  const callbackUrl = router.query?.callbackUrl as string;
 
   return (
     <main className="grid h-full place-items-center pt-12 text-white sm:px-4 md:pt-20">
@@ -85,6 +86,7 @@ const SignInPage = ({
             key={providerName}
             provider={providers[providerName]}
             metaData={CURRENT_PROVIDERS[providerName]}
+            callbackUrl={callbackUrl}
           />
         ))}
       </div>
@@ -97,12 +99,13 @@ export default SignInPage;
 const ProviderButton: React.FC<{
   provider: ClientSafeProvider;
   metaData: typeof CURRENT_PROVIDERS[keyof typeof CURRENT_PROVIDERS];
-}> = ({ provider, metaData }) => {
+  callbackUrl: string;
+}> = ({ provider, metaData, callbackUrl }) => {
   return (
     <button
       className="text-auto my-2 mx-auto flex w-4/5 items-center justify-evenly rounded-md p-2.5 transition-shadow active:shadow-[inset_0_0rem_0.2rem_#ffffff] md:text-lg"
       style={{ background: metaData.color }}
-      onClick={() => signIn(provider.id)}
+      onClick={() => signIn(provider.id, { callbackUrl })}
     >
       <Image
         alt={`Logo of ${provider.name}`}
