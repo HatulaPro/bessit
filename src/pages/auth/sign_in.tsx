@@ -60,8 +60,9 @@ const SignInPage = ({
   const [wasRedirected, setRedirected] = useState<boolean>(false);
 
   if (session.status === "authenticated") {
-    router.back();
+    router.push("/");
   }
+
   if (!providers) {
     return <></>;
   }
