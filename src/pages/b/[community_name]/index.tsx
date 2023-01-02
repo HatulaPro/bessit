@@ -254,7 +254,7 @@ const CommunityHeader: React.FC<{
 
       {session.status === "authenticated" && (
         <Dialog close={() => setOpen(false)} isOpen={isOpen}>
-          <PostEditor defaultCommunity={community.name} defaultOpen />
+          <PostEditor defaultCommunity={community.name} />
         </Dialog>
       )}
     </>
@@ -324,7 +324,7 @@ const AboutCommunity: React.FC<{
         </p>
       )}
       <Dialog close={() => setOpen(false)} isOpen={isOpen}>
-        <PostEditor defaultCommunity={community.name} defaultOpen />
+        <PostEditor defaultCommunity={community.name} />
       </Dialog>
     </div>
   );
