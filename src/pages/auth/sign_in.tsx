@@ -5,6 +5,7 @@ import {
   useSession,
   type ClientSafeProvider,
 } from "next-auth/react";
+import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -68,51 +69,63 @@ const SignInPage = ({
   const callbackUrl = router.query?.callbackUrl as string;
 
   return (
-    <main className="h-[600px] pt-12 text-white sm:px-4 md:pt-20">
-      <div className="relative mx-auto h-full w-full max-w-sm overflow-hidden rounded-md bg-zinc-800 py-4 text-center">
-        <Image
-          src="/bessit_logo.png"
-          alt="Bessit logo"
-          className="mx-auto"
-          width={112}
-          height={112}
+    <>
+      <Head>
+        <title>Bessit | Sign In </title>
+        <meta
+          name="description"
+          content="Sign in to the Best Reddit alternative on earth, also known as Bessit."
         />
-        <h1 className="mb-8 mt-2 text-2xl md:text-4xl">Log In to Bessit</h1>
-        {error && (
-          <span className="text-red-500">
-            <b>Error:</b> {ERRORS[error] ?? ERRORS["default"]}
-          </span>
-        )}
-        <div
-          className="absolute top-1/2 w-full transition-all"
-          style={{
-            transform: wasRedirected ? "translateY(0%)" : "translateY(200%)",
-            opacity: wasRedirected ? 1 : 0,
-          }}
-        >
-          <LoadingLogin />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <main className="h-[600px] pt-12 text-white sm:px-4 md:pt-20">
+        <div className="relative mx-auto h-full w-full max-w-sm overflow-hidden rounded-md bg-zinc-800 py-4 text-center">
+          <Image
+            src="/bessit_logo.png"
+            alt="Bessit logo"
+            className="mx-auto"
+            width={112}
+            height={112}
+          />
+          <h1 className="mb-8 mt-2 text-2xl md:text-4xl">Log In to Bessit</h1>
+          {error && (
+            <span className="text-red-500">
+              <b>Error:</b> {ERRORS[error] ?? ERRORS["default"]}
+            </span>
+          )}
+          <div
+            className="absolute top-1/2 w-full transition-all"
+            style={{
+              transform: wasRedirected ? "translateY(0%)" : "translateY(200%)",
+              opacity: wasRedirected ? 1 : 0,
+            }}
+          >
+            <LoadingLogin />
+          </div>
+          <div
+            className="absolute w-full transition-all"
+            style={{
+              transform: wasRedirected ? "translateY(200%)" : "translateY(0%)",
+              opacity: wasRedirected ? 0 : 1,
+            }}
+          >
+            {(
+              Object.keys(
+                CURRENT_PROVIDERS
+              ) as (keyof typeof CURRENT_PROVIDERS)[]
+            ).map((providerName) => (
+              <ProviderButton
+                key={providerName}
+                provider={providers[providerName]}
+                metaData={CURRENT_PROVIDERS[providerName]}
+                callbackUrl={callbackUrl}
+                setRedirected={setRedirected}
+              />
+            ))}
+          </div>
         </div>
-        <div
-          className="absolute w-full transition-all"
-          style={{
-            transform: wasRedirected ? "translateY(200%)" : "translateY(0%)",
-            opacity: wasRedirected ? 0 : 1,
-          }}
-        >
-          {(
-            Object.keys(CURRENT_PROVIDERS) as (keyof typeof CURRENT_PROVIDERS)[]
-          ).map((providerName) => (
-            <ProviderButton
-              key={providerName}
-              provider={providers[providerName]}
-              metaData={CURRENT_PROVIDERS[providerName]}
-              callbackUrl={callbackUrl}
-              setRedirected={setRedirected}
-            />
-          ))}
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 };
 
