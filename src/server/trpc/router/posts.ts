@@ -70,7 +70,7 @@ export const postsRouter = router({
       const userId: string = ctx.session.user.id;
       const community = await ctx.prisma.community.findUnique({
         where: { name: input.communityName },
-        select: { id: true },
+        select: { name: true },
       });
       if (!community) {
         throw new TRPCError({
@@ -85,7 +85,7 @@ export const postsRouter = router({
           content: input.content,
           isDeleted: false,
           userId: userId,
-          communityId: community.id,
+          communityName: community.name,
         },
       });
 
@@ -533,17 +533,9 @@ export const postsRouter = router({
         where: { isDeleted: false },
       };
       if (input.community) {
-        const community = await ctx.prisma.community.findUnique({
-          where: { name: input.community },
-          select: { id: true },
-        });
-        if (!community) {
-          throw new TRPCError({
-            message: "Community not found.",
-            code: "BAD_REQUEST",
-          });
-        }
-        whereQuery = { where: { communityId: community.id, isDeleted: false } };
+        whereQuery = {
+          where: { communityName: input.community, isDeleted: false },
+        };
       }
 
       if (input.postsFromLast === "day") {
@@ -593,10 +585,13 @@ export const postsRouter = router({
           createdAt: {
             gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
           },
-          communityId: {
+          communityName: {
             in: await ctx.prisma.communityMember
-              .findMany({ where: { userId: ctx.session.user.id } })
-              .then((res) => res.map((f) => f.communityId)),
+              .findMany({
+                where: { userId: ctx.session.user.id },
+                include: { community: { select: { name: true } } },
+              })
+              .then((res) => res.map((f) => f.community.name)),
           },
         };
       }
