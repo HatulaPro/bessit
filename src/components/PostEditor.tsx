@@ -2,16 +2,17 @@ import { useForm, Controller } from "react-hook-form";
 import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { useDebounce } from "../hooks/useDebounce";
-import { cx, slugify } from "../utils/general";
+import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs } from "./Tabs";
-import { useRouter } from "next/router";
 import { Loading } from "./Loading";
 import { signIn, useSession } from "next-auth/react";
 import { ImageHidesOnError } from "./ImageHidesOnError";
 import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
 import dynamic from "next/dynamic";
+import { usePostRedirect } from "../hooks/useRedirects";
+import { GET_POST_PLACEHOLDER } from "../utils/placeholders";
 
 const Markdown = dynamic(() => import("./Markdown").then((x) => x.Markdown));
 
@@ -35,7 +36,6 @@ export const PostEditor: React.FC<{
   const optionsDivRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
 
   const { status: authStatus } = useSession();
 
@@ -89,13 +89,16 @@ export const PostEditor: React.FC<{
 
   const trpcContext = trpc.useContext();
 
+  const postRedirect = usePostRedirect();
   const createPostMutation = trpc.post.createPost.useMutation({
     retry: false,
     onSuccess: (data) => {
       trpcContext.post.getPosts.invalidate();
-      router.push(
-        `/b/${searchCommunityQueryInput}/post/${data.id}/${slugify(data.title)}`
-      );
+
+      postRedirect({
+        ...data,
+        community: { ...GET_POST_PLACEHOLDER.community },
+      });
     },
     onError: (err) => {
       setError("communityName", { message: err.shape?.message });

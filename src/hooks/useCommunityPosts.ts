@@ -1,6 +1,9 @@
+import {
+  GET_COMMUNITY_PLACEHOLDER,
+  GET_POSTS_PLACEHOLDER,
+} from "./../utils/placeholders";
 import superjson from "superjson";
 import { useRouter } from "next/router";
-import type { InfiniteData } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { trpc } from "../utils/trpc";
 import type { RouterInputs, RouterOutputs } from "../utils/trpc";
@@ -29,10 +32,7 @@ export function useCommunityPosts(
     retry: 0,
     notifyOnChangeProps: "all",
     keepPreviousData: true,
-    placeholderData: {
-      pageParams: [undefined],
-      pages: [],
-    } as InfiniteData<RouterOutputs["post"]["getPosts"]>,
+    placeholderData: GET_POSTS_PLACEHOLDER,
   });
 
   useEffect(() => {
@@ -84,18 +84,8 @@ export function useCommunityPosts(
       refetchOnWindowFocus: false,
       retry: 0,
       placeholderData: {
-        desc: "",
-        id: "",
-        image: null,
-        logo: null,
-        name: communityName || "community",
-        ownerId: "",
-        moderators: [],
-        rules: [],
-        _count: {
-          members: 0,
-        },
-        members: [],
+        ...GET_COMMUNITY_PLACEHOLDER,
+        name: communityName ?? GET_COMMUNITY_PLACEHOLDER.name,
         ...cached_community,
       },
     }

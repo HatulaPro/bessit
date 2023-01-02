@@ -21,6 +21,10 @@ import {
 import { UserProfileLink } from "../components/UserProfileLink";
 import { useCommunityPosts } from "../hooks/useCommunityPosts";
 import { cx } from "../utils/general";
+import {
+  GET_FAVORITE_COMMUNITIES_PLACEHOLDER,
+  GET_TOP_COMMUNITIES_PLACEHOLDER,
+} from "../utils/placeholders";
 import { trpc } from "../utils/trpc";
 const PostEditor = dynamic(() =>
   import("../components/PostEditor").then((x) => x.PostEditor)
@@ -127,21 +131,7 @@ const BrowseSection: React.FC = () => {
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       enabled: session.status === "authenticated",
-      placeholderData: [
-        {
-          userId: "...",
-          communityId: "communityId",
-          community: {
-            ownerId: "...",
-            name: "community",
-            desc: "words",
-            id: "communityId",
-            logo: null,
-            image: null,
-            rules: [],
-          },
-        },
-      ],
+      placeholderData: GET_FAVORITE_COMMUNITIES_PLACEHOLDER,
     });
 
   const getTopCommunitiesQuery = trpc.community.getTopCommunities.useQuery(
@@ -151,18 +141,7 @@ const BrowseSection: React.FC = () => {
       staleTime: Infinity,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      placeholderData: [
-        {
-          ownerId: "...",
-          name: "community",
-          desc: "words",
-          id: "communityId",
-          logo: null,
-          image: null,
-          rules: [],
-          _count: { members: 1 },
-        },
-      ],
+      placeholderData: GET_TOP_COMMUNITIES_PLACEHOLDER,
     }
   );
 

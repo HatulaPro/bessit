@@ -4,7 +4,7 @@ import { useSession, signOut, signIn } from "next-auth/react";
 import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
 import { CgComponents } from "react-icons/cg";
-import { cx, slugify, timeAgo } from "../utils/general";
+import { cx, timeAgo } from "../utils/general";
 import {
   BsArrowRepeat,
   BsAt,
@@ -24,6 +24,8 @@ import { useRouter } from "next/router";
 import { Dialog } from "./Dialog";
 import { Loading } from "./Loading";
 import { UserProfileLink } from "./UserProfileLink";
+import { usePostRedirect } from "../hooks/useRedirects";
+import { GET_POST_PLACEHOLDER } from "../utils/placeholders";
 
 export const TopBar: React.FC = () => {
   const session = useSession();
@@ -222,6 +224,7 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
     });
 
   const utils = trpc.useContext();
+  const postRedirect = usePostRedirect();
   return (
     <>
       <button
@@ -285,15 +288,26 @@ const TopBarNotificationsDialog: React.FC<{ searchBarOpen: boolean }> = ({
                     notificationId: notification.id,
                   });
                 }
-                router.push(
-                  `/b/${notification.relatedPost.community.name}/post/${
-                    notification.relatedPostId
-                  }/${slugify(notification.relatedPost.title)}${
+                if (notification.newCommentId) {
+                  postRedirect(
+                    {
+                      ...notification.relatedPost,
+                      community: {
+                        ...GET_POST_PLACEHOLDER.community,
+                        ...notification.relatedPost.community,
+                      },
+                    },
                     notification.newCommentId
-                      ? "/" + notification.newCommentId
-                      : ""
-                  }`
-                );
+                  );
+                } else {
+                  postRedirect({
+                    ...notification.relatedPost,
+                    community: {
+                      ...GET_POST_PLACEHOLDER.community,
+                      ...notification.relatedPost.community,
+                    },
+                  });
+                }
               }}
             >
               {notification.type === "COMMENT_ON_POST" ? (

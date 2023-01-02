@@ -25,6 +25,7 @@ import { NotBannedOnlyButton } from "./NotBannedOnlyButton";
 import dynamic from "next/dynamic";
 import { LinkToCommunity } from "./LinkToCommunity";
 import { LinkToPost } from "./LinkToPost";
+import { useCommunityRedirect, usePostRedirect } from "../hooks/useRedirects";
 
 const Markdown = dynamic(() => import("./Markdown").then((x) => x.Markdown));
 const EditPostForm = dynamic(() =>
@@ -232,6 +233,8 @@ export const PostModeratorTools: React.FC<{
   const session = useSession();
   const isGlobalMod = Boolean(session.data?.user?.isGlobalMod);
 
+  const postRedirect = usePostRedirect();
+  const communityRedirect = useCommunityRedirect();
   const utils = trpc.useContext();
   const deletePostMutation = trpc.moderator.setPostDeleted.useMutation({
     onSuccess: (data) => {
@@ -245,11 +248,7 @@ export const PostModeratorTools: React.FC<{
   const deleteCommentMutation = trpc.moderator.setCommentDeleted.useMutation({
     onSuccess: (data) => {
       utils.post.getComments.invalidate();
-      router.push(
-        `/b/${post.community.name}/post/${post.id}/${slugify(
-          post.title
-        )}/${data}`
-      );
+      postRedirect(post, data);
     },
   });
 
@@ -259,7 +258,7 @@ export const PostModeratorTools: React.FC<{
       utils.post.getPost.setData({ post_id: post.id }, () => {
         return undefined;
       });
-      router.push(`/b/${post.community.name}`);
+      communityRedirect(post.community);
     },
   });
 

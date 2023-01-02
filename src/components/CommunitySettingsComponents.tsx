@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { BsX, BsPlus } from "react-icons/bs";
 import z from "zod";
+import { useCommunityRedirect } from "../hooks/useRedirects";
 import type { CommunityReturnType } from "../pages/b/[community_name]/community_settings";
 import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
@@ -53,8 +53,8 @@ const EditCommunityForm: React.FC<{
         logo: community.logo ?? "",
       },
     });
+  const communityRedirect = useCommunityRedirect();
 
-  const router = useRouter();
   const utils = trpc.useContext();
   const editComunityMutation = trpc.community.editCommunity.useMutation({
     onSuccess: (data) => {
@@ -65,7 +65,7 @@ const EditCommunityForm: React.FC<{
         if (!prev) return community;
         return { ...prev, ...data };
       });
-      router.push(`/b/${data.name}`);
+      communityRedirect({ ...community, ...data });
     },
   });
 
@@ -290,12 +290,12 @@ const TransferCommunityForm: React.FC<{ community: CommunityReturnType }> = ({
   const [newOwnerId, setNewOwnerId] = useState<string>("");
 
   const utils = trpc.useContext();
-  const router = useRouter();
+  const communityRedirect = useCommunityRedirect();
   const transferCommunityMutation =
     trpc.moderator.transferCommunity.useMutation({
       onSuccess: () => {
         utils.community.getCommunity.invalidate({ name: community.name });
-        router.push(`/b/${community.name}`);
+        communityRedirect(community);
       },
     });
 

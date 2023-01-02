@@ -29,11 +29,14 @@ import {
 import Image from "next/image";
 import { CommentLikeButton } from "../../../../components/CommentLikeButton";
 import { LoggedOnlyButton } from "../../../../components/LoggedOnlyButton";
-import type { InfiniteData } from "@tanstack/react-query";
 import { UserProfileLink } from "../../../../components/UserProfileLink";
 import { AiFillMeh } from "react-icons/ai";
 import { NotBannedOnlyButton } from "../../../../components/NotBannedOnlyButton";
 import dynamic from "next/dynamic";
+import {
+  GET_COMMENTS_PLACEHOLDER,
+  GET_POST_PLACEHOLDER,
+} from "../../../../utils/placeholders";
 
 const Markdown = dynamic(() =>
   import("../../../../components/Markdown").then((x) => x.Markdown)
@@ -484,37 +487,8 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       refetchOnReconnect: false,
       staleTime: Infinity,
       cacheTime: Infinity,
-      // TODO: Build infra so this doesn't look like shit
       placeholderData: {
-        communityId: "communityId",
-        community: {
-          ownerId: "",
-          name: "communityName",
-          desc: "",
-          id: "communityId",
-          image: null,
-          logo: null,
-          moderators: [],
-          rules: [],
-        },
-        content: "",
-        createdAt: new Date(),
-        id: "postId",
-        isDeleted: false,
-        title: "",
-        updatedAt: new Date(),
-        user: {
-          email: "",
-          emailVerified: new Date(),
-          id: "",
-          image: null,
-          name: "",
-          isGlobalMod: false,
-          bannedUntil: new Date(0),
-        },
-        userId: "",
-        votes: [],
-        _count: { comments: 0, votes: 0 },
+        ...GET_POST_PLACEHOLDER,
         ...initialPlaceholderFromCache,
       },
     }
@@ -535,9 +509,7 @@ const useCachedPost = (topElement: HTMLElement | null) => {
       cacheTime: Infinity,
       notifyOnChangeProps: "all",
       keepPreviousData: true,
-      placeholderData: { pages: [], pageParams: [] } as InfiniteData<
-        RouterOutputs["post"]["getComments"]
-      >,
+      placeholderData: GET_COMMENTS_PLACEHOLDER,
     }
   );
 
