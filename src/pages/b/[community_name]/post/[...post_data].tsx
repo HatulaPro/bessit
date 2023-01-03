@@ -167,7 +167,7 @@ export type UIComment = {
   id: string;
   createdAt: Date;
   updatedAt: Date;
-  user: User;
+  user: Omit<User, "email" | "emailVerified">;
   content: string;
   postId: string;
   _count: {

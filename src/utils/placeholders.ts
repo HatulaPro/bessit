@@ -72,8 +72,6 @@ export const GET_POST_PLACEHOLDER = {
   title: "",
   updatedAt: new Date(),
   user: {
-    email: "",
-    emailVerified: new Date(),
     id: "",
     image: null,
     name: "",

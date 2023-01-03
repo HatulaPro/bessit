@@ -15,7 +15,19 @@ export const communitiesRouter = router({
       return ctx.prisma.community.findUnique({
         where: { name: input.name },
         include: {
-          moderators: { include: { user: true } },
+          moderators: {
+            include: {
+              user: {
+                select: {
+                  bannedUntil: true,
+                  id: true,
+                  image: true,
+                  isGlobalMod: true,
+                  name: true,
+                },
+              },
+            },
+          },
           members: ctx.session?.user?.id
             ? { where: { userId: ctx.session.user.id } }
             : { where: { userId: "NOT_REAL_USER_ID" } },

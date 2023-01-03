@@ -312,10 +312,12 @@ const UserProfilePosts: React.FC<{
   posts: RouterOutputs["user"]["getUserPosts"]["posts"];
   comments: RouterOutputs["user"]["getUserComments"]["comments"];
   currentlyViewing: "posts" | "comments";
+  userData: Exclude<RouterOutputs["user"]["getUser"], null>;
   setCurrentlyViewing: (x: "posts" | "comments") => void;
 }> = ({
   posts,
   comments,
+  userData,
   isLoadingPosts,
   currentlyViewing,
   setCurrentlyViewing,
@@ -361,6 +363,13 @@ const UserProfilePosts: React.FC<{
               post={{
                 ...p,
                 community: { ...p.community, moderators: [] },
+                user: {
+                  bannedUntil: userData.user.bannedUntil,
+                  id: userData.user.id,
+                  image: userData.user.image,
+                  isGlobalMod: userData.user.isGlobalMod,
+                  name: userData.user.name,
+                },
               }}
             >
               <>
@@ -387,6 +396,13 @@ const UserProfilePosts: React.FC<{
               post={{
                 ...c.post,
                 community: { ...c.post.community, moderators: [] },
+                user: {
+                  bannedUntil: userData.user.bannedUntil,
+                  id: userData.user.id,
+                  image: userData.user.image,
+                  isGlobalMod: userData.user.isGlobalMod,
+                  name: userData.user.name,
+                },
               }}
               commentId={c.id}
             >
@@ -608,6 +624,7 @@ const UserProfileContent: React.FC<{
         isLoadingPosts={isLoadingPosts}
         posts={posts}
         comments={comments}
+        userData={userData}
         currentlyViewing={currentlyViewing}
         setCurrentlyViewing={setCurrentlyViewing}
       />

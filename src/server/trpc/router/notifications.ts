@@ -57,7 +57,15 @@ export const notificationsRouter = router({
           relatedPost: {
             include: {
               community: { select: { id: true, name: true } },
-              user: true,
+              user: {
+                select: {
+                  bannedUntil: true,
+                  id: true,
+                  image: true,
+                  isGlobalMod: true,
+                  name: true,
+                },
+              },
             },
           },
           relatedComment: true,

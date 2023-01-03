@@ -121,7 +121,15 @@ export const postsRouter = router({
         data: { title: input.title, content: input.content },
         include: {
           community: true,
-          user: true,
+          user: {
+            select: {
+              bannedUntil: true,
+              id: true,
+              image: true,
+              isGlobalMod: true,
+              name: true,
+            },
+          },
           _count: { select: { votes: true, comments: true } },
           votes: {
             where: { userId: ctx.session?.user?.id },
@@ -275,8 +283,32 @@ export const postsRouter = router({
       return ctx.prisma.post.findUnique({
         where: { id: input.post_id },
         include: {
-          community: { include: { moderators: { include: { user: true } } } },
-          user: true,
+          community: {
+            include: {
+              moderators: {
+                include: {
+                  user: {
+                    select: {
+                      bannedUntil: true,
+                      id: true,
+                      image: true,
+                      isGlobalMod: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              bannedUntil: true,
+              id: true,
+              image: true,
+              isGlobalMod: true,
+              name: true,
+            },
+          },
           _count: { select: { votes: true, comments: true } },
           votes: {
             where: { userId: ctx.session?.user?.id },
@@ -316,7 +348,15 @@ export const postsRouter = router({
               updatedAt: true,
               postId: true,
               id: true,
-              user: true,
+              user: {
+                select: {
+                  bannedUntil: true,
+                  id: true,
+                  image: true,
+                  isGlobalMod: true,
+                  name: true,
+                },
+              },
               _count: { select: { childComments: true, votes: true } },
               votes: {
                 where: { userId: ctx.session?.user?.id },
@@ -326,7 +366,15 @@ export const postsRouter = router({
                 where: { isDeleted: false },
                 orderBy: { createdAt: "desc" },
                 select: {
-                  user: true,
+                  user: {
+                    select: {
+                      bannedUntil: true,
+                      id: true,
+                      image: true,
+                      isGlobalMod: true,
+                      name: true,
+                    },
+                  },
                   content: true,
                   isDeleted: true,
                   createdAt: true,
@@ -342,7 +390,15 @@ export const postsRouter = router({
                     where: { isDeleted: false },
                     orderBy: { createdAt: "desc" },
                     select: {
-                      user: true,
+                      user: {
+                        select: {
+                          bannedUntil: true,
+                          id: true,
+                          image: true,
+                          isGlobalMod: true,
+                          name: true,
+                        },
+                      },
                       content: true,
                       postId: true,
                       isDeleted: true,
@@ -358,7 +414,15 @@ export const postsRouter = router({
                         where: { isDeleted: false },
                         orderBy: { createdAt: "desc" },
                         select: {
-                          user: true,
+                          user: {
+                            select: {
+                              bannedUntil: true,
+                              id: true,
+                              image: true,
+                              isGlobalMod: true,
+                              name: true,
+                            },
+                          },
                           content: true,
                           postId: true,
                           isDeleted: true,
@@ -385,7 +449,15 @@ export const postsRouter = router({
           createdAt: true,
           updatedAt: true,
           id: true,
-          user: true,
+          user: {
+            select: {
+              bannedUntil: true,
+              id: true,
+              image: true,
+              isGlobalMod: true,
+              name: true,
+            },
+          },
           postId: true,
           _count: { select: { childComments: true, votes: true } },
           votes: {
@@ -612,8 +684,32 @@ export const postsRouter = router({
         where: whereQuery.where,
         cursor: input.cursor ? { id: input.cursor } : undefined,
         include: {
-          community: { include: { moderators: { include: { user: true } } } },
-          user: true,
+          community: {
+            include: {
+              moderators: {
+                include: {
+                  user: {
+                    select: {
+                      bannedUntil: true,
+                      id: true,
+                      image: true,
+                      isGlobalMod: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              bannedUntil: true,
+              id: true,
+              image: true,
+              isGlobalMod: true,
+              name: true,
+            },
+          },
           _count: { select: { votes: true, comments: true } },
           votes: {
             where: { userId: ctx.session?.user?.id },

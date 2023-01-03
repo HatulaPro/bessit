@@ -16,7 +16,21 @@ export const moderationRouter = router({
       const [community, user] = await Promise.all([
         ctx.prisma.community.findUnique({
           where: { id: input.communityId },
-          include: { moderators: { include: { user: true } } },
+          include: {
+            moderators: {
+              include: {
+                user: {
+                  select: {
+                    bannedUntil: true,
+                    id: true,
+                    image: true,
+                    isGlobalMod: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         }),
         ctx.prisma.user.findUnique({ where: { id: input.moderatorId } }),
       ]);
@@ -49,7 +63,17 @@ export const moderationRouter = router({
       return await ctx.prisma.moderator
         .create({
           data: { communityId: input.communityId, userId: input.moderatorId },
-          include: { user: true },
+          include: {
+            user: {
+              select: {
+                bannedUntil: true,
+                id: true,
+                image: true,
+                isGlobalMod: true,
+                name: true,
+              },
+            },
+          },
         })
         .then((mod) => {
           community.moderators.push(mod);
@@ -70,7 +94,21 @@ export const moderationRouter = router({
     .mutation(async ({ ctx, input }) => {
       const community = await ctx.prisma.community.findUnique({
         where: { id: input.communityId },
-        include: { moderators: { include: { user: true } } },
+        include: {
+          moderators: {
+            include: {
+              user: {
+                select: {
+                  bannedUntil: true,
+                  id: true,
+                  image: true,
+                  isGlobalMod: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!community || community.ownerId !== ctx.session.user.id) {
@@ -120,7 +158,21 @@ export const moderationRouter = router({
       const [community, newOwner] = await Promise.all([
         ctx.prisma.community.findUnique({
           where: { id: input.communityId },
-          include: { moderators: { include: { user: true } } },
+          include: {
+            moderators: {
+              include: {
+                user: {
+                  select: {
+                    bannedUntil: true,
+                    id: true,
+                    image: true,
+                    isGlobalMod: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         }),
         ctx.prisma.user.findUnique({ where: { id: input.newOwnerId } }),
       ]);
@@ -180,7 +232,23 @@ export const moderationRouter = router({
       const post = await ctx.prisma.post.findUnique({
         where: { id: input.postId },
         include: {
-          community: { include: { moderators: { include: { user: true } } } },
+          community: {
+            include: {
+              moderators: {
+                include: {
+                  user: {
+                    select: {
+                      bannedUntil: true,
+                      id: true,
+                      image: true,
+                      isGlobalMod: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
       if (!post) {
@@ -235,7 +303,21 @@ export const moderationRouter = router({
           post: {
             include: {
               community: {
-                include: { moderators: { include: { user: true } } },
+                include: {
+                  moderators: {
+                    include: {
+                      user: {
+                        select: {
+                          bannedUntil: true,
+                          id: true,
+                          image: true,
+                          isGlobalMod: true,
+                          name: true,
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
