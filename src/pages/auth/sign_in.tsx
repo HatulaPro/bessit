@@ -64,6 +64,7 @@ const SignInPage = ({
   }
 
   if (!providers) {
+    router.push("/");
     return <></>;
   }
   const error = router.query?.error as string | undefined;
@@ -79,52 +80,64 @@ const SignInPage = ({
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="h-[600px] pt-12 text-white sm:px-4 md:pt-20">
-        <div className="relative mx-auto h-full w-full max-w-sm overflow-hidden rounded-md bg-zinc-800 py-4 text-center">
-          <Image
-            src="/bessit_logo.png"
-            alt="Bessit logo"
-            className="mx-auto"
-            width={112}
-            height={112}
-          />
-          <h1 className="mb-8 mt-2 text-2xl md:text-4xl">Log In to Bessit</h1>
-          {error && (
-            <span className="text-red-500">
-              <b>Error:</b> {ERRORS[error] ?? ERRORS["default"]}
-            </span>
-          )}
-          <div
-            className="absolute top-1/2 w-full transition-all"
-            style={{
-              transform: wasRedirected ? "translateY(0%)" : "translateY(200%)",
-              opacity: wasRedirected ? 1 : 0,
-            }}
-          >
-            <LoadingLogin />
-          </div>
-          <div
-            className="absolute w-full transition-all"
-            style={{
-              transform: wasRedirected ? "translateY(200%)" : "translateY(0%)",
-              opacity: wasRedirected ? 0 : 1,
-            }}
-          >
-            {(
-              Object.keys(
-                CURRENT_PROVIDERS
-              ) as (keyof typeof CURRENT_PROVIDERS)[]
-            ).map((providerName) => (
-              <ProviderButton
-                key={providerName}
-                provider={providers[providerName]}
-                metaData={CURRENT_PROVIDERS[providerName]}
-                callbackUrl={callbackUrl}
-                setRedirected={setRedirected}
-              />
-            ))}
+      <main className="flex h-screen flex-col items-center justify-center bg-zinc-900 text-white sm:px-4 md:bg-inherit">
+        <div className="h-[440px] w-full max-w-sm bg-zinc-900 py-4 md:rounded-xl md:bg-zinc-800 md:shadow-md md:shadow-black">
+          <div className="relative mx-auto h-full w-full  overflow-hidden text-center">
+            <Image
+              src="/bessit_logo.png"
+              alt="Bessit logo"
+              className="mx-auto my-2 h-24 w-24"
+              width={512}
+              height={512}
+            />
+            {error && (
+              <span className="text-red-500">
+                <b>Error:</b> {ERRORS[error] ?? ERRORS["default"]}
+              </span>
+            )}
+            <div
+              className="absolute top-1/2 w-full transition-all"
+              style={{
+                transform: wasRedirected
+                  ? "translateY(0%)"
+                  : "translateY(200%)",
+                opacity: wasRedirected ? 1 : 0,
+              }}
+            >
+              <LoadingLogin />
+            </div>
+            <div
+              className="absolute w-full transition-all"
+              style={{
+                transform: wasRedirected
+                  ? "translateY(200%)"
+                  : "translateY(0%)",
+                opacity: wasRedirected ? 0 : 1,
+              }}
+            >
+              {(
+                Object.keys(
+                  CURRENT_PROVIDERS
+                ) as (keyof typeof CURRENT_PROVIDERS)[]
+              ).map((providerName) => (
+                <ProviderButton
+                  key={providerName}
+                  provider={providers[providerName]}
+                  metaData={CURRENT_PROVIDERS[providerName]}
+                  callbackUrl={callbackUrl}
+                  setRedirected={setRedirected}
+                />
+              ))}
+            </div>
           </div>
         </div>
+        <button
+          onClick={() => router.back()}
+          disabled={wasRedirected}
+          className="mt-6 rounded-md bg-indigo-600 py-2 px-4 enabled:hover:bg-indigo-700 disabled:bg-zinc-500"
+        >
+          Cancel
+        </button>
       </main>
     </>
   );
@@ -140,7 +153,7 @@ const ProviderButton: React.FC<{
 }> = ({ provider, metaData, callbackUrl, setRedirected }) => {
   return (
     <button
-      className="text-auto my-2 mx-auto flex w-4/5 items-center justify-evenly rounded-md p-2.5 transition-shadow active:shadow-[inset_0_0rem_0.2rem_#ffffff] md:text-lg"
+      className="text-auto my-3 mx-auto flex w-2/3 items-center justify-evenly rounded-md border-2 border-zinc-600 p-2 font-bold transition-shadow active:shadow-[inset_0_0rem_0.2rem_#ffffff] md:text-lg"
       style={{ background: metaData.color }}
       onClick={() => {
         signIn(provider.id, { callbackUrl }).then((res) => {
