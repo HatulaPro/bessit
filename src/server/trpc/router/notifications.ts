@@ -55,7 +55,10 @@ export const notificationsRouter = router({
             },
           },
           relatedPost: {
-            include: { community: { select: { id: true, name: true } } },
+            include: {
+              community: { select: { id: true, name: true } },
+              user: true,
+            },
           },
           relatedComment: true,
         },
