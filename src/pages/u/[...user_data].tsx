@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -192,6 +192,7 @@ type FullUser = Exclude<RouterOutputs["user"]["getUser"], null>;
 const UserDataSection: React.FC<{
   userData: FullUser;
 }> = ({ userData }) => {
+  const session = useSession();
   function randomlyGeneratedGoodAdjective() {
     const WORDS = [
       "Wholesome",
@@ -234,6 +235,9 @@ const UserDataSection: React.FC<{
             )}
           ></span>{" "}
           u/{userData.user.name}
+          {userData.user.id === session.data?.user?.id && (
+            <span className="text-lg text-zinc-300"> (you)</span>
+          )}
         </h1>
         <span className="text-sm font-normal text-zinc-400">
           ID: {userData.user.id}
@@ -275,6 +279,14 @@ const UserDataSection: React.FC<{
           <BsFillShieldFill className="ml-1 text-lg text-green-600" />
           <span>Official Bessit Mod</span>
         </div>
+      )}
+      {userData.user.id === session.data?.user?.id && (
+        <button
+          className="mx-auto mt-2 block rounded bg-red-900 px-3 py-1 hover:bg-red-800"
+          onClick={() => signOut()}
+        >
+          Log Out
+        </button>
       )}
     </div>
   );
