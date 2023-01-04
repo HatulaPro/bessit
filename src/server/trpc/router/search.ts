@@ -5,6 +5,7 @@ export const searchRouter = router({
   search: publicProcedure
     .input(z.object({ q: z.string() }))
     .query(async ({ ctx, input }) => {
+      input.q = input.q.trim();
       const query: Record<"username" | "community", string | null> = {
         username: null,
         community: null,
@@ -53,6 +54,29 @@ export const searchRouter = router({
               },
             })
           : null,
+        posts:
+          query.username && query.community
+            ? await ctx.prisma.post.findMany({
+                take: 6,
+                where: {
+                  OR: [
+                    { title: { contains: input.q, mode: "insensitive" } },
+                    { content: { contains: input.q, mode: "insensitive" } },
+                  ],
+                },
+                include: {
+                  user: {
+                    select: {
+                      bannedUntil: true,
+                      id: true,
+                      image: true,
+                      isGlobalMod: true,
+                      name: true,
+                    },
+                  },
+                },
+              })
+            : null,
       };
     }),
   getTaggedUser: publicProcedure

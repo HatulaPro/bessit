@@ -4,7 +4,7 @@ import { useSession, signOut, signIn } from "next-auth/react";
 import Link from "next/link";
 import { AiFillCaretDown, AiFillMeh } from "react-icons/ai";
 import { CgComponents } from "react-icons/cg";
-import { cx, timeAgo } from "../utils/general";
+import { cx, slugify, timeAgo } from "../utils/general";
 import {
   BsArrowRepeat,
   BsAt,
@@ -448,6 +448,7 @@ const TopBarSearch: React.FC<{
   const debouncedQueryInput = useDebounce(queryInput, 500);
   const firstUserRef = useRef<HTMLDivElement>(null);
   const firstCommunityRef = useRef<HTMLDivElement>(null);
+  const firstPostRef = useRef<HTMLDivElement>(null);
   const searchQueryInputRef = useRef<HTMLInputElement>(null);
 
   const searchQuery = trpc.search.search.useQuery(
@@ -523,7 +524,10 @@ const TopBarSearch: React.FC<{
         autoComplete="off"
         onKeyDown={(e) => {
           const focusAt =
-            firstUserRef.current || firstCommunityRef.current || null;
+            firstUserRef.current ||
+            firstCommunityRef.current ||
+            firstPostRef.current ||
+            null;
 
           if (!focusAt) return;
           if (e.key === "ArrowDown") {
@@ -566,7 +570,7 @@ const TopBarSearch: React.FC<{
 
       <div
         className={cx(
-          "absolute top-full w-full origin-top overflow-hidden rounded-b-sm bg-zinc-800 transition-all",
+          "absolute top-full max-h-[75vh] w-full origin-top overflow-hidden overflow-y-auto rounded-b-md bg-zinc-800 shadow-md shadow-black transition-all",
           open ? "px-1" : "scale-y-0 px-0",
           ((searchQuery.data?.users && searchQuery.data?.users.length > 0) ||
             (searchQuery.data?.communities &&
@@ -645,6 +649,62 @@ const TopBarSearch: React.FC<{
               ))}
             </>
           )}
+
+        {searchQuery.data?.posts && searchQuery.data.posts.length > 0 && (
+          <>
+            <h3 className="p-2 text-xl font-bold">Posts</h3>
+            {searchQuery.data.posts.map((post, index) => (
+              <div
+                className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 outline-none transition-colors hover:bg-zinc-900 focus:bg-black"
+                key={post.id}
+                onClick={(e) => {
+                  router.push(
+                    `/b/${post.communityName}/post/${post.id}/${slugify(
+                      post.title
+                    )}`
+                  );
+                  e.currentTarget.blur();
+                }}
+                tabIndex={
+                  index +
+                  ((searchQuery.data.users?.length || 0) +
+                    (searchQuery.data.communities?.length || 0)) +
+                  10
+                }
+                ref={index === 0 ? firstPostRef : undefined}
+                onKeyDown={onKeyDown(
+                  `/b/${post.communityName}/post/${post.id}/${slugify(
+                    post.title
+                  )}`,
+                  post.title
+                )}
+              >
+                {post.user.image ? (
+                  <Image
+                    className="rounded-full"
+                    loader={({ src }) => src}
+                    src={post.user.image}
+                    alt="Profile Image"
+                    width={28}
+                    height={28}
+                    priority
+                  />
+                ) : (
+                  <AiFillMeh className="h-7 w-7 rounded-full" />
+                )}
+                <span className="flex-shrink-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
+                  {post.title}
+                </span>
+                {post.content.length && (
+                  <BsDot className="shrink-0 text-gray-400" />
+                )}
+                <span className="overflow-hidden overflow-ellipsis whitespace-nowrap text-xs text-gray-400">
+                  {post.content}
+                </span>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
