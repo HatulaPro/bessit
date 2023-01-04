@@ -2,11 +2,10 @@ import {
   GET_COMMUNITY_PLACEHOLDER,
   GET_POSTS_PLACEHOLDER,
 } from "./../utils/placeholders";
-import superjson from "superjson";
-import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
 import { trpc } from "../utils/trpc";
-import type { RouterInputs, RouterOutputs } from "../utils/trpc";
+import type { RouterInputs } from "../utils/trpc";
+import { useCommunityFromQuery } from "./useRedirects";
 
 export type CommunityPosts = ReturnType<typeof useCommunityPosts>;
 
@@ -15,8 +14,6 @@ export function useCommunityPosts(
   sort: RouterInputs["post"]["getPosts"]["sort"],
   postsFromLast: RouterInputs["post"]["getPosts"]["postsFromLast"]
 ) {
-  const router = useRouter();
-
   const input: RouterInputs["post"]["getPosts"] = {
     community: communityName ?? null,
     count: 25,
@@ -67,12 +64,7 @@ export function useCommunityPosts(
     );
   }, [getPostsQuery]);
 
-  const cached_community =
-    ((router.query.cached_community as string | undefined) &&
-      (superjson.parse(router.query.cached_community as string) as Partial<
-        RouterOutputs["community"]["getCommunity"]
-      >)) ||
-    {};
+  const cached_community = useCommunityFromQuery();
   const communityQueryEnabled = Boolean(input.community);
   const getCommunityQuery = trpc.community.getCommunity.useQuery(
     { name: input.community ?? "NOT_SENDABLE" },

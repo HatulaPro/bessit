@@ -59,12 +59,11 @@ const SignInPage = ({
   const session = useSession();
   const [wasRedirected, setRedirected] = useState<boolean>(false);
 
-  if (session.status === "authenticated") {
+  if (router.isReady && session.status === "authenticated") {
     router.push("/");
   }
 
   if (!providers) {
-    router.push("/");
     return <></>;
   }
   const error = router.query?.error as string | undefined;
