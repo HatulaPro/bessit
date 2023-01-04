@@ -176,7 +176,7 @@ const BrowseSection: React.FC = () => {
             ))}
             {getFavoriteCommunitiesQuery.data?.length === 0 && (
               <span className="text-sm">
-                You haven&apos;t joined any community yet
+                You haven&apos;t joined any communities yet
               </span>
             )}
           </div>
