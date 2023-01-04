@@ -136,7 +136,7 @@ const useUserProfileData = () => {
       )
         return;
       if (
-        window.innerHeight + window.scrollY + 800 >
+        window.innerHeight + window.scrollY + 1200 >
         document.body.offsetHeight
       ) {
         relevantQuery.fetchNextPage();
