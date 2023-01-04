@@ -6,14 +6,13 @@ import type { RouterOutputs } from "../utils/trpc";
 import type { CommunityPosts } from "./useCommunityPosts";
 import { z } from "zod";
 
+type CommunityType = Partial<RouterOutputs["community"]["getCommunity"]> & {
+  name: string;
+};
 export function useCommunityRedirect() {
   const router = useRouter();
 
-  return (
-    community: Partial<RouterOutputs["community"]["getCommunity"]> & {
-      name: string;
-    }
-  ) => {
+  return (community: CommunityType) => {
     router.push(
       {
         pathname: `/b/${community.name}`,
@@ -25,7 +24,6 @@ export function useCommunityRedirect() {
   };
 }
 
-type CommunityType = Partial<RouterOutputs["community"]["getCommunity"]>;
 const CommunitySchema = z.object({
   members: z
     .array(
@@ -38,7 +36,7 @@ const CommunitySchema = z.object({
   _count: z.object({ members: z.number() }).optional(),
   desc: z.string().optional(),
   id: z.string().optional(),
-  name: z.string().optional(),
+  name: z.string(),
   ownerId: z.string().optional(),
   image: z.string().nullable().optional(),
   logo: z.string().nullable().optional(),
@@ -78,7 +76,11 @@ export function useCommunityFromQuery() {
   return cached_community;
 }
 
-type PostType = Partial<RouterOutputs["post"]["getPost"]>;
+type PostType = Partial<CommunityPosts["posts"][number]> & {
+  id: string;
+  title: string;
+  communityName: string;
+};
 const PostSchema = z.object({
   user: z
     .object({
@@ -119,10 +121,10 @@ const PostSchema = z.object({
       comments: z.number(),
     })
     .optional(),
-  communityName: z.string().optional(),
-  title: z.string().optional(),
+  communityName: z.string(),
+  title: z.string(),
   content: z.string().optional(),
-  id: z.string().optional(),
+  id: z.string(),
   userId: z.string().optional(),
   isDeleted: z.boolean().optional(),
   createdAt: z.date().optional(),
@@ -135,15 +137,8 @@ const PostSchema = z.object({
 export function usePostRedirect() {
   const router = useRouter();
 
-  return (
-    post: Partial<CommunityPosts["posts"][number]> & {
-      community: { name: string };
-      id: string;
-      title: string;
-    },
-    commentId?: string
-  ) => {
-    const link = `/b/${post.community.name}/post/${post.id}/${slugify(
+  return (post: PostType, commentId?: string) => {
+    const link = `/b/${post.communityName}/post/${post.id}/${slugify(
       post.title
     )}${commentId ? "/" + commentId : ""}`;
     router.push(
