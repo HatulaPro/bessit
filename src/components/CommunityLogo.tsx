@@ -9,7 +9,7 @@ export const CommunityLogo: React.FC<{
   return (
     <div
       className={cx(
-        "relative flex items-center justify-center overflow-hidden rounded-full bg-indigo-800",
+        "relative flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-800",
         size === "large"
           ? "h-20 w-20 text-5xl md:h-24 md:w-24 md:text-7xl"
           : size === "small"
