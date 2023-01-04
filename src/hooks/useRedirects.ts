@@ -25,7 +25,7 @@ export function useCommunityRedirect() {
   };
 }
 
-type Temp = Partial<RouterOutputs["community"]["getCommunity"]>;
+type CommunityType = Partial<RouterOutputs["community"]["getCommunity"]>;
 const CommunitySchema = z.object({
   members: z
     .array(
@@ -58,7 +58,7 @@ const CommunitySchema = z.object({
       })
     )
     .optional(),
-}) satisfies z.ZodType<Temp>;
+}) satisfies z.ZodType<CommunityType>;
 
 export function useCommunityFromQuery() {
   const router = useRouter();
@@ -71,12 +71,66 @@ export function useCommunityFromQuery() {
     if (result.success) {
       return result.data;
     }
-    // throw new Error("Can not parse community info.");
-    return {};
+    if (process.env.NODE_ENV === "production") return {};
+    throw new Error("Can not parse community info.");
   }, [router?.query?.cached_community]);
 
   return cached_community;
 }
+
+type PostType = Partial<RouterOutputs["post"]["getPost"]>;
+const PostSchema = z.object({
+  user: z
+    .object({
+      bannedUntil: z.date(),
+      name: z.string().nullable(),
+      image: z.string().nullable(),
+      id: z.string(),
+      isGlobalMod: z.boolean(),
+    })
+    .optional(),
+  community: z
+    .object({
+      desc: z.string(),
+      id: z.string(),
+      name: z.string(),
+      ownerId: z.string(),
+      image: z.string().nullable(),
+      logo: z.string().nullable(),
+      rules: z.array(z.string()),
+      moderators: z.array(
+        z.object({
+          communityId: z.string(),
+          userId: z.string(),
+          user: z.object({
+            bannedUntil: z.date(),
+            name: z.string().nullable(),
+            image: z.string().nullable(),
+            id: z.string(),
+            isGlobalMod: z.boolean(),
+          }),
+        })
+      ),
+    })
+    .optional(),
+  _count: z
+    .object({
+      votes: z.number(),
+      comments: z.number(),
+    })
+    .optional(),
+  communityName: z.string().optional(),
+  title: z.string().optional(),
+  content: z.string().optional(),
+  id: z.string().optional(),
+  userId: z.string().optional(),
+  isDeleted: z.boolean().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  votes: z
+    .array(z.object({ postId: z.string(), userId: z.string() }))
+    .optional(),
+}) satisfies z.ZodType<PostType>;
 
 export function usePostRedirect() {
   const router = useRouter();
@@ -101,4 +155,21 @@ export function usePostRedirect() {
       { shallow: true }
     );
   };
+}
+
+export function usePostFromQuery() {
+  const router = useRouter();
+
+  const cached_post = useMemo(() => {
+    if (typeof router?.query?.cached_post !== "string") return {};
+    const parsed = superjson.parse(router.query.cached_post as string) || {};
+    const result = PostSchema.safeParse(parsed);
+    if (result.success) {
+      return result.data;
+    }
+    if (process.env.NODE_ENV === "production") return {};
+    throw new Error("Can not parse post info.");
+  }, [router?.query?.cached_post]);
+
+  return cached_post;
 }
