@@ -19,7 +19,7 @@ export const timeAgo = (date: Date): string => {
   if (days < 30) return `${Math.floor(days)}d`;
 
   const months = days / 30.5;
-  if (days < 12) return `${Math.floor(months)}mo`;
+  if (months < 12) return `${Math.floor(months)}mo`;
 
   const years = months / 12;
   return `${Math.floor(years)}y`;
