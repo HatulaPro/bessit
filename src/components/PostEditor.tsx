@@ -110,7 +110,6 @@ export const PostEditor: React.FC<{
     onError: (err) => {
       setError("communityName", { message: err.shape?.message });
     },
-    onMutate: console.log,
   });
 
   const onSubmit = (data: createPostForm) => {
