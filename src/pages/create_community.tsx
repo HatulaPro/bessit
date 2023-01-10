@@ -5,12 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cx } from "../utils/general";
 import { trpc } from "../utils/trpc";
-import { useRouter } from "next/router";
 import { Loading } from "../components/Loading";
 import { useDebounce } from "../hooks/useDebounce";
 import { useLoggedOnly } from "../hooks/useLoggedOnly";
 import { NotBannedOnlyButton } from "../components/NotBannedOnlyButton";
 import { useRef } from "react";
+import { useCommunityRedirect } from "../hooks/useRedirects";
 
 const CreateCommunity: NextPage = () => {
   useLoggedOnly("/");
@@ -42,7 +42,6 @@ export const createCommunitySchema = z.object({
 export type createCommunityForm = z.infer<typeof createCommunitySchema>;
 
 const CreateCommunityForm: React.FC = () => {
-  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const { control, handleSubmit, formState, setError, watch } =
     useForm<createCommunityForm>({
@@ -69,11 +68,19 @@ const CreateCommunityForm: React.FC = () => {
     }
   );
 
+  const communityRedirect = useCommunityRedirect();
   const onSubmit = (data: createCommunityForm) => {
     createCommunityMutation
       .mutateAsync({ name: data.name, desc: data.desc })
       .then((com) => {
-        getCommunityQuery.refetch().then(() => router.push(`/b/${com.name}`));
+        getCommunityQuery.refetch().then(() => {
+          communityRedirect({
+            ...com,
+            moderators: [],
+            _count: { members: 0 },
+            members: [],
+          });
+        });
       })
       .catch((reason) => {
         setError("name", reason.shape?.message ?? "Unkown error.");
