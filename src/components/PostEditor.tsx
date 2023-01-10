@@ -37,7 +37,7 @@ export const PostEditor: React.FC<{
   const searchInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const { status: authStatus } = useSession();
+  const session = useSession();
 
   const {
     control,
@@ -97,7 +97,14 @@ export const PostEditor: React.FC<{
 
       postRedirect({
         ...data,
-        community: { ...GET_POST_PLACEHOLDER.community },
+        user: session.data?.user && {
+          id: session.data.user.id,
+          isGlobalMod: session.data.user.isGlobalMod,
+          image: session.data.user.image || null,
+          name: session.data.user.name || null,
+          bannedUntil: new Date(),
+        },
+        community: { ...GET_POST_PLACEHOLDER.community, ...currentCommunity },
       });
     },
     onError: (err) => {
@@ -331,7 +338,7 @@ export const PostEditor: React.FC<{
           )}
         />
       </div>
-      {authStatus !== "authenticated" && (
+      {session.status !== "authenticated" && (
         <p className="w-full text-left text-sm">
           <button
             onClick={() => signIn()}
