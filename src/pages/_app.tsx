@@ -5,6 +5,7 @@ import { trpc } from "../utils/trpc";
 import "../styles/globals.css";
 import dynamic from "next/dynamic";
 import { useScrollRestoration } from "../hooks/useScrollRestoration";
+import Head from "next/head";
 
 const TopBar = dynamic(
   () => import("../components/TopBar").then((x) => x.TopBar),
@@ -21,10 +22,18 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   useScrollRestoration();
   return (
-    <SessionProvider session={session}>
-      <TopBar />
-      <Component {...pageProps} />
-    </SessionProvider>
+    <>
+      <Head>
+        <meta
+          name="google-site-verification"
+          content="i2lVn2NFIbQos5gqEv7T0L2hfwir5fHbYisBREVXYKg"
+        />
+      </Head>
+      <SessionProvider session={session}>
+        <TopBar />
+        <Component {...pageProps} />
+      </SessionProvider>
+    </>
   );
 };
 
