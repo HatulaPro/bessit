@@ -35,7 +35,7 @@ export const TopBar: React.FC = () => {
   return (
     <div
       className={cx(
-        "fixed top-0 z-50 flex w-full flex-row-reverse justify-between bg-zinc-700 p-2 text-white md:flex-row",
+        "fixed top-0 z-50 flex w-full flex-row-reverse justify-between bg-gradient-to-b from-black to-[#00000088] p-2 text-white md:flex-row",
         searchBarOpen ? "gap-0 md:gap-3" : "gap-3"
       )}
     >
