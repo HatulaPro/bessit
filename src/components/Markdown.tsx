@@ -27,12 +27,16 @@ export const Markdown: React.FC<{ source: string; simplify?: boolean }> = ({
 
   const userQueries = trpc.useQueries((t) =>
     usersMatched.map((name) => {
-      const query = t.search.getTaggedUser({ name });
-      query.enabled = !simplify;
-      query.cacheTime = Infinity;
-      query.staleTime = Infinity;
-      query.refetchOnWindowFocus = false;
-      query.refetchOnReconnect = false;
+      const query = t.search.getTaggedUser(
+        { name },
+        {
+          enabled: !simplify,
+          cacheTime: Infinity,
+          staleTime: Infinity,
+          refetchOnWindowFocus: false,
+          refetchOnReconnect: false,
+        }
+      );
       return query;
     })
   );
