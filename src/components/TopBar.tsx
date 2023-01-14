@@ -13,6 +13,7 @@ import {
   BsCheck2All,
   BsDot,
   BsFillExclamationTriangleFill,
+  BsFillPersonFill,
   BsSearch,
   BsSuitHeartFill,
   BsXLg,
@@ -732,6 +733,8 @@ const TopBarUserMenu: React.FC = () => {
     return () => document.removeEventListener("mousedown", listener);
   }, [menuRef, isMenuOpen, buttonRef, setMenuOpen]);
 
+  const session = useSession();
+
   return (
     <>
       <button
@@ -759,10 +762,19 @@ const TopBarUserMenu: React.FC = () => {
         <hr className="m-1" />
         <Link
           href="/create_community"
-          className="flex items-center justify-center gap-2 p-1 transition-colors hover:bg-zinc-700"
+          className="flex items-center justify-between gap-2 p-1 text-center transition-colors hover:bg-zinc-700"
         >
-          <CgComponents /> new community
+          <CgComponents /> <span className="block w-full">new community</span>
         </Link>
+        {session.data?.user && (
+          <Link
+            href={`/u/${session.data.user.id}/${session.data.user.name}`}
+            className="flex items-center justify-between gap-2 p-1 text-center transition-colors hover:bg-zinc-700"
+          >
+            <BsFillPersonFill />{" "}
+            <span className="block w-full">my profile</span>
+          </Link>
+        )}
       </div>
     </>
   );
